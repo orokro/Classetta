@@ -143,44 +143,44 @@ $iconJSColor: #E2D973;
 
 		//THE INVIDUAL TAB STYLES
 		.iconEditor {
-			@include tabGradient($iconEditorColor);
-			&:hover { @include tabGradient(lighten($iconEditorColor, 5%)); }
+			background: desaturate(lighten($iconEditorColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconEditorColor); }
 			.tabIcon { 	background-position: -199px 0px;
 						width: 32px; }
 		}
 		.iconJava {
-			@include tabGradient($iconJavaColor);
-			&:hover { @include tabGradient(lighten($iconJavaColor, 5%)); }
+			background: desaturate(lighten($iconJavaColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconJavaColor); }
 			.tabIcon { 	background-position: -236px 0px;
 						width: 32px; }
 		}
 		.iconCSharp {
-			@include tabGradient($iconCSharpColor);
-			&:hover { @include tabGradient(lighten($iconCSharpColor, 5%)); }
+			background: desaturate(lighten($iconCSharpColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconCSharpColor); }
 			.tabIcon { 	background-position: -274px 0px;
 						width: 49px; }
 		}
 		.iconPython {
-			@include tabGradient($iconPythonColor);
-			&:hover { @include tabGradient(lighten($iconPythonColor, 5%)); }
+			background: desaturate(lighten($iconPythonColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconPythonColor); }
 			.tabIcon { 	background-position: -329px 0px;
 						width: 31px; }
 		}
 		.iconRuby {
-			@include tabGradient($iconRubyColor);
-			&:hover { @include tabGradient(lighten($iconRubyColor, 5%)); }
+			background: desaturate(lighten($iconRubyColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconRubyColor); }
 			.tabIcon { 	background-position: -366px 0px;
 						width: 27px; }
 		}
 		.iconPHP {
-			@include tabGradient($iconPHPColor);
-			&:hover { @include tabGradient(lighten($iconPHPColor, 5%)); }
+			background: desaturate(lighten($iconPHPColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconPHPColor); }
 			.tabIcon { 	background-position: -399px 0px;
 						width: 46px; }
 		}
 		.iconJS {
-			@include tabGradient($iconJSColor);
-			&:hover { @include tabGradient(lighten($iconJSColor, 5%)); }
+			background: desaturate(lighten($iconJSColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconJSColor); }
 			.tabIcon { 	background-position: -451px 0px;
 						width: 28px; }
 		}

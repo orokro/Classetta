@@ -17,8 +17,11 @@ class TabManager{
 		//associative array to store our tab page references
 		this.tabs = {};
 
+		//save refernce to the DOM elements that make up the tabs:
+		this.tabsDOM = $('#topTabs li');
+
 		//get each of the tabs and create a page for it (if one doesn't already exist)
-		$('#topTabs li').each(function(){
+		this.tabsDOM.each(function(){
 
 			//extract the name / keyword id for this tab:
 			var name = $(this).attr('id').split('_')[1];
@@ -64,6 +67,10 @@ class TabManager{
 
 		//update the background
 		me.DOM.removeClass().addClass('tabPage'+name+'BG');
+
+		//update tab sytles:
+		me.tabsDOM.removeClass('activeTab');
+		$(elem).addClass('activeTab');
 		
 		//show just the tab we care about:
 		me.tabs[name].show();

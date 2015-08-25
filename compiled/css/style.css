@@ -207,64 +207,57 @@
       height: 36px;
       display: inline-block; }
     #topTabsContainer #topTabs .iconEditor {
-      background: linear-gradient(to bottom, white 0%, white 50%, #EFEFEF 51%, #d5d5d5 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconEditor:hover {
-        background: linear-gradient(to bottom, white 0%, white 50%, #fcfcfc 51%, #e2e2e2 100%);
+      background: #fcfcfc; }
+      #topTabsContainer #topTabs .iconEditor.activeTab, #topTabsContainer #topTabs .iconEditor:hover {
+        background: linear-gradient(to bottom, white 0%, white 50%, #EFEFEF 51%, #d5d5d5 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconEditor .tabIcon {
         background-position: -199px 0px;
         width: 32px; }
     #topTabsContainer #topTabs .iconJava {
-      background: linear-gradient(to bottom, #fcf4ec 0%, #f0bf93 50%, #E69750 51%, #e07c23 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconJava:hover {
-        background: linear-gradient(to bottom, white 0%, #f3cca9 50%, #e9a466 51%, #e38a3a 100%);
+      background: #e0a56f; }
+      #topTabsContainer #topTabs .iconJava.activeTab, #topTabsContainer #topTabs .iconJava:hover {
+        background: linear-gradient(to bottom, #fcf4ec 0%, #f0bf93 50%, #E69750 51%, #e07c23 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconJava .tabIcon {
         background-position: -236px 0px;
         width: 32px; }
     #topTabsContainer #topTabs .iconCSharp {
-      background: linear-gradient(to bottom, #cbebf4 0%, #76cae2 50%, #37B2D5 51%, #2694b3 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconCSharp:hover {
-        background: linear-gradient(to bottom, #e0f3f8 0%, #8bd2e7 50%, #4cbad9 51%, #2aa5c8 100%);
+      background: #57b4cf; }
+      #topTabsContainer #topTabs .iconCSharp.activeTab, #topTabsContainer #topTabs .iconCSharp:hover {
+        background: linear-gradient(to bottom, #cbebf4 0%, #76cae2 50%, #37B2D5 51%, #2694b3 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconCSharp .tabIcon {
         background-position: -274px 0px;
         width: 49px; }
     #topTabsContainer #topTabs .iconPython {
-      background: linear-gradient(to bottom, #cfdbe5 0%, #8da9c2 50%, #5B84A7 51%, #486a87 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconPython:hover {
-        background: linear-gradient(to bottom, #e0e8ee 0%, #9db6cb 50%, #6c90b0 51%, #517797 100%);
+      background: #7790a5; }
+      #topTabsContainer #topTabs .iconPython.activeTab, #topTabsContainer #topTabs .iconPython:hover {
+        background: linear-gradient(to bottom, #cfdbe5 0%, #8da9c2 50%, #5B84A7 51%, #486a87 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconPython .tabIcon {
         background-position: -329px 0px;
         width: 31px; }
     #topTabsContainer #topTabs .iconRuby {
-      background: linear-gradient(to bottom, #f7d7d7 0%, #e78282 50%, #DA4242 51%, #c32626 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconRuby:hover {
-        background: linear-gradient(to bottom, #fbeded 0%, #eb9797 50%, #de5757 51%, #d62d2d 100%);
+      background: #d46161; }
+      #topTabsContainer #topTabs .iconRuby.activeTab, #topTabsContainer #topTabs .iconRuby:hover {
+        background: linear-gradient(to bottom, #f7d7d7 0%, #e78282 50%, #DA4242 51%, #c32626 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconRuby .tabIcon {
         background-position: -366px 0px;
         width: 27px; }
     #topTabsContainer #topTabs .iconPHP {
-      background: linear-gradient(to bottom, #e4e4ef 0%, #a5a5c9 50%, #7575AC 51%, #595995 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconPHP:hover {
-        background: linear-gradient(to bottom, #f4f4f9 0%, #b5b5d2 50%, #8585b6 51%, #6565a2 100%);
+      background: #8f8fac; }
+      #topTabsContainer #topTabs .iconPHP.activeTab, #topTabsContainer #topTabs .iconPHP:hover {
+        background: linear-gradient(to bottom, #e4e4ef 0%, #a5a5c9 50%, #7575AC 51%, #595995 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconPHP .tabIcon {
         background-position: -399px 0px;
         width: 46px; }
     #topTabsContainer #topTabs .iconJS {
-      background: linear-gradient(to bottom, white 0%, #efeab2 50%, #E2D973 51%, #d9ce49 100%);
-      /* W3C */ }
-      #topTabsContainer #topTabs .iconJS:hover {
-        background: linear-gradient(to bottom, white 0%, #f4f0c7 50%, #e6df88 51%, #ded35e 100%);
+      background: #dfd98f; }
+      #topTabsContainer #topTabs .iconJS.activeTab, #topTabsContainer #topTabs .iconJS:hover {
+        background: linear-gradient(to bottom, white 0%, #efeab2 50%, #E2D973 51%, #d9ce49 100%);
         /* W3C */ }
       #topTabsContainer #topTabs .iconJS .tabIcon {
         background-position: -451px 0px;
