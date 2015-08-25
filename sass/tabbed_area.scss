@@ -5,8 +5,15 @@
 		- The tabs along the top. This will be positioned with negative top values
 		- The body for each tab, including source viewers for each section
 		- The tab with the main editor interface
-
+	
+	This SASS document has three main areas:
+		- GENERAL TAB STUFF
+		- TABS
+		- TAB PAGES
 */
+//GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF
+//GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF +++ GENERAL TAB STUFF
+
 #divTabbedArea {
 	//SIZE AND POSITION
 	position: absolute;
@@ -29,12 +36,14 @@ $iconRubyColor: #DA4242;
 $iconPHPColor: #7575AC;
 $iconJSColor: #E2D973;
 
+
+//TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
+//TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
+
 //Handy mixin to generate the color gradients for the tab
 @mixin tabGradient($color){
 	background: linear-gradient(to bottom,  lighten($color, 35%) 0%, lighten($color, 15%) 50%, $color 51%, darken($color, 10%) 100%); /* W3C */
 }
-
-
 
 //the container for the tabs
 #topTabsContainer {
@@ -44,7 +53,6 @@ $iconJSColor: #E2D973;
 	height:50px;
 	width: 100%;
 
-
 	//the actual UL / LI tabs themselves
 	#topTabs {
 		
@@ -52,7 +60,7 @@ $iconJSColor: #E2D973;
 		position: absolute;
 		bottom: -0px;
 
-		margin:0px !important;
+		margin:0px 0px 0px 11px !important;
 		padding:0px !important;
 
 		//so the tabs dont wrap when the window gets to small
@@ -82,6 +90,12 @@ $iconJSColor: #E2D973;
 		}
 		.selectedTab { }
 
+		//specific tab settings..
+		#tab_Editor {
+			color: #444 !important;
+			text-shadow:0px 1px 1px #888;
+		}
+
 		//make the icons fade slightly on hover
 		li:hover{
 			.tabIcon{
@@ -105,7 +119,6 @@ $iconJSColor: #E2D973;
 		    border-top:13px solid #E7E7E7;
 		    border-left:13px solid transparent;
 		}
-
 
 		//general styles for the tab labels
 		.tabLabel {
@@ -175,30 +188,55 @@ $iconJSColor: #E2D973;
 }
 
 
+//PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES
+//PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES +++ PAGES
+
 //Handy mixin to generate the background colors for the tab-pages
 @mixin tabPageGradient($color){
-	background: linear-gradient(to bottom,  darken($color, 10%) 0%, #FFF 40%, #FFF 100%); /* W3C */
+	background: linear-gradient(to bottom,  darken($color, 10%) 0%, lighten($color, 42%) 100%); /* W3C */
 }
 
 //Tab Page styles...
-.tabPageEditor {
+.tabPageEditorBG {
 	@include tabPageGradient($iconEditorColor);
 }
-.tabPageJava {
+.tabPageJavaBG {
 	@include tabPageGradient($iconJavaColor);
 }
-.tabPageCSharp {
+.tabPageCSharpBG {
 	@include tabPageGradient($iconCSharpColor);
 }
-.tabPagePython {
+.tabPagePythonBG {
 	@include tabPageGradient($iconPythonColor);
 }
-.tabPageRuby {
+.tabPageRubyBG {
 	@include tabPageGradient($iconRubyColor);
 }
-.tabPagePHP {
+.tabPagePHPBG {
 	@include tabPageGradient($iconPHPColor);
 }
-.tabPageJS {
+.tabPageJSBG {
 	@include tabPageGradient($iconJSColor);
+}
+
+// Make sure the initial tab page is visible
+
+// General tab page stuff
+.tabPage {
+
+	//SIZE AND POSITION
+	position: absolute;
+	top: 10px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+	padding: 5px;
+
+	//STYLE
+	border: 1px solid #CCC;
+	background: #FFF;
+
+	//hidden by default
+	display: none;
+
 }

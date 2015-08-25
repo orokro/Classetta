@@ -5,8 +5,13 @@
 class ClassDesignApp {
 
     constructor(){
-        //Create and Initialize our TabManager
-        this.TabMgr = new TabManager();
 
+        //Create and Initialize our TabManager. It expects a reference to the tabs area
+        this.TabMgr = new TabManager($('#divTabbedArea'));
+
+    }
+
+    fuck(){
+        console.log("fuuucckk");
     }
 }

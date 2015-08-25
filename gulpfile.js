@@ -46,11 +46,17 @@ gulp.task('js', function() {
     gulp.src(jsSources)
     .pipe(plumber())
     .pipe(babel())
-    .pipe(uglify())
     .pipe(concat('script.js'))
     .pipe(gulp.dest(outputJS))
     .pipe(connect.reload())
 });
+
+/*
+    ^^^
+    put this before pipe(concat...
+    .pipe(uglify())
+
+*/
 
 // Set up our watches so we can laze around and watch for changes!
 gulp.task('watch', function() {

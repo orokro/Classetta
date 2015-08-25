@@ -131,7 +131,11 @@
 		- The tabs along the top. This will be positioned with negative top values
 		- The body for each tab, including source viewers for each section
 		- The tab with the main editor interface
-
+	
+	This SASS document has three main areas:
+		- GENERAL TAB STUFF
+		- TABS
+		- TAB PAGES
 */
 #divTabbedArea {
   position: absolute;
@@ -150,7 +154,7 @@
     list-style: none;
     position: absolute;
     bottom: -0px;
-    margin: 0px !important;
+    margin: 0px 0px 0px 11px !important;
     padding: 0px !important;
     white-space: nowrap; }
     #topTabsContainer #topTabs li {
@@ -168,6 +172,9 @@
       background-color: blue;
       border: 1px solid #BBB;
       display: inline-block; }
+    #topTabsContainer #topTabs #tab_Editor {
+      color: #444 !important;
+      text-shadow: 0px 1px 1px #888; }
     #topTabsContainer #topTabs li:hover .tabIcon {
       -moz-opacity: 0.80;
       -khtml-opacity: 0.80;
@@ -263,33 +270,44 @@
         background-position: -451px 0px;
         width: 28px; }
 
-.tabPageEditor {
-  background: linear-gradient(to bottom, #d5d5d5 0%, #FFF 40%, #FFF 100%);
+.tabPageEditorBG {
+  background: linear-gradient(to bottom, #d5d5d5 0%, white 100%);
   /* W3C */ }
 
-.tabPageJava {
-  background: linear-gradient(to bottom, #e07c23 0%, #FFF 40%, #FFF 100%);
+.tabPageJavaBG {
+  background: linear-gradient(to bottom, #e07c23 0%, white 100%);
   /* W3C */ }
 
-.tabPageCSharp {
-  background: linear-gradient(to bottom, #2694b3 0%, #FFF 40%, #FFF 100%);
+.tabPageCSharpBG {
+  background: linear-gradient(to bottom, #2694b3 0%, #e8f6fa 100%);
   /* W3C */ }
 
-.tabPagePython {
-  background: linear-gradient(to bottom, #486a87 0%, #FFF 40%, #FFF 100%);
+.tabPagePythonBG {
+  background: linear-gradient(to bottom, #486a87 0%, #e6edf2 100%);
   /* W3C */ }
 
-.tabPageRuby {
-  background: linear-gradient(to bottom, #c32626 0%, #FFF 40%, #FFF 100%);
+.tabPageRubyBG {
+  background: linear-gradient(to bottom, #c32626 0%, #fdf5f5 100%);
   /* W3C */ }
 
-.tabPagePHP {
-  background: linear-gradient(to bottom, #595995 0%, #FFF 40%, #FFF 100%);
+.tabPagePHPBG {
+  background: linear-gradient(to bottom, #595995 0%, #fbfbfc 100%);
   /* W3C */ }
 
-.tabPageJS {
-  background: linear-gradient(to bottom, #d9ce49 0%, #FFF 40%, #FFF 100%);
+.tabPageJSBG {
+  background: linear-gradient(to bottom, #d9ce49 0%, white 100%);
   /* W3C */ }
+
+.tabPage {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  padding: 5px;
+  border: 1px solid #CCC;
+  background: #FFF;
+  display: none; }
 
 img {
   border: none; }
