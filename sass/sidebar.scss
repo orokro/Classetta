@@ -1,0 +1,92 @@
+/*
+	This is the main stylesheet for the sidebar.
+
+	The sidebar sits on the left side of the interface and houses:
+		- The add / remove class buttons
+		- The list of current classes
+*/
+#divSideBar{
+
+	//SIZE AND POSITION
+	position: relative;
+	height: 100%;
+	width: 216px;
+
+	//The contents of the side bar
+	.contents {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+	}
+
+	//the box containing the list of classes
+	.classListContainer {
+
+		//SIZE AND POSITION
+		position: absolute;
+		top: 25px;
+		width: 100%;
+		bottom: 0px;
+
+		//STYLE
+		border: 1px solid #BBB;
+		background: #FFF;
+
+		//nice inner drop shadow
+		-webkit-box-shadow: inset 3px 3px 10px -2px rgba(0,0,0,0.2);
+		-moz-box-shadow: inset 3px 3px 10px -2px rgba(0,0,0,0.2);
+		box-shadow: inset 3px 3px 10px -2px rgba(0,0,0,0.2);
+
+		//MISC
+		overflow-y: scroll;
+
+	}
+
+	//the actual box containing the class names
+	#divClassList {
+		padding: 10px;
+	}
+
+	//floating box to position the add/remove class buttons
+	.addRemoveButtons {
+		position: absolute;
+		top: 0px;
+		right: -2px;
+		//border: 1px solid #FFF;
+
+		//the divs that make up the buttons
+		div{
+
+			//SIZE AND POSITION
+			float: right;
+			width: 44px;
+			height: 24px;
+
+			//FONT SETTINGS
+			color: #FFF;
+			font-weight: bold;
+			font-size: 20px;
+			text-align: center;
+
+			//MISC
+			cursor: pointer;
+
+			//STYLE
+			border-top: 	1px solid #FFF;
+			border-right: 	1px solid #FFF;
+			border-bottom: 	1px solid #BBB;
+			border-left: 	1px solid #BBB;
+			
+			background: #D3D1D1;
+
+
+			
+		}
+		div:hover {
+				background: lighten( #D3D1D1, 3% );
+			}
+	}
+
+}

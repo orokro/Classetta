@@ -12,6 +12,7 @@ var gulp = require('gulp'),
 // Now we should set up some variables to hold the file pathes for our project
 var jsSources = ['js_raw/*.js'],
     sassSources = ['sass/*.scss'],
+    mainSass = ['sass/style.scss'],
     htmlSources = ['*.html'],
     outputCSS = 'compiled/css/',
     outputJS = 'compiled/js/';
@@ -31,7 +32,7 @@ gulp.task('copy', function() {
 // Compile our SASS files from the sassSources variable,
 // Then reload our live server
 gulp.task('sass', function() {
-    gulp.src(sassSources)
+    gulp.src(mainSass)
     .pipe(plumber())
     .pipe(sass({style: 'expanded'}))
         .on('error', gutil.log)

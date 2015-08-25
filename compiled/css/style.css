@@ -1,2 +1,317 @@
-h1 {
-  color: red; }
+/*
+	This is the main stylesheet for our footer bar.
+
+	Right now it only contains copyright information.
+*/
+#divFooter {
+  height: 20px;
+  width: 100%;
+  min-width: 1008px;
+  padding: 10px 0px 10px;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  font-size: 14px;
+  color: #CCC;
+  background: #45484d;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #45484d 0%, #000000 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #45484d), color-stop(100%, #000000));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #45484d 0%, #000000 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #45484d 0%, #000000 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #45484d 0%, #000000 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #45484d 0%, #000000 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 );
+  /* IE6-9 */ }
+  #divFooter a {
+    color: #CCC;
+    text-decoration: none;
+    font-weight: bold; }
+
+/*
+	This is the main stylesheet for the header area
+	
+	For now it primarily contains:
+		- Itself with a nice background gradient
+		- The websites main header logo
+
+	For now, the tabs that appear on the header will actually be part of
+	the main-tabbed area.
+*/
+#divHeader {
+  position: relative;
+  height: 60px;
+  border-bottom: 1px solid #BBBBBB;
+  background: #eeeeee;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #eeeeee 0%, #cccccc 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eeeeee), color-stop(100%, #cccccc));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #eeeeee 0%, #cccccc 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #eeeeee 0%, #cccccc 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #eeeeee 0%, #cccccc 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #eeeeee 0%, #cccccc 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+  /* IE6-9 */ }
+  #divHeader #divLogo {
+    position: absolute;
+    top: 15px;
+    left: 11px;
+    height: 36px;
+    width: 196px;
+    background: url("/img/Icon_Sprites.png") top left no-repeat; }
+
+/*
+	This is the main stylesheet for the sidebar.
+
+	The sidebar sits on the left side of the interface and houses:
+		- The add / remove class buttons
+		- The list of current classes
+*/
+#divSideBar {
+  position: relative;
+  height: 100%;
+  width: 216px; }
+  #divSideBar .contents {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px; }
+  #divSideBar .classListContainer {
+    position: absolute;
+    top: 25px;
+    width: 100%;
+    bottom: 0px;
+    border: 1px solid #BBB;
+    background: #FFF;
+    -webkit-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
+    overflow-y: scroll; }
+  #divSideBar #divClassList {
+    padding: 10px; }
+  #divSideBar .addRemoveButtons {
+    position: absolute;
+    top: 0px;
+    right: -2px; }
+    #divSideBar .addRemoveButtons div {
+      float: right;
+      width: 44px;
+      height: 24px;
+      color: #FFF;
+      font-weight: bold;
+      font-size: 20px;
+      text-align: center;
+      cursor: pointer;
+      border-top: 1px solid #FFF;
+      border-right: 1px solid #FFF;
+      border-bottom: 1px solid #BBB;
+      border-left: 1px solid #BBB;
+      background: #D3D1D1; }
+    #divSideBar .addRemoveButtons div:hover {
+      background: #dad9d9; }
+
+/*
+	This is the main style sheet for the "tabbed area"
+
+	This area is complex, but includes:
+		- The tabs along the top. This will be positioned with negative top values
+		- The body for each tab, including source viewers for each section
+		- The tab with the main editor interface
+
+*/
+#divTabbedArea {
+  position: absolute;
+  left: 216px;
+  right: 12px;
+  top: -2px;
+  bottom: 12px;
+  border: 1px solid #BBB; }
+
+#topTabsContainer {
+  position: absolute;
+  top: -50px;
+  height: 50px;
+  width: 100%; }
+  #topTabsContainer #topTabs {
+    list-style: none;
+    position: absolute;
+    bottom: -0px;
+    margin: 0px !important;
+    padding: 0px !important;
+    white-space: nowrap; }
+    #topTabsContainer #topTabs li {
+      display: inline-block;
+      margin: 0px 0px 0px -1px;
+      color: #FFF;
+      font-size: 16px;
+      font-weight: 600;
+      text-shadow: 1px 1px 1px #333333;
+      padding: 3px 12px 0px;
+      border: 1px solid #BBB;
+      border-bottom: 0px none !important;
+      cursor: pointer;
+      position: relative;
+      background-color: blue;
+      border: 1px solid #BBB;
+      display: inline-block; }
+    #topTabsContainer #topTabs li:hover .tabIcon {
+      -moz-opacity: 0.80;
+      -khtml-opacity: 0.80;
+      opacity: 0.80;
+      -ms-filter: "progid:DXImageTransform.Microsoft.Alpha" Opacity=80;
+      filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);
+      filter: alpha(opacity=80); }
+    #topTabsContainer #topTabs li:before {
+      position: absolute;
+      right: -1px;
+      top: -1px;
+      content: '';
+      border-top: 12px solid #BBB;
+      border-left: 12px solid transparent; }
+    #topTabsContainer #topTabs li:after {
+      position: absolute;
+      right: -2px;
+      top: -2px;
+      content: '';
+      border-top: 13px solid #E7E7E7;
+      border-left: 13px solid transparent; }
+    #topTabsContainer #topTabs .tabLabel {
+      display: inline-block;
+      margin-left: 10px;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%); }
+    #topTabsContainer #topTabs .tabIcon {
+      background: url("/img/Icon_Sprites.png");
+      height: 36px;
+      display: inline-block; }
+    #topTabsContainer #topTabs .iconEditor {
+      background: linear-gradient(to bottom, white 0%, white 50%, #EFEFEF 51%, #d5d5d5 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconEditor:hover {
+        background: linear-gradient(to bottom, white 0%, white 50%, #fcfcfc 51%, #e2e2e2 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconEditor .tabIcon {
+        background-position: -199px 0px;
+        width: 32px; }
+    #topTabsContainer #topTabs .iconJava {
+      background: linear-gradient(to bottom, #fcf4ec 0%, #f0bf93 50%, #E69750 51%, #e07c23 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconJava:hover {
+        background: linear-gradient(to bottom, white 0%, #f3cca9 50%, #e9a466 51%, #e38a3a 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconJava .tabIcon {
+        background-position: -236px 0px;
+        width: 32px; }
+    #topTabsContainer #topTabs .iconCSharp {
+      background: linear-gradient(to bottom, #cbebf4 0%, #76cae2 50%, #37B2D5 51%, #2694b3 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconCSharp:hover {
+        background: linear-gradient(to bottom, #e0f3f8 0%, #8bd2e7 50%, #4cbad9 51%, #2aa5c8 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconCSharp .tabIcon {
+        background-position: -274px 0px;
+        width: 49px; }
+    #topTabsContainer #topTabs .iconPython {
+      background: linear-gradient(to bottom, #cfdbe5 0%, #8da9c2 50%, #5B84A7 51%, #486a87 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconPython:hover {
+        background: linear-gradient(to bottom, #e0e8ee 0%, #9db6cb 50%, #6c90b0 51%, #517797 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconPython .tabIcon {
+        background-position: -329px 0px;
+        width: 31px; }
+    #topTabsContainer #topTabs .iconRuby {
+      background: linear-gradient(to bottom, #f7d7d7 0%, #e78282 50%, #DA4242 51%, #c32626 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconRuby:hover {
+        background: linear-gradient(to bottom, #fbeded 0%, #eb9797 50%, #de5757 51%, #d62d2d 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconRuby .tabIcon {
+        background-position: -366px 0px;
+        width: 27px; }
+    #topTabsContainer #topTabs .iconPHP {
+      background: linear-gradient(to bottom, #e4e4ef 0%, #a5a5c9 50%, #7575AC 51%, #595995 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconPHP:hover {
+        background: linear-gradient(to bottom, #f4f4f9 0%, #b5b5d2 50%, #8585b6 51%, #6565a2 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconPHP .tabIcon {
+        background-position: -399px 0px;
+        width: 46px; }
+    #topTabsContainer #topTabs .iconJS {
+      background: linear-gradient(to bottom, white 0%, #efeab2 50%, #E2D973 51%, #d9ce49 100%);
+      /* W3C */ }
+      #topTabsContainer #topTabs .iconJS:hover {
+        background: linear-gradient(to bottom, white 0%, #f4f0c7 50%, #e6df88 51%, #ded35e 100%);
+        /* W3C */ }
+      #topTabsContainer #topTabs .iconJS .tabIcon {
+        background-position: -451px 0px;
+        width: 28px; }
+
+.tabPageEditor {
+  background: linear-gradient(to bottom, #d5d5d5 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPageJava {
+  background: linear-gradient(to bottom, #e07c23 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPageCSharp {
+  background: linear-gradient(to bottom, #2694b3 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPagePython {
+  background: linear-gradient(to bottom, #486a87 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPageRuby {
+  background: linear-gradient(to bottom, #c32626 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPagePHP {
+  background: linear-gradient(to bottom, #595995 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+.tabPageJS {
+  background: linear-gradient(to bottom, #d9ce49 0%, #FFF 40%, #FFF 100%);
+  /* W3C */ }
+
+img {
+  border: none; }
+
+html {
+  overflow: -moz-scrollbars-vertical;
+  overflow: scroll; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px;
+  margin: 0px;
+  background: #cccccc;
+  min-width: 1008px !important; }
+
+#divMainContentArea {
+  position: absolute;
+  top: 60px;
+  bottom: 40px;
+  left: 0px;
+  right: 0px;
+  min-width: 1008px !important;
+  border-top: 1px solid #FFF;
+  border-bottom: 1px solid #000;
+  background: #EAE8E8; }

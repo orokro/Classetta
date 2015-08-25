@@ -1,0 +1,36 @@
+/*
+	This is the main stylesheet for our footer bar.
+
+	Right now it only contains copyright information.
+*/
+#divFooter {
+
+	// SIZE AND POSITION
+	height: 20px;
+	width: 100%;
+	min-width:1008px;
+
+	padding: 10px 0px 10px;
+	position: absolute;
+	bottom: 0px;
+	left:0px;
+	right:0px;
+
+	// FONT SETTINGS
+	font-size: 14px;
+	color: #CCC;
+	a { color: #CCC;
+		text-decoration: none;
+		font-weight: bold; }
+
+	// BACKGROUND GRADIENT
+	background: #45484d; /* Old browsers */
+	background: -moz-linear-gradient(top,  #45484d 0%, #000000 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#45484d), color-stop(100%,#000000)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #45484d 0%,#000000 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #45484d 0%,#000000 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #45484d 0%,#000000 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #45484d 0%,#000000 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+
+}

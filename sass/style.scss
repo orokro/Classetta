@@ -1,4 +1,47 @@
-h1 {
+@import "footer";
+@import "header";
+@import "sidebar";
+@import "tabbed_area";
 
-	color: red;
+// Legacy fix for old browsers
+img { border: none; }
+
+// I like to force the scroll bars always one to prevent weird
+// Glitching when the browser tries to add them in automatically
+html {
+     overflow: -moz-scrollbars-vertical;
+     overflow: scroll;
+}
+
+//General body styles
+body {
+	font-family: 'Open Sans', sans-serif;
+
+	padding: 0px;
+	margin: 0px;
+
+	background: #cccccc;
+
+	//So all the default tabs will fit:
+	min-width: 1008px !important;
+}
+
+
+#divMainContentArea {
+
+	//SIZE AND POSITION:
+	position: absolute;
+	
+	top: 60px;
+	bottom: 40px;
+	left: 0px;
+	right: 0px;
+
+	//So all the default tabs will fit:
+	min-width: 1008px !important;
+
+	border-top: 1px solid #FFF;
+	border-bottom: 1px solid #000;
+
+	background: #EAE8E8;
 }

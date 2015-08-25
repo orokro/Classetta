@@ -1,0 +1,204 @@
+/*
+	This is the main style sheet for the "tabbed area"
+
+	This area is complex, but includes:
+		- The tabs along the top. This will be positioned with negative top values
+		- The body for each tab, including source viewers for each section
+		- The tab with the main editor interface
+
+*/
+#divTabbedArea {
+	//SIZE AND POSITION
+	position: absolute;
+	left: 216px;
+	right: 12px;
+	top: -2px;
+	bottom: 12px;
+
+	//STYLE
+	border: 1px solid #BBB;
+	//background: #FFF;
+}
+
+//Color Schemes for tabs:
+$iconEditorColor: #EFEFEF;
+$iconJavaColor: #E69750;
+$iconCSharpColor: #37B2D5;
+$iconPythonColor: #5B84A7;
+$iconRubyColor: #DA4242;
+$iconPHPColor: #7575AC;
+$iconJSColor: #E2D973;
+
+//Handy mixin to generate the color gradients for the tab
+@mixin tabGradient($color){
+	background: linear-gradient(to bottom,  lighten($color, 35%) 0%, lighten($color, 15%) 50%, $color 51%, darken($color, 10%) 100%); /* W3C */
+}
+
+
+
+//the container for the tabs
+#topTabsContainer {
+
+	position: absolute;
+	top:-50px;
+	height:50px;
+	width: 100%;
+
+
+	//the actual UL / LI tabs themselves
+	#topTabs {
+		
+		list-style: none;
+		position: absolute;
+		bottom: -0px;
+
+		margin:0px !important;
+		padding:0px !important;
+
+		//so the tabs dont wrap when the window gets to small
+		white-space: nowrap;
+
+		//styles for the tab blocks themselves
+		li {
+			//SIZE AND POSITION OF TABS
+			display: inline-block;
+			//float: left;
+			margin: 0px 0px 0px -1px;
+
+			//FONT SETTINGS
+			color: #FFF;
+			font-size: 16px;
+			font-weight: 600;
+			text-shadow:1px 1px 1px #333333;
+
+			padding: 3px 12px 0px;
+			border: 1px solid #BBB;
+			border-bottom: 0px none !important;
+
+			cursor: pointer;
+
+			position:relative; background-color:blue; 
+    		border:1px solid #BBB; display: inline-block;
+		}
+		.selectedTab { }
+
+		//make the icons fade slightly on hover
+		li:hover{
+			.tabIcon{
+				-moz-opacity: 0.80;
+				-khtml-opacity: 0.80;
+				opacity: 0.80;
+				-ms-filter:"progid:DXImageTransform.Microsoft.Alpha"(Opacity=80);
+				filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);
+				filter:alpha(opacity=80);
+			}
+		}
+		// FUCKING MAGICAL CORNER HACK. I DON'T EVEN
+		// http://jsfiddle.net/Gdqex/
+		li:before {
+		    position:absolute; right:-1px; top:-1px; content:'';
+		    border-top:12px solid #BBB;
+		    border-left:12px solid transparent;
+		}
+		li:after {
+		    position:absolute; right:-2px; top:-2px; content:'';
+		    border-top:13px solid #E7E7E7;
+		    border-left:13px solid transparent;
+		}
+
+
+		//general styles for the tab labels
+		.tabLabel {
+
+			//display the div as an inline block
+			display: inline-block;
+
+			margin-left: 10px;
+
+			// vertical text centering hack
+		  	position: relative;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+		//general styles for the tab icons
+		.tabIcon {
+			background: url('/img/Icon_Sprites.png');
+			height: 36px;
+			display: inline-block;
+		}
+
+		//THE INVIDUAL TAB STYLES
+		.iconEditor {
+			@include tabGradient($iconEditorColor);
+			&:hover { @include tabGradient(lighten($iconEditorColor, 5%)); }
+			.tabIcon { 	background-position: -199px 0px;
+						width: 32px; }
+		}
+		.iconJava {
+			@include tabGradient($iconJavaColor);
+			&:hover { @include tabGradient(lighten($iconJavaColor, 5%)); }
+			.tabIcon { 	background-position: -236px 0px;
+						width: 32px; }
+		}
+		.iconCSharp {
+			@include tabGradient($iconCSharpColor);
+			&:hover { @include tabGradient(lighten($iconCSharpColor, 5%)); }
+			.tabIcon { 	background-position: -274px 0px;
+						width: 49px; }
+		}
+		.iconPython {
+			@include tabGradient($iconPythonColor);
+			&:hover { @include tabGradient(lighten($iconPythonColor, 5%)); }
+			.tabIcon { 	background-position: -329px 0px;
+						width: 31px; }
+		}
+		.iconRuby {
+			@include tabGradient($iconRubyColor);
+			&:hover { @include tabGradient(lighten($iconRubyColor, 5%)); }
+			.tabIcon { 	background-position: -366px 0px;
+						width: 27px; }
+		}
+		.iconPHP {
+			@include tabGradient($iconPHPColor);
+			&:hover { @include tabGradient(lighten($iconPHPColor, 5%)); }
+			.tabIcon { 	background-position: -399px 0px;
+						width: 46px; }
+		}
+		.iconJS {
+			@include tabGradient($iconJSColor);
+			&:hover { @include tabGradient(lighten($iconJSColor, 5%)); }
+			.tabIcon { 	background-position: -451px 0px;
+						width: 28px; }
+		}
+	}
+}
+
+
+//Handy mixin to generate the background colors for the tab-pages
+@mixin tabPageGradient($color){
+	background: linear-gradient(to bottom,  darken($color, 10%) 0%, #FFF 40%, #FFF 100%); /* W3C */
+}
+
+//Tab Page styles...
+.tabPageEditor {
+	@include tabPageGradient($iconEditorColor);
+}
+.tabPageJava {
+	@include tabPageGradient($iconJavaColor);
+}
+.tabPageCSharp {
+	@include tabPageGradient($iconCSharpColor);
+}
+.tabPagePython {
+	@include tabPageGradient($iconPythonColor);
+}
+.tabPageRuby {
+	@include tabPageGradient($iconRubyColor);
+}
+.tabPagePHP {
+	@include tabPageGradient($iconPHPColor);
+}
+.tabPageJS {
+	@include tabPageGradient($iconJSColor);
+}
