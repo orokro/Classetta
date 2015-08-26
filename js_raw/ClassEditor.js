@@ -22,6 +22,28 @@ class ClassEditor{
 		//save reference to our dom
 		this.DOM = EditorDOM;
 
+		//start with the basics - lets make the panels toggleable
+		this.DOM.find('.toggleBar').click(function(e){
+
+			//get the next toggle wrapper
+			var wrapper = $(this).next('.toggleWrapper');
+
+			var headerActivated = this;
+			wrapper.toggle("slow", function(){
+
+				if(wrapper.is(':visible'))
+					$(headerActivated).text('▼' + $(headerActivated).text().substr(1) );
+				else
+					$(headerActivated).text('►' + $(headerActivated).text().substr(1) );
+
+			});
+
+		});
+
+		//prevent dragging from messing up selection
+		this.DOM.find('.toggleBar').mousedown(function(e){ e.preventDefault(); });
+
+
 	}
 
 

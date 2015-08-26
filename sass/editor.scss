@@ -1,7 +1,50 @@
+/*
+	This is the main stylesheet for the class Editor interface.
 
+	The editor consists of a serries of expandable / collapsable regions, similar to a jQuery accordian.
 
+	The editor is also responsible for all the input controls, such as textboxes and buttons.
+*/
 #divEditor {
 
 	padding: 10px;
 
+	//remove obvnoxius default margin on paragraphs
+	p { margin: 4px 0px 0px;
+		font-size: 12px;
+		color: #616161; }
+	
+	input {
+		padding: 4px;
+
+	}
+	
+	button {
+		padding: 4px 10px;
+		color: #333;
+	}
+
+	.toggleBar {
+		
+		//FONT STYLES
+		color: #FEFEFE;
+		font-weight: 100;
+		padding: 2px 5px;
+		
+		cursor: pointer;
+
+		margin-bottom: 0px !important;
+		
+		background: #999;
+		border-top: 1px solid #BFBFBF;
+    	border-bottom: 1px solid #737373;
+	}
+	.toggleWrapper {
+
+		padding: 10px 30px 15px;
+		background: #EFEFEF;
+
+		border-top: 1px solid #FFF;
+    	border-bottom: 1px solid #E2E0E0;
+	}
 }

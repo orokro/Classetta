@@ -19,7 +19,7 @@ class ClassDesignApp {
         this.currentClassItem = null;
 
         //Create and Initialize a new ClassEditor. It expects a reference to the current class object, and Editor Tab Page div
-        this.Editor = new ClassEditor(this.currentClassItem, $('#tab_Editor'));
+        this.Editor = new ClassEditor(this.currentClassItem, $('#divEditor'));
 
         //we need to bind an event for when the user changes the selected class,
         //so we can update the editor

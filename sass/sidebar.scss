@@ -100,7 +100,7 @@
 			height: 24px;
 
 			//FONT SETTINGS
-			color: #FFF;
+			color: #333;
 			font-weight: bold;
 			font-size: 20px;
 			text-align: center;
@@ -110,17 +110,19 @@
 
 			//STYLE
 			border-top: 	1px solid #FFF;
-			border-right: 	1px solid #FFF;
+			border-left: 	1px solid #FFF;
 			border-bottom: 	1px solid #BBB;
-			border-left: 	1px solid #BBB;
+			border-right: 	1px solid #BBB;
 			
 			background: #D3D1D1;
 
-
-			
+			span {
+				position: relative;
+				top: -2px;
+			}	
 		}
 		div:hover {
-				background: lighten( #D3D1D1, 3% );
+				background: lighten( #D3D1D1, 5% );
 			}
 	}
 

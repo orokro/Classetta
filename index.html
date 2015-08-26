@@ -35,8 +35,8 @@
 			<div id="divClassListArea" class="contents">
 				My Classes:
 				<div class="addRemoveButtons">
-					<div id="cmdAddClassItem">+</div>
-					<div id="cmdRemoveClassItem">-</div>
+					<div id="cmdAddClassItem"><span>+</span></div>
+					<div id="cmdRemoveClassItem"><span>-</span></div>
 				</div>
 				<div class="classListContainer">
 					<div id="divClassList">
@@ -106,19 +106,55 @@
 				<div id="divEditor" style="display:none;">
 					<h2>Class Editor</h2>
 
+					<h3 class="toggleBar">&#x25BC; Class Name</h3>
 					<div class="toggleWrapper">
-						<h3>Class Name</h3>
+						<p>Name your Class!</p>
 						<input id="txtClsName" type="text" placeholder="ClassName"></input>
 						<div id="infoClsName"></div>
 					</div>
 
+					<h3 class="toggleBar">&#x25BC; Inheritance</h3>
 					<div class="toggleWrapper">
-						<h3>Inheritance</h3>
+						<p>Does this Class extend another class? Only one extenion allowed!</p>
 						<input id="txtAncestor" type="text" placeholder="AncestorClassName"></input>
 						<div id="infoAncestor"></div>
 					</div>
 
-					
+					<h3 class="toggleBar">&#x25BC; Interfaces</h3>
+					<div class="toggleWrapper">
+						<div class="entries">
+						</div>
+						<div class="addBox">
+							<p>Enter one or more comma-seperated Interface names this Class implements.</p>
+							<input id="txtInterfaces" type="text" placeholder="InterfaceNames" size="60"></input>
+							<button type="button" class="cmdAdd">Add</button>
+							<div id="infoInterfaces"></div>
+						</div>
+					</div>
+
+					<h3 class="toggleBar">&#x25BC; Member Variables</h3>
+					<div class="toggleWrapper">
+						<div class="entries">
+						</div>
+						<div class="addBox">
+							<p>Enter one or more comma-seperated Member Variables this Class implements.</p>
+							<input id="txtMembers" type="text" placeholder="MemberVariableNames" size="60"></input>
+							<button type="button" class="cmdAdd">Add</button>
+							<div id="infoMembers"></div>
+						</div>
+					</div>
+
+					<h3 class="toggleBar">&#x25BC; Methods</h3>
+					<div class="toggleWrapper">
+						<div class="entries">
+						</div>
+						<div class="addBox">
+							<p>Enter one or more comma-seperated Method names this Class implements.</p>
+							<input id="txtMethods" type="text" placeholder="MethodNames" size="60"></input>
+							<button type="button" class="cmdAdd">Add</button>
+							<div id="infoMethods"></div>
+						</div>
+					</div>
 
 				</div>
 			</div>

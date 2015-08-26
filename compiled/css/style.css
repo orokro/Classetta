@@ -124,18 +124,21 @@
       float: right;
       width: 44px;
       height: 24px;
-      color: #FFF;
+      color: #333;
       font-weight: bold;
       font-size: 20px;
       text-align: center;
       cursor: pointer;
       border-top: 1px solid #FFF;
-      border-right: 1px solid #FFF;
+      border-left: 1px solid #FFF;
       border-bottom: 1px solid #BBB;
-      border-left: 1px solid #BBB;
+      border-right: 1px solid #BBB;
       background: #D3D1D1; }
+      #divSideBar .addRemoveButtons div span {
+        position: relative;
+        top: -2px; }
     #divSideBar .addRemoveButtons div:hover {
-      background: #dad9d9; }
+      background: #dfdede; }
 
 /*
 	This is the main style sheet for the "tabbed area"
@@ -315,8 +318,38 @@
   background: #FFF;
   display: none; }
 
+/*
+	This is the main stylesheet for the class Editor interface.
+
+	The editor consists of a serries of expandable / collapsable regions, similar to a jQuery accordian.
+
+	The editor is also responsible for all the input controls, such as textboxes and buttons.
+*/
 #divEditor {
   padding: 10px; }
+  #divEditor p {
+    margin: 4px 0px 0px;
+    font-size: 12px;
+    color: #616161; }
+  #divEditor input {
+    padding: 4px; }
+  #divEditor button {
+    padding: 4px 10px;
+    color: #333; }
+  #divEditor .toggleBar {
+    color: #FEFEFE;
+    font-weight: 100;
+    padding: 2px 5px;
+    cursor: pointer;
+    margin-bottom: 0px !important;
+    background: #999;
+    border-top: 1px solid #BFBFBF;
+    border-bottom: 1px solid #737373; }
+  #divEditor .toggleWrapper {
+    padding: 10px 30px 15px;
+    background: #EFEFEF;
+    border-top: 1px solid #FFF;
+    border-bottom: 1px solid #E2E0E0; }
 
 img {
   border: none; }

@@ -117,7 +117,7 @@ var ClassDesignApp = (function () {
                 this.currentClassItem = null;
 
                 //Create and Initialize a new ClassEditor. It expects a reference to the current class object, and Editor Tab Page div
-                this.Editor = new ClassEditor(this.currentClassItem, $('#tab_Editor'));
+                this.Editor = new ClassEditor(this.currentClassItem, $('#divEditor'));
 
                 //we need to bind an event for when the user changes the selected class,
                 //so we can update the editor
@@ -169,11 +169,11 @@ var ClassDesignApp = (function () {
 	it will just start empty.
 
 */
-"use strict";
+'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var ClassEditor = (function () {
 	function ClassEditor(clsItem, EditorDOM) {
@@ -184,12 +184,30 @@ var ClassEditor = (function () {
 
 		//save reference to our dom
 		this.DOM = EditorDOM;
+
+		//start with the basics - lets make the panels toggleable
+		this.DOM.find('.toggleBar').click(function (e) {
+
+			//get the next toggle wrapper
+			var wrapper = $(this).next('.toggleWrapper');
+
+			var headerActivated = this;
+			wrapper.toggle("slow", function () {
+
+				if (wrapper.is(':visible')) $(headerActivated).text('▼' + $(headerActivated).text().substr(1));else $(headerActivated).text('►' + $(headerActivated).text().substr(1));
+			});
+		});
+
+		//prevent dragging from messing up selection
+		this.DOM.find('.toggleBar').mousedown(function (e) {
+			e.preventDefault();
+		});
 	}
 
 	//update the editor to be editing a new ClassItem object...
 
 	_createClass(ClassEditor, [{
-		key: "setClassItem",
+		key: 'setClassItem',
 		value: function setClassItem(clsItem) {
 
 			//save the new class item:
