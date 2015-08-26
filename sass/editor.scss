@@ -1,7 +1,61 @@
 
+//over write some of jQuery's themes
+.ui-accordion-header {
+
+	
+
+	&.ui-state-active {
+		margin-bottom: 0px !important;
+    	background-color: #CACACA !important;
+    }
+    &.ui-state-default {
+    	margin-bottom: 6px !important;
+    	background-color: #CACACA !important;
+    }
+
+
+    
+}
+
+.ui-accordion-content {
+	background: #EFEFEF !important;
+	margin-bottom: 6px !important;
+} 
+
 
 #divEditor {
 
 	padding: 10px;
+
+	//make sure our paragraphs don't have obnoxious default margins
+	p { margin: 3px 0px; }
+
+	//make the text boxes a little more comfortable
+	input { 
+		padding: 5px;
+		
+		background: #EBF4F7;
+
+		//sexy borders
+		border: 1px solid #000;
+		border-radius: 5px; 
+		-moz-border-radius: 5px; 
+		-webkit-border-radius: 5px; 
+
+		@mixin placeholderStyle(){
+			color: #3EBBEB;
+			font-style:italic;
+			font-weight: 100;
+		}
+
+		//FONT STYLES
+		font-size: 16px;
+		font-weight: 600;
+		&::-webkit-input-placeholder { @include placeholderStyle(); }
+		&:-moz-placeholder{ @include placeholderStyle(); }
+		&::-moz-placeholder{ @include placeholderStyle(); }
+		&:-ms-input-placeholder{ @include placeholderStyle(); }
+	}	
+
 
 }

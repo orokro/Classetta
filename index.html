@@ -7,15 +7,20 @@
 
 	<!-- delicious CSS -->
 	<link rel="stylesheet" type="text/css" href="css/style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/jquery-ui-1.9.2.custom.css"/>
+	<!-- link rel="stylesheet" type="text/css" href="css/jquery/jquery-ui-1.8.9.custom/jquery-ui-1.8.9.custom.css" / --> 
 
 	<!-- required scripts -->
 	<script type="text/javascript" src="js/extern/jquery.js"></script>
+	<script type="text/javascript" src="js/extern/jquery-ui-1.8.13.custom.min.js"></script>
+	<script type="text/javascript" src="js/extern/jquery.multi-open-accordion-1.5.3.min.js"></script>
 	<script type="text/javascript" src="js/script.js"></script>
 
 	<!-- app init script -->
 	<script type="text/javascript">
 		$(document).ready(function(){
 			window.app = new ClassDesignApp();
+			$('#multiOpenAccordion').multiOpenAccordion();
 		});
 	</script>
 </head>
@@ -106,20 +111,47 @@
 				<div id="divEditor" style="display:none;">
 					<h2>Class Editor</h2>
 
-					<div class="toggleWrapper">
-						<h3>Class Name</h3>
-						<input id="txtClsName" type="text" placeholder="ClassName"></input>
-						<div id="infoClsName"></div>
+					<div id="multiOpenAccordion">
+
+						<h3><a href="#">Class Name</a></h3>
+						<div>
+							<input id="txtClsName" type="text" placeholder="ClassName"></input>
+							<div id="infoClsName" class="infoBox"></div>
+						</div>
+
+						<h3><a href="#">Inheritance</a></h3>
+						<div>
+							
+							<input id="txtAncestor" type="text" placeholder="AncestorClassName"></input>
+							<div id="infoAncestor" class="infoBox"></div>
+						</div>
+
+						<h3><a href="#">Interfaces</a></h3>
+						<div>
+							<p>Enter one or more comma-seperated Interface names this Class implements.</p>
+							<input id="txtAncestor" type="text" placeholder="Comma-seperated InterfaceNames" size="60"></input>
+							<button type="button" id="cmdAddInterfaces">Add</button>
+							<div id="infoInterfaces" class="infoBox"></div>
+						</div>
+
+						<h3><a href="#">Member Variables</a></h3>
+						<div>
+							<p>Enter one or more comma-seperated Member Variable names this Class implements.</p>
+							<input id="txtMembers" type="text" placeholder="Comma-seperated MemberNames" size="60"></input>
+							<button type="button" id="cmdAddMembers">Add</button>
+							<div id="infoMembers" class="infoBox"></div>
+						</div>
+
+						<h3><a href="#">Methods</a></h3>
+						<div>
+							<p>Enter one or more comma-seperated Methods names this Class implements.</p>
+							<input id="txtMethods" type="text" placeholder="Comma-seperated MethodNames" size="60"></input>
+							<button type="button" id="cmdAddMethods">Add</button>
+							<div id="infoMethods" class="infoBox"></div>
+						</div>
+
+					<!-- /multiOpenAccordion -->
 					</div>
-
-					<div class="toggleWrapper">
-						<h3>Inheritance</h3>
-						<input id="txtAncestor" type="text" placeholder="AncestorClassName"></input>
-						<div id="infoAncestor"></div>
-					</div>
-
-					
-
 				</div>
 			</div>
 		<!-- /divTabbedArea -->	
@@ -131,6 +163,5 @@
 	<div id="divFooter" align="center">
 		&copy;<a href="http://gmiller.net/" target="_blank">Greg Miller</a>, 2015.
 	</div>
-
 </body>
 </html>

@@ -21,6 +21,7 @@ class ClassEditor{
 
 		//save reference to our dom
 		this.DOM = EditorDOM;
+		
 
 	}
 
