@@ -5,6 +5,13 @@
 		- The add / remove class buttons
 		- The list of current classes
 */
+
+//Handy mixin to generate the color gradients
+@mixin gradientHelper($color){
+	//background: linear-gradient(to bottom,  lighten($color, 2%) 0%, lighten($color, 1%) 50%, $color 51%, darken($color, 3%) 100%); /* W3C */
+	background: linear-gradient(to bottom,  lighten($color, 20%) 0%, lighten($color, 5%) 50%, $color 51%, darken($color, 10%) 100%); /* W3C */
+}
+
 #divSideBar{
 
 	//SIZE AND POSITION
@@ -46,7 +53,35 @@
 
 	//the actual box containing the class names
 	#divClassList {
-		padding: 10px;
+		
+
+		//styles for the list items themselves
+		.listItem {
+			cursor: pointer;
+
+			//font not TOO dark..
+			color: #333;
+
+			//padding to avoid clutter
+			padding: 4px 10px;
+
+			border-bottom: 1px solid #FFF;
+
+			//alternating backgrounds...
+			background: #EBF4F7;
+			&:nth-child(even){ background: #D6E8EF; /* #C9E9F5; */ }
+
+			//they should look nice when hovering:
+			&:hover{	background: #65C9EF; }
+			&.selectedClassItem{ 	@include gradientHelper(#65C9EF);
+						font-weight: bold;
+						//color: #FFF;
+						//text-shadow:1px 1px 1px #333333; 
+					}
+		}
+
+
+		
 	}
 
 	//floating box to position the add/remove class buttons

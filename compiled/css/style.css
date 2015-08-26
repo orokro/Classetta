@@ -101,8 +101,21 @@
     -moz-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
     box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
     overflow-y: scroll; }
-  #divSideBar #divClassList {
-    padding: 10px; }
+  #divSideBar #divClassList .listItem {
+    cursor: pointer;
+    color: #333;
+    padding: 4px 10px;
+    border-bottom: 1px solid #FFF;
+    background: #EBF4F7; }
+    #divSideBar #divClassList .listItem:nth-child(even) {
+      background: #D6E8EF;
+      /* #C9E9F5; */ }
+    #divSideBar #divClassList .listItem:hover {
+      background: #65C9EF; }
+    #divSideBar #divClassList .listItem.selectedClassItem {
+      background: linear-gradient(to bottom, #c1e9f9 0%, #7cd1f1 50%, #65C9EF 51%, #37b9ea 100%);
+      /* W3C */
+      font-weight: bold; }
   #divSideBar .addRemoveButtons {
     position: absolute;
     top: 0px;
@@ -302,6 +315,9 @@
   background: #FFF;
   display: none; }
 
+#divEditor {
+  padding: 10px; }
+
 img {
   border: none; }
 
@@ -326,3 +342,16 @@ body {
   border-top: 1px solid #FFF;
   border-bottom: 1px solid #000;
   background: #EAE8E8; }
+  #divMainContentArea h1, #divMainContentArea h2, #divMainContentArea h3, #divMainContentArea h4, #divMainContentArea h5 {
+    margin: 0px 0px 4px; }
+  #divMainContentArea h1 {
+    color: #222; }
+  #divMainContentArea h2, #divMainContentArea h3, #divMainContentArea h4, #divMainContentArea h5 {
+    color: #555; }
+
+#divWelcome {
+  padding: 25px !important; }
+  #divWelcome .indent {
+    margin-left: 20px; }
+  #divWelcome ol {
+    margin: 0px; }

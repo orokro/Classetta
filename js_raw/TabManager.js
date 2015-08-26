@@ -27,10 +27,10 @@ class TabManager{
 			var name = $(this).attr('id').split('_')[1];
 
 			//check if a page for this one already exists..
-			var tabCheck = $(this.DOM).find('#tabPage_'+name);
+			var tabCheck = me.DOM.find('#tabPage_'+name);
 
 			//if it DOESNT exist, let's create it!
-			if(! tabCheck.length>0){
+			if(!tabCheck.length>0){
 
 				//create a new tab page
 				me.tabs[name] = $('<div id="tabPage_'+name+'" class="tabPage">Tab page for '+name+'!</div>');
@@ -40,7 +40,7 @@ class TabManager{
 
 			//otherwise, there should only be one 0 save the reference and move on!
 			}else if(tabCheck.length==1){
-				me.tabs[name] = tabCheck[0];
+				me.tabs[name] = $(tabCheck[0]);
 			}else{
 				Throw ("TabManager found more than one tab sharing the ID: #tabPage_"+name);
 			}
@@ -51,9 +51,11 @@ class TabManager{
 		this.pagesDOM = this.DOM.find('.tabPage');
 
 		//bind events for when a tab is clicked on...
-		$('#topTabs li').click(	function(e){
-									me.handleTabClick(me, this); 
-								});
+		this.tabsDOM.click(	function(e){ me.handleTabClick(me, this); });
+
+		//dont allow draging to mess things up with selection:
+		this.tabsDOM.mousedown(function(e){ e.preventDefault(); });
+		
 	}//constructor()
 
 	//When a tab is changed let's change which tab data is displayed:
@@ -71,7 +73,7 @@ class TabManager{
 		//update tab sytles:
 		me.tabsDOM.removeClass('activeTab');
 		$(elem).addClass('activeTab');
-		
+
 		//show just the tab we care about:
 		me.tabs[name].show();
 	}

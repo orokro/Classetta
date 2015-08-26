@@ -32,28 +32,14 @@
 
 		<!-- SIDE BAR -->
 		<div id="divSideBar">
-			<div class="contents">
+			<div id="divClassListArea" class="contents">
 				My Classes:
 				<div class="addRemoveButtons">
-					<div id="cmdAddClass">+</div>
-					<div id="cmdRemoveClass">-</div>
+					<div id="cmdAddClassItem">+</div>
+					<div id="cmdRemoveClassItem">-</div>
 				</div>
 				<div class="classListContainer">
 					<div id="divClassList">
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						Foo<br>Bar<br>Meow<br>
-						
 					</div>
 				</div>
 			</div>
@@ -78,7 +64,64 @@
 			</div>
 
 			<!-- the default editor tab -->
-			<div id="tabPage_Editor" class="tabPage" style="display: block;">Tab page for Editor!</div>
+			<div id="tabPage_Editor" class="tabPage" style="display: block;">
+
+				<!-- temporary welcome page, for times when no ClassItems exist to edit -->
+				<div id="divWelcome">
+					<h1>Welcome to Class.Design!</h1>
+					<div class="indent">
+						<h2>Get Started</h2>
+						<div class="indent">
+							<p>
+								<ol>
+									<li>Click the [+] Button on the left column to add a new Class.</li>
+									<li>Use the <strong>Editor</strong> tab to build a class!<br>
+										Give it a name, ancestors, Interfaces, Methods and Members!</li>
+									<li>Use the language tabs to see how the class looks like in each language!</li>
+								</ol>
+							</p>
+						</div>
+					</div>
+					<div class="indent">
+						<h2>About</h2>
+						<div class="indent">
+							<p>
+								I've alway found it difficult to remember the particulars of each language I work in. Though I enjoy many different languages I can sometimes go weeks or months between usage depending on my projects and workload. I decided to make this little demo to compare the differences in class architecture across the languages I frequent.
+							</p>
+							<p>
+								Though it’s typically easy to remember the details after a brief refresher I wanted to make this interactive demo both as an exercise for myself and as a tool to help others learn. Perhaps you’ve never worked in C# or Ruby before? Just make a class with the editor and see how it would be written by a .NET wizard or a Rubyist.
+							</p>
+							<p>
+								As I learn new languages, I wish to update this project, so stay tuned! You can find out more about me and my adventures on <a href="http://www.gmiller.net/">http://www.gmiller.net/</a>
+							</p>
+							<p>
+								Enjoy!
+							</p>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- the container for the editor interface! -->
+				<div id="divEditor" style="display:none;">
+					<h2>Class Editor</h2>
+
+					<div class="toggleWrapper">
+						<h3>Class Name</h3>
+						<input id="txtClsName" type="text" placeholder="ClassName"></input>
+						<div id="infoClsName"></div>
+					</div>
+
+					<div class="toggleWrapper">
+						<h3>Inheritance</h3>
+						<input id="txtAncestor" type="text" placeholder="AncestorClassName"></input>
+						<div id="infoAncestor"></div>
+					</div>
+
+					
+
+				</div>
+			</div>
 		<!-- /divTabbedArea -->	
 		</div>
 

@@ -2,6 +2,7 @@
 @import "header";
 @import "sidebar";
 @import "tabbed_area";
+@import "editor";
 
 // Legacy fix for old browsers
 img { border: none; }
@@ -26,12 +27,15 @@ body {
 	min-width: 1008px !important;
 }
 
-
+//This is a pretty important div - it wraps both the sidebar and the tabs/editor portions of the screen.
+//It does not, however, include the header bar or the footer bar.
 #divMainContentArea {
 
 	//SIZE AND POSITION:
 	position: absolute;
 	
+	//position abosolutely in the document, leaving room for the header and footer.
+	//hackish perhaps? Not sure how to make the rest of the interface work correctly without... 
 	top: 60px;
 	bottom: 40px;
 	left: 0px;
@@ -44,4 +48,24 @@ body {
 	border-bottom: 1px solid #000;
 
 	background: #EAE8E8;
+
+	//headers shouldn't have insane HTML margins:
+	h1, h2, h3, h4, h5 { margin: 0px 0px 4px; }
+
+	h1 { color: #222; }
+	h2, h3, h4, h5 { color: #555; }
+}
+
+//the welcome page for when there are no ClassItems to edit yet
+#divWelcome {
+
+	//generous padding for this basic page
+	padding: 25px !important;
+
+	//for the indent ares of text:
+	.indent{ margin-left: 20px; }
+
+	//the OLs padding makes things look awkward, lets remove it
+	ol { margin: 0px;  }
+
 }
