@@ -115,6 +115,10 @@ class ClassItemManager {
 		//every time a class is added, it should be "selected"
 		this.setSelectedItem(item.getID());
 
+		//if this item changes it's name, the list should be updated:
+		var me=this;
+		item.onNameChange(function(){me.updateList();});
+
 		//and rebuild our list:
 		this.updateList();
 
@@ -195,7 +199,7 @@ class ClassItemManager {
 			var item = this.classItems[i];
 
 			//add a row for this item. Auto add in the "selected" identifier if the ID's match
-			listItemsDOM.append('<div id="clsItm_'+item.getID()+'" class="listItem '+((item.getID()==this.selectedClassItem)?'selectedClassItem':'')+'">'+item.getName()+' {'+item.getID()+'}</div>');
+			listItemsDOM.append('<div id="clsItm_'+item.getID()+'" class="listItem '+((item.getID()==this.selectedClassItem)?'selectedClassItem':'')+'">'+item.getName()); //+' {'+item.getID()+'}</div>');
 
 		}//next i
 

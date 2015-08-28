@@ -126,7 +126,72 @@ var ClassDesignApp = (function () {
                 });
 
                 //add default item for debugging
-                this.ClassItmMgr.addClassItm(new ClassItem(this.ClassItmMgr.classIDCounter++));
+                var newItem = new ClassItem(this.ClassItmMgr.classIDCounter++);
+
+                newItem.setName('DemoClass');
+
+                newItem.addInterface("Petable");
+                newItem.addInterface("Feedable");
+                newItem.addInterface("foo");
+
+                newItem.addMember("aInt");
+                newItem.getMemberByName("aInt").mType = INT;
+                newItem.getMemberByName("aInt").access = PUBLIC;
+                newItem.getMemberByName("aInt").isStatic = true;
+                newItem.getMemberByName("aInt").isConst = true;
+                newItem.getMemberByName("aInt").val = 123000000;
+                newItem.addMember("aShort");
+                newItem.getMemberByName("aShort").mType = SHORT;
+                newItem.getMemberByName("aShort").access = PUBLIC;
+                newItem.getMemberByName("aShort").isStatic = true;
+                newItem.getMemberByName("aShort").val = 123000;
+                newItem.addMember("aLong");
+                newItem.getMemberByName("aLong").mType = LONG;
+                newItem.getMemberByName("aLong").access = PUBLIC;
+                newItem.getMemberByName("aLong").val = 123000000000;
+                newItem.addMember("aByte");
+                newItem.getMemberByName("aByte").mType = BYTE;
+                newItem.getMemberByName("aByte").val = 123;
+                newItem.addMember("aFloat");
+                newItem.getMemberByName("aFloat").mType = FLOAT;
+                newItem.getMemberByName("aFloat").val = 3.14159;
+                newItem.addMember("aDouble");
+                newItem.getMemberByName("aDouble").mType = DOUBLE;
+                newItem.getMemberByName("aDouble").val = 3.1415926535897;
+                newItem.addMember("aChar");
+                newItem.getMemberByName("aChar").mType = CHAR;
+                newItem.getMemberByName("aChar").val = 'g';
+                newItem.addMember("aString");
+                newItem.getMemberByName("aString").mType = STRING;
+                newItem.getMemberByName("aString").val = "Design.Class Rules!";
+                newItem.addMember("aBoolean");
+                newItem.getMemberByName("aBoolean").mType = BOOLEAN;
+                newItem.getMemberByName("aBoolean").val = true;
+
+                newItem.addMethod("main");
+                newItem.getMethodByName("main").mType = VOID;
+                newItem.getMethodByName("main").access = PUBLIC;
+                newItem.getMethodByName("main").isStatic = true;
+                newItem.getMethodByName("main").isConst = false;
+                newItem.getMethodByName("main").params = ["String args[]"];
+                newItem.addMethod("foo");
+                newItem.getMethodByName("foo").mType = LONG;
+                newItem.getMethodByName("foo").access = PRIVATE;
+                newItem.getMethodByName("foo").isStatic = false;
+                newItem.getMethodByName("foo").isConst = true;
+                newItem.getMethodByName("foo").params = ["String args[]"];
+                newItem.addMethod("bar");
+                newItem.getMethodByName("bar").mType = STRING;
+                newItem.getMethodByName("bar").access = PUBLIC;
+                newItem.getMethodByName("bar").isStatic = false;
+                newItem.getMethodByName("bar").isConst = false;
+                newItem.getMethodByName("bar").params = ["String args[]"];
+
+                this.ClassItmMgr.addClassItm(newItem);
+
+                newItem.onChange(function () {
+                        console.log('My object changed!');
+                });
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -179,11 +244,47 @@ var ClassEditor = (function () {
 	function ClassEditor(clsItem, EditorDOM) {
 		_classCallCheck(this, ClassEditor);
 
+		//variable so scope will resolve in call backs
+		var me = this;
+
 		//save the itintial class item:
 		this.currentClassItem = clsItem;
 
 		//save reference to our dom
 		this.DOM = EditorDOM;
+
+		//lets cache a bunch of jQuery searchs for useful elements
+		this.area = {
+			classname: { DOM: this.DOM.find('#classname'),
+				txt: this.DOM.find('#classname').find(':text'),
+				nfo: this.DOM.find('#classname').find('.infobox'),
+				chkClassPublic: this.DOM.find('#chkClassPublic'),
+				chkClassFinal: this.DOM.find('#chkClassFinal'),
+				chkClassAbstract: this.DOM.find('#chkClassAbstract')
+			},
+			ancestor: { DOM: this.DOM.find('#ancestor'),
+				txt: this.DOM.find('#ancestor').find('input'),
+				nfo: this.DOM.find('#ancestor').find('.infobox')
+			},
+			interfaces: { DOM: this.DOM.find('#interfaces'),
+				txt: this.DOM.find('#interfaces').find('input'),
+				cmd: this.DOM.find('#interfaces').find('button'),
+				nfo: this.DOM.find('#interfaces').find('.infobox'),
+				lst: this.DOM.find('#interfaces').find('.entries')
+			},
+			members: { DOM: this.DOM.find('#members'),
+				txt: this.DOM.find('#members').find('input'),
+				cmd: this.DOM.find('#members').find('button'),
+				nfo: this.DOM.find('#members').find('.infobox'),
+				lst: this.DOM.find('#members').find('.entries')
+			},
+			methods: { DOM: this.DOM.find('#methods'),
+				txt: this.DOM.find('#methods').find('input'),
+				cmd: this.DOM.find('#methods').find('button'),
+				nfo: this.DOM.find('#methods').find('.infobox'),
+				lst: this.DOM.find('#methods').find('.entries')
+			}
+		};
 
 		//start with the basics - lets make the panels toggleable
 		this.DOM.find('.toggleBar').click(function (e) {
@@ -192,7 +293,7 @@ var ClassEditor = (function () {
 			var wrapper = $(this).next('.toggleWrapper');
 
 			var headerActivated = this;
-			wrapper.toggle("slow", function () {
+			wrapper.slideToggle("slow", function () {
 
 				if (wrapper.is(':visible')) $(headerActivated).text('▼' + $(headerActivated).text().substr(1));else $(headerActivated).text('►' + $(headerActivated).text().substr(1));
 			});
@@ -202,16 +303,422 @@ var ClassEditor = (function () {
 		this.DOM.find('.toggleBar').mousedown(function (e) {
 			e.preventDefault();
 		});
+		this.DOM.find('label').mousedown(function (e) {
+			e.preventDefault();
+		});
+
+		//Lots of events to bind ...
+
+		//simple handlets for the checkboxes:
+		this.area.classname.chkClassPublic.bind('change click keyup', function (e) {
+			me.currentClassItem.setPublic($(this).is(":checked"));
+		});
+		this.area.classname.chkClassFinal.bind('change click keyup', function (e) {
+			me.currentClassItem.setFinal($(this).is(":checked"));
+		});
+		this.area.classname.chkClassAbstract.bind('change click keyup', function (e) {
+			me.currentClassItem.setAbstract($(this).is(":checked"));
+		});
+
+		//handle input for the Class Name and Ancestor Name
+		this.area.classname.txt.bind('keypress keyup keydown change', function (e) {
+			me.handleNameChange(me, this, e);
+		});
+		this.area.ancestor.txt.bind('keypress keyup keydown change', function (e) {
+			me.handleAncestorChange(me, this, e);
+		});
+
+		//handle text box changes for the Interfaces / Members / Methods boxes (which each take comma seperated values)
+		this.area.interfaces.txt.bind('keypress keyup keydown change', function (e) {
+			me.handleMultiInputChange(me, this, e, true, me.area.interfaces);
+		});
+		this.area.methods.txt.bind('keypress keyup keydown change', function (e) {
+			me.handleMultiInputChange(me, this, e, false, me.area.methods);
+		});
+		this.area.members.txt.bind('keypress keyup keydown change', function (e) {
+			me.handleMultiInputChange(me, this, e, false, me.area.members);
+		});
+
+		//handle when the return key is pressed on the mutlis
+		this.area.interfaces.txt.bind('keydown change', function (e) {
+			if (e.which == 13) me.addAll(me.currentClassItem.addInterface, me.area.interfaces.txt);
+		});
+		this.area.methods.txt.bind('keydown change', function (e) {
+			if (e.which == 13) me.addAll(me.currentClassItem.addMethod, me.area.methods.txt);
+		});
+		this.area.members.txt.bind('keydown change', function (e) {
+			if (e.which == 13) me.addAll(me.currentClassItem.addMember, me.area.members.txt);
+		});
+
+		//handle button presses
+		this.area.interfaces.cmd.click(function (e) {
+			me.addAll(me.currentClassItem.addInterface, me.area.interfaces.txt);
+		});
+		this.area.methods.cmd.click(function (e) {
+			me.addAll(me.currentClassItem.addMethod, me.area.methods.txt);
+		});
+		this.area.members.cmd.click(function (e) {
+			me.addAll(me.currentClassItem.addMember, me.area.members.txt);
+		});
+
+		//handle all the events for the select boxes!
+		this.area.members.DOM.change(function (e) {
+			me.handleSelectChange(me, me.currentClassItem.updateMemberByName, e);
+		});
+		this.area.methods.DOM.change(function (e) {
+			me.handleSelectChange(me, me.currentClassItem.updateMethodByName, e);
+		});
+
+		//handle all the events for any of the editable text areas!
+		this.area.interfaces.DOM.mouseup(function (e) {
+			me.handleEditableTextClick(me, e);
+		});
+		this.area.members.DOM.mouseup(function (e) {
+			me.handleEditableTextClick(me, e);
+		});
+		this.area.methods.DOM.mouseup(function (e) {
+			me.handleEditableTextClick(me, e);
+		});
+
+		//handle all the events for the edit in place text areas
+		this.area.interfaces.DOM.bind('keypress keyup keydown change', function (e) {
+			if (e.which == 13 && $(e.target).is('.editInPlaceBox')) me.handleEditableTextSubmit(me, me.currentClassItem.updateInterfaceByName, e);
+		});
+		this.area.members.DOM.bind('keypress keyup keydown change', function (e) {
+			if (e.which == 13 && $(e.target).is('.editInPlaceBox')) me.handleEditableTextSubmit(me, me.currentClassItem.updateMemberByName, e);
+		});
+		this.area.methods.DOM.bind('keypress keyup keydown change', function (e) {
+			if (e.which == 13 && $(e.target).is('.editInPlaceBox')) me.handleEditableTextSubmit(me, me.currentClassItem.updateMethodByName, e);
+		});
+
+		//if(e.which==13) me.handleEditableTextSubmit(me, e);
+		//	editBox.bind('keypress keyup keydown change', function(e){ me.handleEditableTextChange(me, e); });
 	}
 
-	//update the editor to be editing a new ClassItem object...
+	//takes a text box and makes sure there's no whitespace or double quotes, then returns the value as a string
 
 	_createClass(ClassEditor, [{
+		key: 'removeWhiteSpace',
+		value: function removeWhiteSpace(textBox) {
+			var val = $(textBox).val();
+
+			//remove all whitespace if there's any
+			if (val.match(/\s/g) != null && val.match(/\s/g).length > 0) {
+				val = val.replace(/\s/g, "");
+				$(textBox).val(val);
+			}
+			if (val.match(/\"/g) != null && val.match(/\"/g).length > 0) {
+				val = val.replace(/\"/g, "");
+				$(textBox).val(val);
+			}
+
+			return val;
+		}
+
+		//returns a string of HTML elements description warnings about nameformatting.
+		//For instance, class names generally should start with a capitol, not start with a number, etc
+	}, {
+		key: 'getNameWarnings',
+		value: function getNameWarnings(strName) {
+			var classOrInterface = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+			//a string of HTML to append to:
+			var ret = '';
+
+			//if it's empty, this will be easy!
+			if (strName == '') {
+				return '<div class="warning">Empty name!</div>';
+			}
+
+			//get the first character of the string:
+			var firstChar = strName.substr(0, 1);
+
+			if (classOrInterface == true) {
+				//check if first char is not a letter:
+				if (firstChar.match(/[a-zA-Z]/) == null) {
+					ret += '<div class="warning"><strong>[' + strName + ']</strong>: The first character "' + firstChar + '" is not a letter [a-zA-Z]. This is illegal in most languages.</div>';
+
+					//if it is a letter, make sure it's upper case:
+				} else if (firstChar.match(/[A-Z]/) == null) {
+						ret += '<div class="warning"><strong>[' + strName + ']</strong>: The first character "' + firstChar + '" is not uppercase. It is considered good convention in most languages to start a Class / Interface with an uppercase.</div>';
+					}
+
+				//if not classOrInterface, rules are slightly different for methods and members...
+			} else {
+					//check if first char is not a letter:
+					if (firstChar.match(/[a-zA-Z_]/) == null) {
+						ret += '<div class="warning"><strong>[' + strName + ']</strong>: The first character "' + firstChar + '" is not a letter [a-zA-Z] or underscore _. This is illegal in most languages.</div>';
+
+						//if it is a letter, make sure it's lowercase case:
+					} else if (firstChar.match(/[a-z_]/) == null) {
+							ret += '<div class="warning"><strong>[' + strName + ']</strong>: The first character "' + firstChar + '" is not lowercase. It may be mistaken for a Class name, which usually start with an uppercase.</div>';
+						}
+				} //end if classOrInterface
+
+			//now if there are any special characters
+			if (strName.match(/[^0-9a-zA-Z_]/) != null) {
+				ret += '<div class="warning"><strong>[' + strName + ']</strong>: This name contains special characters that may not be available in all languages.</div>';
+			}
+
+			//return our warnngs!
+			return ret;
+		}
+	}, {
+		key: 'handleNameChange',
+		value: function handleNameChange(me, trigger, e) {
+			//get the value and make sure there's no whitespace:
+			var val = me.removeWhiteSpace(trigger);
+
+			//update the info label with any warnings:
+			me.area.classname.nfo.html(me.getNameWarnings(val));
+
+			//if the value is empty we can just use "Untitled"
+			if (val == '') val = 'Untitled';
+
+			//update the object (note: warnings are only warnings. If the user enters stupid data, this will generate stupid output!)
+			if (me.currentClassItem != null && !(typeof me.currentClassItem === "undefined")) me.currentClassItem.setName(val);
+		}
+	}, {
+		key: 'handleAncestorChange',
+		value: function handleAncestorChange(me, trigger, e) {
+			//get the value and make sure there's no whitespace:
+			var val = me.removeWhiteSpace(trigger);
+
+			//update the info label with any warnings:
+			if (val == '') me.area.ancestor.nfo.html('');else me.area.ancestor.nfo.html(me.getNameWarnings(val));
+
+			//update the object (note: warnings are only warnings. If the user enters stupid data, this will generate stupid output!)
+			if (me.currentClassItem != null && !(typeof me.currentClassItem === "undefined")) me.currentClassItem.setAncestor(val);
+		}
+
+		//handle when the comma-seperated value boxes change
+	}, {
+		key: 'handleMultiInputChange',
+		value: function handleMultiInputChange(me, trigger, e, classOrInterface, area) {
+			//get the value and make sure there's no whitespace:
+			var val = me.removeWhiteSpace(trigger);
+
+			//split based on commas and remove empties:
+			var items = val.split(',').filter(function (s) {
+				return s != "";
+			});
+
+			//get warnings for all items
+			var allWarnings = '';
+			for (var i = 0; i < items.length; i++) allWarnings += me.getNameWarnings(items[i], classOrInterface);
+
+			//update warning label
+			area.nfo.html(allWarnings);
+		}
+
+		//call the supplied add method with every item in an array of strings
+	}, {
+		key: 'addAll',
+		value: function addAll(func, txtBox) {
+			//get the value and make sure there's no whitespace:
+			var val = this.removeWhiteSpace(txtBox);
+
+			//split based on commas and remove empties:
+			var items = val.split(',').filter(function (s) {
+				return s != "";
+			});
+
+			//add all items to the object
+			for (var i = 0; i < items.length; i++) func.apply(this.currentClassItem, [items[i]]);
+
+			//definately should rebuild the dom now...
+			this.updateDOM();
+		}
+
+		// get the details of a table item
+	}, {
+		key: 'tblItmDetails',
+		value: function tblItmDetails(elem) {
+			return {
+				val: elem.val(),
+				propName: elem.parent().attr('class'),
+				mName: elem.parent().parent().attr('class').split('_')[1],
+				container: elem.parent()
+			};
+		}
+
+		//handle when one of the select boxes changes in a table
+	}, {
+		key: 'handleSelectChange',
+		value: function handleSelectChange(me, f, e) {
+
+			//get the element that fired the event
+			var elem = $(e.target);
+
+			//if a select fired the change event, we can change the value...
+			if (elem.is('select')) {
+
+				//get details of this table item
+				var details = this.tblItmDetails(elem);
+				if (details.val === 'true') details.val = true;
+				if (details.val === 'false') details.val = false;
+
+				//now we can update the item
+				f.apply(me.currentClassItem, [details.mName, details.propName, details.val]);
+			} //endif select
+		}
+
+		//when an edit-in-place text field is submitted we need to get its value, update the span, and update our Class Item object
+	}, {
+		key: 'handleEditableTextSubmit',
+		value: function handleEditableTextSubmit(me, f, e) {
+
+			//get the element that fired the event
+			var elem = $(e.target);
+
+			//get details of this table item
+			var details = this.tblItmDetails(elem);
+
+			//now we can update the item
+			f.apply(me.currentClassItem, [details.mName, details.propName, details.val]);
+
+			//lets update the span...
+			details.container.find('span').html(details.val).show();
+
+			//and remove the text box!
+			elem.remove();
+
+			//we should rebuild the itnerface because the TR tag is now invalid
+			//of course, I could do some complciated logic here to go an update the TR class, BUT
+			//then id have to make special cases for the different sections...
+			me.updateDOM();
+		}
+
+		//handle when an editable text field is clicked on one of the tables
+	}, {
+		key: 'handleEditableTextClick',
+		value: function handleEditableTextClick(me, e) {
+
+			e.preventDefault();
+
+			//get the element that was clicked
+			var elem = $(e.target);
+
+			//if it was a span of type "editableTextField" then we can convert the field to a text box:
+			if (elem.is('span') && elem.is('.editableTextField')) {
+
+				//get the value of the span:
+				var val = elem.html();
+
+				//hide the element
+				elem.hide();
+
+				//get the container for the element and the new textbox (it's parent)
+				var container = elem.parent();
+
+				//create an input box with the same value
+				container.append('<input type="text" class="editInPlaceBox" value="' + val + '" style="width:' + container.width() + 'px"/>');
+
+				//find and focus the textbox
+				var editBox = container.find('input').focus().select();
+
+				//bind an event to the editbox, should be become unfocused, just hide itself and restore the span!
+				var dissolveBox = function dissolveBox(e) {
+					editBox.remove();elem.show();
+				};
+				editBox.blur(dissolveBox);
+				editBox.keydown(function (e) {
+					if (e.keyCode == 27) dissolveBox();
+				});
+			} //end if is editableTextField span
+		}
+
+		//update the editor to be editing a new ClassItem object...
+	}, {
 		key: 'setClassItem',
 		value: function setClassItem(clsItem) {
 
 			//save the new class item:
 			this.currentClassItem = clsItem;
+
+			//update the DOM interface to reflect the new class!
+			this.updateDOM();
+		}
+
+		//clears all fields and dom elements
+	}, {
+		key: 'clearDOM',
+		value: function clearDOM() {
+			this.DOM.find('input').val('');
+			this.DOM.find('.infobox').html('');
+			this.DOM.find('.entries').html('');
+			this.area.classname.chkClassPublic.prop('checked', true);
+			this.area.classname.chkClassFinal.prop('checked', false);
+			this.area.classname.chkClassAbstract.prop('checked', false);
+		}
+
+		//make a select html box for the options
+	}, {
+		key: 'makeSelect',
+		value: function makeSelect(value, options) {
+			value = value.toString();
+			var ret = '<select>';
+			for (var opt in options) {
+				var text = options[opt];
+				ret += '<option value="' + opt + '" ' + (opt == value ? 'selected' : '') + ' >' + text + '</option>';
+			} //next opt
+			ret += '</select>';
+			return ret;
+		}
+
+		//updates the DOM
+	}, {
+		key: 'updateDOM',
+		value: function updateDOM() {
+
+			//start with a fresh slate...
+			this.clearDOM();
+
+			//if there is no current class item, we out!
+			if (this.currentClassItem == null || typeof this.currentClassItem === "undefined") return;
+
+			//update the main class checkboxes
+			this.area.classname.chkClassPublic.prop('checked', this.currentClassItem.getPublic());
+			this.area.classname.chkClassFinal.prop('checked', this.currentClassItem.getFinal());
+			this.area.classname.chkClassAbstract.prop('checked', this.currentClassItem.getAbstract());
+
+			//update the class name box
+			this.area.classname.txt.val(this.currentClassItem.getName());
+
+			//only populate this box if data exists:
+			if (this.currentClassItem.getAncestor() != null) this.area.ancestor.txt.val(this.currentClassItem.getAncestor());
+
+			//get the interfaces of this item and build a table
+			var interfaces = this.currentClassItem.getInterfaces();
+			if (interfaces.length > 0) {
+				var tbl = $('<table><tr><td>Implements Interface:</td></tr></table>');
+				for (var i = 0; i < interfaces.length; i++) {
+					tbl.append('<tr class="tr_' + interfaces[i].mName + '"><td class="mName"><span class="editableTextField">' + interfaces[i].mName + '</span></tr></td>');
+				} //next i
+				this.area.interfaces.lst.append(tbl);
+			}
+
+			//get the members of this item and build a table
+			var members = this.currentClassItem.getMembers();
+			if (members.length > 0) {
+				var tbl = $('<table>' + '<tr>' + '<td>Access</td>' + '<td>Static</td>' + '<td>Const/Final</td>' + '<td>Type</td>' + '<td>Name</td>' + '<td>Initial Value</td>' + '</tr>' + '</table>');
+				for (var i = 0; i < members.length; i++) {
+					var m = members[i];
+					tbl.append('<tr class="tr_' + m.mName + '">' + '<td class="access">' + this.makeSelect(m.access, { 0: "private", 1: "public" }) + '</td>' + '<td class="isStatic">' + this.makeSelect(m.isStatic, { 'false': " - ", 'true': "static" }) + '</td>' + '<td class="isConst">' + this.makeSelect(m.isConst, { 'false': " - ", 'true': "const" }) + '</td>' + '<td class="mType">' + this.makeSelect(m.mType, { 1: "int", 2: "short", 3: "long", 4: "byte", 5: "float", 6: "double", 7: "char", 8: "string", 9: "boolean" }) + '</td>' + '<td class="mName"><span class="editableTextField">' + m.mName + '</span></td>' + '<td class="val"><span class="editableTextField">' + m.val + '</span></td>' + '</tr>');
+				} //next i
+				this.area.members.lst.append(tbl);
+			}
+
+			//get the methods of this item and build a table
+			var methods = this.currentClassItem.getMethods();
+			if (methods.length > 0) {
+				var tbl = $('<table>' + '<tr>' + '<td>Access</td>' + '<td>Static</td>' + '<td>Final</td>' + '<td>Return Type</td>' + '<td>Name</td>' + '<td>Params</td>' + '</tr>' + '</table>');
+				for (var i = 0; i < methods.length; i++) {
+					var m = methods[i];
+					tbl.append('<tr class="tr_' + m.mName + '">' + '<td class="access">' + this.makeSelect(m.access, { 0: "private", 1: "public" }) + '</td>' + '<td class="isStatic">' + this.makeSelect(m.isStatic, { 'false': " - ", 'true': "static" }) + '</td>' + '<td class="isConst">' + this.makeSelect(m.isConst, { 'false': " - ", 'true': "const" }) + '</td>' + '<td class="mType">' + this.makeSelect(m.mType, { 0: "void", 1: "int", 2: "short", 3: "long", 4: "byte", 5: "float", 6: "double", 7: "char", 8: "string", 9: "boolean" }) + '</td>' + '<td class="mName"><span class="editableTextField">' + m.mName + '</td>' + '<td class="params">' + '()' + '</td>' + '</tr>');
+				} //next i
+				this.area.methods.lst.append(tbl);
+			}
 		}
 	}]);
 
@@ -224,11 +731,27 @@ var ClassEditor = (function () {
 	Rather, ClassItems are the "classes" that the user is building.
 
 */
-"use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+//making these constants global because apparently ES6 constants are next-to-useless unless global
+'use strict';
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var PRIVATE = 0;
+var PUBLIC = 1;
+
+var VOID = 0;
+var INT = 1;
+var SHORT = 2;
+var LONG = 3;
+var BYTE = 4;
+var FLOAT = 5;
+var DOUBLE = 6;
+var CHAR = 7;
+var STRING = 8;
+var BOOLEAN = 9;
 
 var ClassItem = (function () {
 	function ClassItem(ID) {
@@ -241,27 +764,340 @@ var ClassItem = (function () {
 
 		//save our given name (or default)
 		this.itmName = initialClassName;
+
+		this.ancestorName = null;
+		this.interfaces = [];
+		this.members = [];
+		this.methods = [];
+		this.isPublic = true;
+		this.isFinal = false;
+		this.isAbstract = false;
+
+		//add some events
+		this.eventNameChange = new CallbackHelperObj();
+		this.eventChange = new CallbackHelperObj();
 	}
 
 	//constructor(initialClassName);
 
 	_createClass(ClassItem, [{
-		key: "getID",
+		key: 'getID',
 		value: function getID() {
 			return this.ID;
 		}
 
 		//setID(ID){ this.ID = ID; } //no setid, id's should be immutable
 
+		//get/set the class name
 	}, {
-		key: "getName",
+		key: 'getName',
 		value: function getName() {
 			return this.itmName;
 		}
 	}, {
-		key: "setName",
+		key: 'setName',
 		value: function setName(n) {
 			this.itmName = n;
+			this.eventNameChange.fire(this.itmName);
+			this.eventChange.fire();
+		}
+
+		//get/set access
+	}, {
+		key: 'getPublic',
+		value: function getPublic() {
+			return this.isPublic;
+		}
+	}, {
+		key: 'setPublic',
+		value: function setPublic(b) {
+			this.isPublic = b;this.eventChange.fire();
+		}
+
+		//get/set final
+	}, {
+		key: 'getFinal',
+		value: function getFinal() {
+			return this.isFinal;
+		}
+	}, {
+		key: 'setFinal',
+		value: function setFinal(b) {
+			this.isFinal = b;this.eventChange.fire();
+		}
+
+		//get/set abstract
+	}, {
+		key: 'getAbstract',
+		value: function getAbstract() {
+			return this.isAbstract;
+		}
+	}, {
+		key: 'setAbstract',
+		value: function setAbstract(b) {
+			this.isAbstract = b;this.eventChange.fire();
+		}
+
+		//get/set the ancestor
+	}, {
+		key: 'getAncestor',
+		value: function getAncestor() {
+			return this.ancestorName;
+		}
+	}, {
+		key: 'setAncestor',
+		value: function setAncestor(n) {
+			if (n == '') this.ancestorName = null;else this.ancestorName = n;
+			this.eventChange.fire();
+		}
+
+		//interfaces are just strings... so just add / remove strings:
+		//getInterfaces(){ return this.interfaces; }
+		//addInterface(n){ if(this.interfaces.indexOf(n)<0) this.interfaces.push(n); }
+		//remInterface(n){ this.interfaces = this.interfaces.filter(function(i){ return i!=n;}); }
+
+		//get / add / remove / update interfaces
+	}, {
+		key: 'getInterfaces',
+		value: function getInterfaces() {
+			return this.interfaces;
+		}
+	}, {
+		key: 'addInterface',
+		value: function addInterface(n) {
+			if (this.findByName(this.interfaces, n) === false) {
+				this.interfaces.push({
+					mName: n
+				});
+				this.eventChange.fire();
+			}
+		}
+	}, {
+		key: 'remInterfaceByName',
+		value: function remInterfaceByName(n) {
+			this.interfaces = this.interfaces.filter(function (i) {
+				return i.mName !== n;
+			});
+		}
+	}, {
+		key: 'getInterfaceByName',
+		value: function getInterfaceByName(n) {
+			return this.interfaces[this.findByName(this.interfaces, n)];
+		}
+	}, {
+		key: 'updateInterfaceByName',
+		value: function updateInterfaceByName(n, prop, val) {
+			var m = this.interfaces[this.findByName(this.interfaces, n)];
+
+			//make sure the value is a string at least...
+			val = val.toString();
+
+			//special logic for names - make sure they fit the rules
+			if (prop == 'mName') {
+				//remove whitespace and quotes
+				val = val.replace(/\"/g, "");
+				val = val.replace(/\s/g, "");
+
+				if (val == "") return;
+			}
+
+			m[prop] = val;
+			this.eventChange.fire();
+		}
+
+		//get / add / remove / update members
+	}, {
+		key: 'getMembers',
+		value: function getMembers() {
+			return this.members;
+		}
+	}, {
+		key: 'addMember',
+		value: function addMember(n) {
+			if (this.findByName(this.members, n) === false) {
+				this.members.push({
+					mName: n,
+					access: PRIVATE,
+					isStatic: false,
+					isConst: false,
+					mType: INT,
+					val: 0
+				});
+				this.eventChange.fire();
+			}
+		}
+	}, {
+		key: 'remMemberByName',
+		value: function remMemberByName(n) {
+			this.members = this.members.filter(function (i) {
+				return i.mName !== n;
+			});
+		}
+	}, {
+		key: 'getMemberByName',
+		value: function getMemberByName(n) {
+			return this.members[this.findByName(this.members, n)];
+		}
+	}, {
+		key: 'updateMemberByName',
+		value: function updateMemberByName(n, prop, val) {
+			var m = this.members[this.findByName(this.members, n)];
+
+			//make sure the value is a string at least...
+			val = val.toString();
+
+			//special logic for names - make sure they fit the rules
+			if (prop == 'mName') {
+				//remove whitespace and quotes
+				val = val.replace(/\"/g, "");
+				val = val.replace(/\s/g, "");
+
+				if (val == "") return;
+			}
+
+			//special logic for the value: let's do some basic processing based on the "type"
+			if (prop == 'val') {
+				switch (m.mType) {
+					case INT:
+					case SHORT:
+					case LONG:
+					case BYTE:
+
+						//remove whitespace and quotes
+						val = val.replace(/\"/g, "");
+						val = val.replace(/\s/g, "");
+
+						//check if its a number:
+						if (val.match(/[^0-9.]/g) != null) val = "0";
+
+						//remove anything after the first decimal, if there is one:
+						val = val.split('.')[0];
+						break;
+
+					case FLOAT:
+					case DOUBLE:
+
+						//remove whitespace and quotes
+						val = val.replace(/\"/g, "");
+						val = val.replace(/\s/g, "");
+
+						//check if its a number:
+						if (val.match(/[^0-9.]/g) != null || val == '') val = "0";
+
+						//remove extranous decimals, if any
+						if (val.match(/\./g) != null) {
+							if (val.match(/\./g).length > 1) val = val.split('.')[0] + '.' + val.split('.').splice(1).join('');
+						} else val += '.0';
+
+						break;
+
+					case CHAR:
+
+						//always just take the first char:
+						if (val.length > 1) val = val.substr(0, 1);
+						break;
+
+					case BOOLEAN:
+						if (val.toLowerCase() == 't') val = 'true';
+						try {
+							val = Boolean(JSON.parse(val.toLowerCase()));
+						} catch (e) {
+							val = false;
+						}
+						break;
+				} //swatch
+			} //end if is a val edit
+
+			m[prop] = val;
+			this.eventChange.fire();
+		}
+
+		//get / add / remove / update methods
+	}, {
+		key: 'getMethods',
+		value: function getMethods() {
+			return this.methods;
+		}
+	}, {
+		key: 'addMethod',
+		value: function addMethod(n) {
+			if (this.findByName(this.methods, n) === false) {
+				this.methods.push({
+					mName: n,
+					access: PUBLIC,
+					isStatic: false,
+					isConst: false,
+					mType: VOID,
+					params: []
+				});
+				this.eventChange.fire();
+			}
+		}
+	}, {
+		key: 'remMethodByName',
+		value: function remMethodByName(n) {
+			this.methods = this.methods.filter(function (i) {
+				return i.mName !== n;
+			});
+		}
+	}, {
+		key: 'getMethodByName',
+		value: function getMethodByName(n) {
+			return this.methods[this.findByName(this.methods, n)];
+		}
+	}, {
+		key: 'updateMethodByName',
+		value: function updateMethodByName(n, prop, val) {
+			var m = this.methods[this.findByName(this.methods, n)];
+
+			//make sure the value is a string at least...
+			val = val.toString();
+
+			//special logic for names - make sure they fit the rules
+			if (prop == 'mName') {
+				//remove whitespace and quotes
+				val = val.replace(/\"/g, "");
+				val = val.replace(/\s/g, "");
+
+				if (val == "") return;
+			}
+
+			m[prop] = val;
+			this.eventChange.fire();
+		}
+
+		//given an array finds an item that has a certain name
+	}, {
+		key: 'findByName',
+		value: function findByName(arr, name) {
+			for (var i = 0; i < arr.length; i++) {
+				if (arr[i].mName == name) return i;
+			}
+			return false;
+		}
+
+		//allow functions to be un/registerd for our name change event
+	}, {
+		key: 'onNameChange',
+		value: function onNameChange(func) {
+			return this.eventNameChange.register(func);
+		}
+	}, {
+		key: 'unbindNameChange',
+		value: function unbindNameChange(id) {
+			return this.eventNameChange.unregister(id);
+		}
+
+		//allow functions to be un/registerd for our general change event
+	}, {
+		key: 'onChange',
+		value: function onChange(func) {
+			return this.eventChange.register(func);
+		}
+	}, {
+		key: 'unbindChange',
+		value: function unbindChange(id) {
+			return this.eventChange.unregister(id);
 		}
 	}]);
 
@@ -405,6 +1241,12 @@ var ClassItemManager = (function () {
 			//every time a class is added, it should be "selected"
 			this.setSelectedItem(item.getID());
 
+			//if this item changes it's name, the list should be updated:
+			var me = this;
+			item.onNameChange(function () {
+				me.updateList();
+			});
+
 			//and rebuild our list:
 			this.updateList();
 		}
@@ -487,7 +1329,7 @@ var ClassItemManager = (function () {
 				var item = this.classItems[i];
 
 				//add a row for this item. Auto add in the "selected" identifier if the ID's match
-				listItemsDOM.append('<div id="clsItm_' + item.getID() + '" class="listItem ' + (item.getID() == this.selectedClassItem ? 'selectedClassItem' : '') + '">' + item.getName() + ' {' + item.getID() + '}</div>');
+				listItemsDOM.append('<div id="clsItm_' + item.getID() + '" class="listItem ' + (item.getID() == this.selectedClassItem ? 'selectedClassItem' : '') + '">' + item.getName()); //+' {'+item.getID()+'}</div>');
 			} //next i
 
 			//update the list DOM

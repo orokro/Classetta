@@ -42,7 +42,15 @@ $iconJSColor: #E2D973;
 
 //Handy mixin to generate the color gradients for the tab
 @mixin tabGradient($color){
-	background: linear-gradient(to bottom,  lighten($color, 35%) 0%, lighten($color, 15%) 50%, $color 51%, darken($color, 10%) 100%); /* W3C */
+
+	background: $color; /* Old browsers */
+	background: linear-gradient(to bottom,  									lighten($color, 35%) 0%, 					lighten($color, 15%) 50%, 					$color 51%, 				 darken($color, 10%) 100%); /* W3C */
+	background: -moz-linear-gradient(top,  										lighten($color, 35%) 0%, 					lighten($color, 15%) 50%, 					$color 51%, 				 darken($color, 10%) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom,  color-stop(0%, lighten($color, 35%)), 		color-stop(50%, lighten($color, 15%)), 		color-stop(51%, $color), 	color-stop(100%, darken($color, 10%))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  									lighten($color, 35%) 0%,					lighten($color, 15%) 50%,					$color 51%,					 darken($color, 10%) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  										lighten($color, 35%) 0%,					lighten($color, 15%) 50%,					$color 51%,					 darken($color, 10%) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  										lighten($color, 35%) 0%,					lighten($color, 15%) 50%,					$color 51%,					 darken($color, 10%) 100%); /* IE10+ */
+	filter: progid:DXImageTransform.Microsoft.gradient(			 startColorstr='lighten($color, 35%)', 																					endColorstr='darken($color, 10%)',GradientType=0 ); /* IE6-9 */
 }
 
 //the container for the tabs
@@ -193,8 +201,21 @@ $iconJSColor: #E2D973;
 
 //Handy mixin to generate the background colors for the tab-pages
 @mixin tabPageGradient($color){
-	background: linear-gradient(to bottom,  darken($color, 10%) 0%, lighten($color, 42%) 100%); /* W3C */
+	background: $color; /* Old browsers */
+	background: linear-gradient(to bottom,  									darken($color, 10%) 0%, 	 			 lighten($color, 42%) 100%); /* W3C */
+	background: -moz-linear-gradient(top,  										darken($color, 10%) 0%, 				 lighten($color, 42%) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,	darken($color, 10%)), 	color-stop(100%, lighten($color, 42%))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  									darken($color, 10%) 0%,					 lighten($color, 42%) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  										darken($color, 10%) 0%,					 lighten($color, 42%) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  										darken($color, 10%) 0%,					 lighten($color, 42%) 100%); /* IE10+ */
+	filter: progid:DXImageTransform.Microsoft.gradient(  		 startColorstr='darken($color, 10%)', 		endColorstr='lighten($color, 42%)', GradientType=0 ); /* IE6-9 */
+
 }
+
+
+
+
+
 
 //Tab Page styles...
 .tabPageEditorBG {
@@ -231,6 +252,8 @@ $iconJSColor: #E2D973;
 	left: 10px;
 	right: 10px;
 	padding: 5px;
+
+	overflow-y: scroll;
 
 	//STYLE
 	border: 1px solid #CCC;

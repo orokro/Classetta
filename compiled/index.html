@@ -104,55 +104,58 @@
 
 				<!-- the container for the editor interface! -->
 				<div id="divEditor" style="display:none;">
-					<h2>Class Editor</h2>
-
-					<h3 class="toggleBar">&#x25BC; Class Name</h3>
-					<div class="toggleWrapper">
+					<h3 class="toggleBar">&#x25BC; General Class Properties</h3>
+					<div id="classname" class="toggleWrapper">
+						
+						<input type="checkbox" id="chkClassPublic"  name="chkClassPublic" checked/><label for="chkClassPublic">Public</label>
+						<input type="checkbox" id="chkClassFinal"  name="chkClassFinal"/><label for="chkClassFinal">Final</label>
+						<input type="checkbox" id="chkClassAbstract"  name="chkClassAbstract"/><label for="chkClassAbstract">Abstract</label>
 						<p>Name your Class!</p>
-						<input id="txtClsName" type="text" placeholder="ClassName"></input>
-						<div id="infoClsName"></div>
+						<input type="text" placeholder="ClassName"></input>
+
+						<div class="infobox"></div>
 					</div>
 
 					<h3 class="toggleBar">&#x25BC; Inheritance</h3>
-					<div class="toggleWrapper">
-						<p>Does this Class extend another class? Only one extenion allowed!</p>
-						<input id="txtAncestor" type="text" placeholder="AncestorClassName"></input>
-						<div id="infoAncestor"></div>
+					<div id="ancestor" class="toggleWrapper">
+						<p>Does this Class extend another class? Only one extension allowed!</p>
+						<input type="text" placeholder="AncestorClassName"></input>
+						<div class="infobox"></div>
 					</div>
 
 					<h3 class="toggleBar">&#x25BC; Interfaces</h3>
-					<div class="toggleWrapper">
+					<div id="interfaces" class="toggleWrapper">
 						<div class="entries">
 						</div>
 						<div class="addBox">
 							<p>Enter one or more comma-seperated Interface names this Class implements.</p>
-							<input id="txtInterfaces" type="text" placeholder="InterfaceNames" size="60"></input>
-							<button type="button" class="cmdAdd">Add</button>
-							<div id="infoInterfaces"></div>
+							<input type="text" placeholder="InterfaceNames" size="57"></input>
+							<button type="button"  class="cmdAdd">Add</button>
+							<div class="infobox"></div>
 						</div>
 					</div>
 
 					<h3 class="toggleBar">&#x25BC; Member Variables</h3>
-					<div class="toggleWrapper">
+					<div id="members" class="toggleWrapper">
 						<div class="entries">
 						</div>
 						<div class="addBox">
 							<p>Enter one or more comma-seperated Member Variables this Class implements.</p>
-							<input id="txtMembers" type="text" placeholder="MemberVariableNames" size="60"></input>
+							<input type="text" placeholder="MemberVariableNames" size="57"></input>
 							<button type="button" class="cmdAdd">Add</button>
-							<div id="infoMembers"></div>
+							<div class="infobox"></div>
 						</div>
 					</div>
 
 					<h3 class="toggleBar">&#x25BC; Methods</h3>
-					<div class="toggleWrapper">
+					<div id="methods" class="toggleWrapper">
 						<div class="entries">
 						</div>
 						<div class="addBox">
 							<p>Enter one or more comma-seperated Method names this Class implements.</p>
-							<input id="txtMethods" type="text" placeholder="MethodNames" size="60"></input>
+							<input type="text" placeholder="MethodNames" size="57"></input>
 							<button type="button" class="cmdAdd">Add</button>
-							<div id="infoMethods"></div>
+							<div class="infobox"></div>
 						</div>
 					</div>
 
