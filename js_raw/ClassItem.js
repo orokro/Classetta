@@ -91,7 +91,8 @@ class ClassItem {
 							this.eventChange.fire();
 						}
 					}
-	remInterfaceByName(n){ 	this.interfaces = this.interfaces.filter(function(i){ return i.mName!==n; }) }
+	remInterfaceByName(n){ 	this.interfaces = this.interfaces.filter(function(i){ return i.mName!==n; });
+							this.eventChange.fire(); }
 	getInterfaceByName(n){		return this.interfaces[this.findByName(this.interfaces, n)]; }
 	updateInterfaceByName(n, prop, val){	var m = this.interfaces[this.findByName(this.interfaces, n)];
 
@@ -125,7 +126,8 @@ class ClassItem {
 						this.eventChange.fire();
 					}
 				}
-	remMemberByName(n){ 	this.members = this.members.filter(function(i){ return i.mName!==n; }) }
+	remMemberByName(n){ 	this.members = this.members.filter(function(i){ return i.mName!==n; });
+							this.eventChange.fire(); }
 	getMemberByName(n){		return this.members[this.findByName(this.members, n)]; }
 	updateMemberByName(n, prop, val){	
 										var m = this.members[this.findByName(this.members, n)];
@@ -133,74 +135,31 @@ class ClassItem {
 										//make sure the value is a string at least...
 										val = val.toString();
 
-										//special logic for names - make sure they fit the rules
-										if(prop=='mName'){
-											//remove whitespace and quotes
-											val = val.replace(/\"/g, "");
-											val = val.replace(/\s/g, "");
+										//special logic for name, value, and type changes
+										switch(prop){
+											case 'mName':
+												//remove whitespace and quotes
+												val = val.replace(/\"/g, "");
+												val = val.replace(/\s/g, "");
 
-											if(val=="")
-												return;
-										}
+												if(val=="")
+													return;
+												break;
 
-										//special logic for the value: let's do some basic processing based on the "type"
-										if(prop=='val'){
-											switch(m.mType){
-												case INT:
-												case SHORT:
-												case LONG:
-												case BYTE:
+											case 'val':
+												if(prop=='val'){
+													if(val=='')
+														val=null;
+													else
+														val = this.filterValueByType(val, m.mType);
+												}
+												break;
 
-													//remove whitespace and quotes
-													val = val.replace(/\"/g, "");
-													val = val.replace(/\s/g, "");
-
-													//check if its a number:
-													if(val.match(/[^0-9.]/g) != null)
-														val="0";
-
-													//remove anything after the first decimal, if there is one:
-													val = val.split('.')[0];
-													break;
-
-												case FLOAT:
-												case DOUBLE:
-
-													//remove whitespace and quotes
-													val = val.replace(/\"/g, "");
-													val = val.replace(/\s/g, "");
-
-													//check if its a number:
-													if(val.match(/[^0-9.]/g) != null || val=='')
-														val="0";
-
-													//remove extranous decimals, if any
-													if(val.match(/\./g)!=null){
-														if(val.match(/\./g).length>1)
-															val = val.split('.')[0] + '.' + val.split('.').splice(1).join('');
-													}else
-														val += '.0';
-
-													break;
-
-												case CHAR:
-
-													//always just take the first char:
-													if(val.length>1)
-														val = val.substr(0,1);
-													break;
-
-												case BOOLEAN:
-													if(val.toLowerCase()=='t') val='true';
-													try{
-														val = Boolean(JSON.parse(val.toLowerCase()));
-													}catch(e){
-														val = false;
-													}
-													break;
-											}//swatch
-
-										}//end if is a val edit
+											case 'mType':
+												//update the value based on the new type:
+												m.val = this.filterValueByType(m.val.toString(), parseInt(val));
+												break;
+										}//swatch
 
 										m[prop] = val;
 										this.eventChange.fire(); }
@@ -220,7 +179,8 @@ class ClassItem {
 					}
 
 				}
-	remMethodByName(n){ 	this.methods = this.methods.filter(function(i){ return i.mName!==n; }) }
+	remMethodByName(n){ 	this.methods = this.methods.filter(function(i){ return i.mName!==n; });
+							this.eventChange.fire(); }
 	getMethodByName(n){		return this.methods[this.findByName(this.methods, n)]; }
 	updateMethodByName(n, prop, val){	var m = this.methods[this.findByName(this.methods, n)];
 
@@ -249,6 +209,66 @@ class ClassItem {
 		return false;
 	}
 
+
+	//filter a value by it's type
+	filterValueByType(val, type){
+		switch(type){
+			case INT:
+			case SHORT:
+			case LONG:
+			case BYTE:
+
+				//remove whitespace and quotes
+				val = val.replace(/\"/g, "");
+				val = val.replace(/\s/g, "");
+
+				//check if its a number:
+				if(val.match(/[^0-9.]/g) != null)
+					val="0";
+
+				//remove anything after the first decimal, if there is one:
+				val = val.split('.')[0];
+				break;
+
+			case FLOAT:
+			case DOUBLE:
+
+				//remove whitespace and quotes
+				val = val.replace(/\"/g, "");
+				val = val.replace(/\s/g, "");
+
+				//check if its a number:
+				if(val.match(/[^0-9.]/g) != null || val=='')
+					val="0";
+
+				//remove extranous decimals, if any
+				if(val.match(/\./g)!=null){
+					if(val.match(/\./g).length>1)
+						val = val.split('.')[0] + '.' + val.split('.').splice(1).join('');
+				}else
+					val += '.0';
+
+				break;
+
+			case CHAR:
+
+				//always just take the first char:
+				if(val.length>1)
+					val = val.substr(0,1);
+				break;
+
+			case BOOLEAN:
+				if(val.toLowerCase()=='t') val='true';
+				try{
+					val = Boolean(JSON.parse(val.toLowerCase()));
+				}catch(e){
+					val = false;
+				}
+				break;
+		}//swatch
+
+		return val;
+	}
 
 	//allow functions to be un/registerd for our name change event
 	onNameChange(func){ return this.eventNameChange.register(func); }

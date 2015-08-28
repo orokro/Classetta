@@ -8,7 +8,7 @@
 #divEditor {
 
 	padding: 10px;
-	width: 635px;
+	width: 671px; //635px;
 
 	//remove obvnoxius default margin on paragraphs
 	p { margin: 4px 0px 0px;
@@ -57,18 +57,55 @@
 
 			//border-left: 1px solid #999999;
 			//border-right: 1px solid #999999;
+			
 
 			//alternating backgrounds
 			background: #E6E6E6;
 			&:nth-child(odd){ background: #F8F8F8; }
-			&:nth-child(1){ background: #999 !important;
+			&:nth-child(1){ background: #999;
 							color: #FFF;
 							font-size: 14px; }
 			//&:last-child{ border-bottom: 1px solid #999; }
+
+			//handle for deleting rows
+			.deleteRow {
+
+				//POSITION:
+				position: absolute;
+				top: 0px;
+				bottom: 0px;
+				right: -30px;
+				width: 29px;
+
+				//MISC STYLE
+				background: red;
+				cursor: pointer;
+				border: 1px solid #999;
+				border-left: 0px none;
+
+				//FONT SYTLES
+				font-weight: 600;
+				color: white;
+				text-align: center;
+				padding: 3px 0px 0px;
+
+				visibility: hidden;
+
+				&:hover { text-decoration: underline; }
+			}
+			&:hover { .deleteRow { visibility: visible; }}
+
+		}
+		.deleteRowTr {
+			td, div, span, select {
+				background: red !important;
+				color: white !important;
+			}
 		}
 
 		td {
 			padding: 2px 10px;
+			position: relative;
 
 		}
 
@@ -82,8 +119,14 @@
 		//for the editiable fields
 		.editableTextField {
 			cursor: pointer;
-			word-wrap: break-word;
+			//word-wrap: break-word;
+			overflow: hidden;
+			max-width: 93px !important;
+			display: inline-block;
+
+			&.unset{ font-style: italic; }
 		}
+
 		.editableTextField:hover{ text-decoration: underline; }
 		.editInPlaceBox {
 			font-size: 12px;
@@ -92,6 +135,8 @@
 			margin-bottom: -1px;
 
 		}
+
+
 	}
 
 	//each section on the main editor form is a box that can be toggled open/shut

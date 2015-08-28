@@ -538,7 +538,7 @@
 */
 #divEditor {
   padding: 10px;
-  width: 635px; }
+  width: 671px; }
   #divEditor p {
     margin: 4px 0px 0px;
     font-size: 12px;
@@ -579,11 +579,34 @@
       #divEditor table tr:nth-child(odd) {
         background: #F8F8F8; }
       #divEditor table tr:nth-child(1) {
-        background: #999 !important;
+        background: #999;
         color: #FFF;
         font-size: 14px; }
+      #divEditor table tr .deleteRow {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        right: -30px;
+        width: 29px;
+        background: red;
+        cursor: pointer;
+        border: 1px solid #999;
+        border-left: 0px none;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        padding: 3px 0px 0px;
+        visibility: hidden; }
+        #divEditor table tr .deleteRow:hover {
+          text-decoration: underline; }
+      #divEditor table tr:hover .deleteRow {
+        visibility: visible; }
+    #divEditor table .deleteRowTr td, #divEditor table .deleteRowTr div, #divEditor table .deleteRowTr span, #divEditor table .deleteRowTr select {
+      background: red !important;
+      color: white !important; }
     #divEditor table td {
-      padding: 2px 10px; }
+      padding: 2px 10px;
+      position: relative; }
     #divEditor table select {
       font-size: 12px;
       font-family: "Lucida Console", Monaco, monospace;
@@ -591,7 +614,11 @@
       border: 0px none !important; }
     #divEditor table .editableTextField {
       cursor: pointer;
-      word-wrap: break-word; }
+      overflow: hidden;
+      max-width: 93px !important;
+      display: inline-block; }
+      #divEditor table .editableTextField.unset {
+        font-style: italic; }
     #divEditor table .editableTextField:hover {
       text-decoration: underline; }
     #divEditor table .editInPlaceBox {

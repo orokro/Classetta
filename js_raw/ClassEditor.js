@@ -83,6 +83,17 @@ class ClassEditor{
 
 		//Lots of events to bind ...
 
+		//make the table rows red when the delete flag is hovered over
+		this.DOM.mouseover( function(e)	{ 
+										if($(e.target).is('.deleteRow'))
+											$(e.target).parent().parent().addClass('deleteRowTr');
+									});
+		this.DOM.mouseout( function(e)	{ 
+										if($(e.target).is('.deleteRow'))
+											$(e.target).parent().parent().removeClass('deleteRowTr');
+									});
+
+
 		//simple handlets for the checkboxes:
 		this.area.classname.chkClassPublic.bind('change click keyup', function(e){ me.currentClassItem.setPublic($(this).is(":checked")); });
 		this.area.classname.chkClassFinal.bind('change click keyup', function(e){ me.currentClassItem.setFinal($(this).is(":checked")); });
@@ -112,9 +123,12 @@ class ClassEditor{
 		this.area.methods.DOM.change(function(e){ me.handleSelectChange(me, me.currentClassItem.updateMethodByName, e); });
 		
 		//handle all the events for any of the editable text areas!
-		this.area.interfaces.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e); });
-		this.area.members.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e); });
-		this.area.methods.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e); });
+		this.area.interfaces.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e);
+													  me.handleDeleteRowClick(me, e, me.currentClassItem.remInterfaceByName); });
+		this.area.members.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e); 
+													  me.handleDeleteRowClick(me, e, me.currentClassItem.remMemberByName); });
+		this.area.methods.DOM.mouseup(function(e){ me.handleEditableTextClick(me, e); 
+													  me.handleDeleteRowClick(me, e, me.currentClassItem.remMethodByName); });
 			
 		//handle all the events for the edit in place text areas
 		this.area.interfaces.DOM.bind('keypress keyup keydown change', function(e){ 
@@ -272,8 +286,10 @@ class ClassEditor{
 		return {
 					val: elem.val(),
 					propName: elem.parent().attr('class'),
-					mName: elem.parent().parent().attr('class').split('_')[1],
-					container: elem.parent()
+					mName: elem.parent().parent().attr('class').split(' ')[0].split('_')[1],
+					container: elem.parent(),
+					row: elem.parent().parent(),
+					table: elem.parent().parent()
 				};
 	}
 
@@ -334,7 +350,11 @@ class ClassEditor{
 		if(elem.is('span') && elem.is('.editableTextField')){
 
 			//get the value of the span:
-			var val = elem.html();
+			var val; 
+			if(elem.is('.unset'))
+				val='';
+			else
+				val = elem.html();
 
 			//hide the element
 			elem.hide();
@@ -357,6 +377,34 @@ class ClassEditor{
 		}//end if is editableTextField span
 	}
 
+	//handle when an editable text field is clicked on one of the tables
+	handleDeleteRowClick(me, e, f){
+
+		e.preventDefault();
+
+		//get the element that was clicked
+		var elem = $(e.target);
+
+		//if it was a span of type "editableTextField" then we can convert the field to a text box:
+		if(elem.is('div') && elem.is('.deleteRow')){
+
+			//get details of this table item
+			var details = this.tblItmDetails(elem);
+
+			//remove the item from the ClassItem object
+			f.apply(me.currentClassItem, [details.mName]);
+
+			//remove the parent tr
+			details.row.fadeOut('fast', function(){ $(this).remove(); });
+
+			//if the table has no more TRs then just update the interface
+			if(details.table.find('tr').length<=1)
+				me.updateDOM();
+
+
+		}//end if is editableTextField span
+	}
+
 	
 
 
@@ -368,7 +416,6 @@ class ClassEditor{
 
 		//update the DOM interface to reflect the new class!
 		this.updateDOM();
-
 	}
 
 	//clears all fields and dom elements
@@ -418,9 +465,12 @@ class ClassEditor{
 		//get the interfaces of this item and build a table
 		var interfaces = this.currentClassItem.getInterfaces();
 		if(interfaces.length>0){
-			var tbl = $('<table><tr><td>Implements Interface:</td></tr></table>');
+			var tbl = $('<table><tr><td>Implements Interface:</td><td width="0"></td></tr></table>');
 			for(var i=0; i<interfaces.length; i++){
-				tbl.append('<tr class="tr_' + interfaces[i].mName + '"><td class="mName"><span class="editableTextField">'+interfaces[i].mName+'</span></tr></td>');
+				tbl.append('<tr class="tr_' + interfaces[i].mName + '">' +
+								'<td class="mName"><span class="editableTextField">'+interfaces[i].mName+'</span></td>' + 
+								'<td class="delete"><div class="deleteRow">DEL</div></td>' +
+							'</tr>');
 			}//next i
 			this.area.interfaces.lst.append(tbl);
 		}
@@ -436,6 +486,7 @@ class ClassEditor{
 								'<td>Type</td>' + 
 								'<td>Name</td>' + 
 								'<td>Initial Value</td>' + 
+								'<td width="0"></td>' +
 							'</tr>'+
 						'</table>');
 			for(var i=0; i<members.length; i++){
@@ -446,7 +497,8 @@ class ClassEditor{
 								'<td class="isConst">' + this.makeSelect(m.isConst, {false:" - ", true:"const"}) + '</td>' + 
 								'<td class="mType">' + this.makeSelect(m.mType, {1:"int", 2:"short", 3:"long", 4:"byte", 5:"float", 6:"double", 7:"char", 8:"string", 9:"boolean"}) + '</td>' + 
 								'<td class="mName"><span class="editableTextField">' + m.mName + '</span></td>' + 
-								'<td class="val"><span class="editableTextField">' + m.val + '</span></td>' + 
+								'<td class="val"><span class="editableTextField ' + ((m.val==null)?'unset':'') + '">' + ((m.val==null)?'&lt;unset&gt;':m.val) + '</span></td>' + 
+								'<td class="delete"><div class="deleteRow">DEL</div></td>' +
 							'</tr>');
 			}//next i
 			this.area.members.lst.append(tbl);
@@ -463,6 +515,7 @@ class ClassEditor{
 								'<td>Return Type</td>' + 
 								'<td>Name</td>' + 
 								'<td>Params</td>' + 
+								'<td width="0"></td>' +
 							'</tr>'+
 						'</table>');
 			for(var i=0; i<methods.length; i++){
@@ -474,6 +527,7 @@ class ClassEditor{
 								'<td class="mType">' + this.makeSelect(m.mType, {0: "void", 1:"int", 2:"short", 3:"long", 4:"byte", 5:"float", 6:"double", 7:"char", 8:"string", 9:"boolean"}) + '</td>' + 
 								'<td class="mName"><span class="editableTextField">' + m.mName + '</td>' + 
 								'<td class="params">' + '()' + '</td>' + 
+								'<td class="delete"><div class="deleteRow">DEL</div></td>' +
 							'</tr>');
 			}//next i
 			this.area.methods.lst.append(tbl);
