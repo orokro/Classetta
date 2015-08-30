@@ -25,71 +25,24 @@ class ClassDesignApp {
         //so we can update the editor
         this.ClassItmMgr.onSelectionChange(function(o){ me.handleSelectionChange(me, o); });
 
+        //and when the editor edits the selected ClassItem... so we can update the code tabs
+        this.ClassItmMgr.onSelectionEdited(function(o){ me.handleSelectionEdited(me, o); });
+
+        //create a bunch of code generators for the tabs
+        this.codeGenerators = [];
+        this.codeGenerators.push( new JavaCodeGenerator(    $('#tabPage_Java')) );
+        this.codeGenerators.push( new CSharpCodeGenerator(  $('#tabPage_CSharp')) );
+        this.codeGenerators.push( new PythonCodeGenerator(  $('#tabPage_Python')) );
+        this.codeGenerators.push( new RubyCodeGenerator(    $('#tabPage_Ruby')) );
+        this.codeGenerators.push( new PHPCodeGenerator(     $('#tabPage_PHP')) );
+        this.codeGenerators.push( new JSCodeGenerator(      $('#tabPage_JS')) );
+
         //add default item for debugging
-        var newItem = new ClassItem(this.ClassItmMgr.classIDCounter++);
+        this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
+        this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
 
-        newItem.setName('DemoClass');
 
-        newItem.addInterface("Petable");
-        newItem.addInterface("Feedable");
-        newItem.addInterface("foo");
-
-        newItem.addMember("aInt");
-        newItem.getMemberByName("aInt").mType = INT;
-        newItem.getMemberByName("aInt").access = PUBLIC;
-        newItem.getMemberByName("aInt").isStatic = true;
-        newItem.getMemberByName("aInt").isConst = true;
-        newItem.getMemberByName("aInt").val = 123000000;
-        newItem.addMember("aShort");
-        newItem.getMemberByName("aShort").mType = SHORT;
-        newItem.getMemberByName("aShort").access = PUBLIC;
-        newItem.getMemberByName("aShort").isStatic = true;
-        newItem.getMemberByName("aShort").val = 123000;
-        newItem.addMember("aLong");
-        newItem.getMemberByName("aLong").mType = LONG;
-        newItem.getMemberByName("aLong").access = PUBLIC;
-        newItem.getMemberByName("aLong").val = 123000000000;
-        newItem.addMember("aByte");
-        newItem.getMemberByName("aByte").mType = BYTE;
-        newItem.getMemberByName("aByte").val = 123;
-        newItem.addMember("aFloat");
-        newItem.getMemberByName("aFloat").mType = FLOAT;
-        newItem.getMemberByName("aFloat").val = 3.14159;
-        newItem.addMember("aDouble");
-        newItem.getMemberByName("aDouble").mType = DOUBLE; 
-        newItem.getMemberByName("aDouble").val = 3.1415926535897;
-        newItem.addMember("aChar");
-        newItem.getMemberByName("aChar").mType = CHAR;
-        newItem.getMemberByName("aChar").val = 'g';
-        newItem.addMember("aString");
-        newItem.getMemberByName("aString").mType = STRING;
-        newItem.getMemberByName("aString").val = "Design.Class Rules!";
-        newItem.addMember("aBoolean");
-        newItem.getMemberByName("aBoolean").mType = BOOLEAN;
-        newItem.getMemberByName("aBoolean").val = true;
-
-        newItem.addMethod("main");
-        newItem.getMethodByName("main").mType = VOID;
-        newItem.getMethodByName("main").access = PUBLIC;
-        newItem.getMethodByName("main").isStatic = true;
-        newItem.getMethodByName("main").isConst = false;
-        newItem.getMethodByName("main").params = ["String args[]"];
-        newItem.addMethod("foo");
-        newItem.getMethodByName("foo").mType = LONG;
-        newItem.getMethodByName("foo").access = PRIVATE;
-        newItem.getMethodByName("foo").isStatic = false;
-        newItem.getMethodByName("foo").isConst = true;
-        newItem.getMethodByName("foo").params = ["String args[]"];
-        newItem.addMethod("bar");
-        newItem.getMethodByName("bar").mType = STRING;
-        newItem.getMethodByName("bar").access = PUBLIC;
-        newItem.getMethodByName("bar").isStatic = false;
-        newItem.getMethodByName("bar").isConst = false;
-        newItem.getMethodByName("bar").params = ["String args[]"];
-
-        this.ClassItmMgr.addClassItm(newItem);
-
-        newItem.onChange(function(){ console.log('My object changed!'); });
+        this.TabMgr.setTab('PHP');
 
     }
 
@@ -109,11 +62,35 @@ class ClassDesignApp {
 
         }else{
 
-            //hide the editor and show the welcome screen
+            //otherwise we better update the code sampels!
+            me.updateGenerators(newItem);
+
+            //hide the weclome and show the editor screen
             $('#divWelcome').hide();
             $('#divEditor').show();
 
         }//endif
+
+
+    }
+
+    //update the app appropriately when the selected ClassItem is edited in the editor
+    handleSelectionEdited(me, item){
+        me.updateGenerators(item);
+    }
+
+    //update all the generators (whether or not they need it)
+    updateGenerators(item){
+        //update each of the code generators!
+        for(var g=0; g<this.codeGenerators.length; g++){
+
+            //get the generator
+            var generator = this.codeGenerators[g];
+
+            //tell it to update it's class
+            generator.update(item);
+
+        }//next g
     }
 
 

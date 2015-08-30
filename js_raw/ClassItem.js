@@ -54,19 +54,19 @@ class ClassItem {
 	getName(){ return this.itmName; }
 	setName(n){ this.itmName = n;
 				this.eventNameChange.fire(this.itmName); 
-				this.eventChange.fire(); }
+				this.eventChange.fire(this); }
 
 	//get/set access
 	getPublic(){ return this.isPublic; }
-	setPublic(b){ this.isPublic=b; this.eventChange.fire();}
+	setPublic(b){ this.isPublic=b; this.eventChange.fire(this);}
 
 	//get/set final
 	getFinal(){ return this.isFinal; }
-	setFinal(b){ this.isFinal=b; this.eventChange.fire();}
+	setFinal(b){ this.isFinal=b; this.eventChange.fire(this);}
 	
 	//get/set abstract
 	getAbstract(){ return this.isAbstract; }
-	setAbstract(b){ this.isAbstract=b; this.eventChange.fire();}
+	setAbstract(b){ this.isAbstract=b; this.eventChange.fire(this);}
 
 	//get/set the ancestor
 	getAncestor(){ return this.ancestorName; }
@@ -74,7 +74,7 @@ class ClassItem {
 						this.ancestorName=null;
 					else
 						this.ancestorName=n;
-					this.eventChange.fire();
+					this.eventChange.fire(this);
 				}
 
 	//interfaces are just strings... so just add / remove strings:
@@ -84,15 +84,21 @@ class ClassItem {
 
 	//get / add / remove / update interfaces
 	getInterfaces(){ 	return this.interfaces; }
-	addInterface(n){	if(this.findByName(this.interfaces, n)===false){
-							this.interfaces.push({
-											mName: n
-										});
-							this.eventChange.fire();
-						}
+	addInterface(n){	
+						if(typeof(n)=='string')
+							n = [n];
+						for(var i in n){
+							var v = n[i];
+							if(this.findByName(this.interfaces, v)===false){
+								this.interfaces.push({
+												mName: v
+											});
+								this.eventChange.fire(this);
+							}
+						}//next i
 					}
 	remInterfaceByName(n){ 	this.interfaces = this.interfaces.filter(function(i){ return i.mName!==n; });
-							this.eventChange.fire(); }
+							this.eventChange.fire(this); }
 	getInterfaceByName(n){		return this.interfaces[this.findByName(this.interfaces, n)]; }
 	updateInterfaceByName(n, prop, val){	var m = this.interfaces[this.findByName(this.interfaces, n)];
 
@@ -109,25 +115,36 @@ class ClassItem {
 													return;
 											}
 
+											if(val=="true") val = true;
+											if(val=="false") val = false;
+
 											m[prop] = val;
-											this.eventChange.fire(); }
+											this.eventChange.fire(this); }
 
 	//get / add / remove / update members
 	getMembers(){ 	return this.members; }
-	addMember(n){	if(this.findByName(this.members, n)===false){
-						this.members.push({
-											mName: n,
-											access: PRIVATE,
-											isStatic: false,
-											isConst: false,
-											mType: INT,
-											val: 0
-										});
-						this.eventChange.fire();
+
+	addMember(n){	if(typeof(n)=='string'){	
+						if(this.findByName(this.members, n)===false){
+							this.members.push({
+												mName: n,
+												access: PRIVATE,
+												isStatic: false,
+												isConst: false,
+												mType: INT,
+												val: null
+											});
+							this.eventChange.fire(this);
+						}
+					}else if(typeof(n)=='object'){
+						if(this.findByName(this.members, n.mName)===false){
+							this.members.push(n);
+							this.eventChange.fire(this);
+						}
 					}
 				}
 	remMemberByName(n){ 	this.members = this.members.filter(function(i){ return i.mName!==n; });
-							this.eventChange.fire(); }
+							this.eventChange.fire(this); }
 	getMemberByName(n){		return this.members[this.findByName(this.members, n)]; }
 	updateMemberByName(n, prop, val){	
 										var m = this.members[this.findByName(this.members, n)];
@@ -147,40 +164,52 @@ class ClassItem {
 												break;
 
 											case 'val':
-												if(prop=='val'){
-													if(val=='')
-														val=null;
-													else
-														val = this.filterValueByType(val, m.mType);
-												}
+												if(val=='')
+													val=null;
+												else
+													val = this.filterValueByType(val, parseInt(m.mType));
 												break;
 
 											case 'mType':
 												//update the value based on the new type:
-												m.val = this.filterValueByType(m.val.toString(), parseInt(val));
+												if(m.val!=null)
+													m.val = this.filterValueByType(m.val.toString(), parseInt(val));
 												break;
+
+											default:
+												if(val=="true") val = true;
+												if(val=="false") val = false;
 										}//swatch
 
 										m[prop] = val;
-										this.eventChange.fire(); }
+										this.eventChange.fire(this); }
 
 	//get / add / remove / update methods
 	getMethods(){ 	return this.methods; }
-	addMethod(n){	if(this.findByName(this.methods, n)===false){
-						this.methods.push({
-											mName: n,
-											access: PUBLIC,
-											isStatic: false,
-											isConst: false,
-											mType: VOID,
-											params: []
-										});
-						this.eventChange.fire();
+	addMethod(n){	if(typeof(n)=='string'){
+						if(this.findByName(this.methods, n)===false){
+						
+							this.methods.push({
+												mName: n,
+												access: PUBLIC,
+												isStatic: false,
+												isConst: false,
+												mType: VOID,
+												params: []
+											});
+						this.eventChange.fire(this);
+						}
+					}else if(typeof(n)=='object'){
+						if(this.findByName(this.methods, n.mName)===false){
+							this.methods.push(n);
+							this.eventChange.fire(this);
+						}
 					}
+
 
 				}
 	remMethodByName(n){ 	this.methods = this.methods.filter(function(i){ return i.mName!==n; });
-							this.eventChange.fire(); }
+							this.eventChange.fire(this); }
 	getMethodByName(n){		return this.methods[this.findByName(this.methods, n)]; }
 	updateMethodByName(n, prop, val){	var m = this.methods[this.findByName(this.methods, n)];
 
@@ -197,8 +226,11 @@ class ClassItem {
 												return;
 										}
 
+										if(val=="true") val = true;
+										if(val=="false") val = false;
+
 										m[prop] = val;
-										this.eventChange.fire(); }
+										this.eventChange.fire(this); }
 
 	//given an array finds an item that has a certain name
 	findByName(arr, name){
