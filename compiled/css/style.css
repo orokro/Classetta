@@ -70,7 +70,7 @@
     top: 15px;
     left: 11px;
     height: 36px;
-    width: 196px;
+    width: 187px;
     background: url("/img/Icon_Sprites.png") top left no-repeat; }
 
 /*
@@ -83,10 +83,10 @@
 #divSideBar {
   position: relative;
   height: 100%;
-  width: 216px; }
+  width: 208px; }
   #divSideBar .contents {
     position: absolute;
-    top: 12px;
+    top: 10px;
     left: 12px;
     right: 12px;
     bottom: 12px; }
@@ -169,7 +169,7 @@
 */
 #divTabbedArea {
   position: absolute;
-  left: 216px;
+  left: 209px;
   right: 12px;
   top: -2px;
   bottom: 12px;
@@ -390,6 +390,28 @@
       #topTabsContainer #topTabs .iconJS .tabIcon {
         background-position: -451px 0px;
         width: 28px; }
+    #topTabsContainer #topTabs .iconVB {
+      background: #88afae; }
+      #topTabsContainer #topTabs .iconVB.activeTab, #topTabsContainer #topTabs .iconVB:hover {
+        background: #6eb0af;
+        /* Old browsers */
+        background: linear-gradient(to bottom, #e2efef 0%, #a0cbca 50%, #6eb0af 51%, #539897 100%);
+        /* W3C */
+        background: -moz-linear-gradient(top, #e2efef 0%, #a0cbca 50%, #6eb0af 51%, #539897 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e2efef), color-stop(50%, #a0cbca), color-stop(51%, #6eb0af), color-stop(100%, #539897));
+        /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, #e2efef 0%, #a0cbca 50%, #6eb0af 51%, #539897 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, #e2efef 0%, #a0cbca 50%, #6eb0af 51%, #539897 100%);
+        /* Opera 11.10+ */
+        background: -ms-linear-gradient(top, #e2efef 0%, #a0cbca 50%, #6eb0af 51%, #539897 100%);
+        /* IE10+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
+        /* IE6-9 */ }
+      #topTabsContainer #topTabs .iconVB .tabIcon {
+        background-position: -485px 0px;
+        width: 28px; }
 
 .tabPageEditorBG {
   background: #EFEFEF;
@@ -517,9 +539,27 @@
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
   /* IE6-9 */ }
 
+.tabPageVBBG {
+  background: #6eb0af;
+  /* Old browsers */
+  background: linear-gradient(to bottom, #539897 0%, #f9fcfc 100%);
+  /* W3C */
+  background: -moz-linear-gradient(top, #539897 0%, #f9fcfc 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #539897), color-stop(100%, #f9fcfc));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #539897 0%, #f9fcfc 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #539897 0%, #f9fcfc 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #539897 0%, #f9fcfc 100%);
+  /* IE10+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
+  /* IE6-9 */ }
+
 .tabPage {
   position: absolute;
-  top: 10px;
+  top: 11px;
   bottom: 10px;
   left: 10px;
   right: 10px;
@@ -528,6 +568,29 @@
   border: 1px solid #CCC;
   background: #FFF;
   display: none; }
+
+.GenHeader {
+  padding: 10px;
+  font-size: 14px;
+  color: #555; }
+  .GenHeader label {
+    font-weight: 600; }
+  .GenHeader .options {
+    padding: 8px 0px 2px 20px; }
+
+#tabPage_JS {
+  padding: 0px;
+  margin: 0px; }
+  #tabPage_JS .GenHeader {
+    background: #F5FFCB;
+    border-bottom: 1px solid #D9CE4B; }
+
+#tabPage_VB {
+  padding: 0px;
+  margin: 0px; }
+  #tabPage_VB .GenHeader {
+    background: #CBE2E2;
+    border-bottom: 1px solid #549998; }
 
 /*
 	This is the main stylesheet for the class Editor interface.
@@ -661,6 +724,9 @@ body {
   margin: 0px;
   background: #cccccc;
   min-width: 1008px !important; }
+
+pre {
+  margin: 0px; }
 
 #divMainContentArea {
   position: absolute;
