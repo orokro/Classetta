@@ -21,7 +21,8 @@ class ClassItemManager {
 		var me = this;
 
 		//lets intialize a counter that will only always increment - so new classes can have unqiue IDs
-		this.classIDCounter = 0;
+		//start with 1000, giving us 1000 private IDs that the Item Manager will never attempt to use.
+		this.classIDCounter = 1000;
 
 		//and of course, initialize our list of class items
 		this.classItems = [];
@@ -55,8 +56,9 @@ class ClassItemManager {
 		//and prevent dragging from messing everything up with highlighting
 		this.listDOM.mousedown(function(e){ e.preventDefault(); });
 
-		//for our own events lets make some help objects
+		//for our own events lets make some helper objects
 		this.eventSelectionChange = new CallbackHelperObj();
+		this.eventSelectionEdited = new CallbackHelperObj();
 		
 	}//constructor
 
@@ -81,7 +83,7 @@ class ClassItemManager {
 
 	}
 
-	//Hand when an item is clicked by capturing it's bubble on the way up
+	//Handle when an item is clicked by capturing it's bubble on the way up
 	handleListClick(me, item, e){
 
 		//check if the target has an id:
@@ -103,6 +105,15 @@ class ClassItemManager {
 
 	}
 
+	//Handle when the selected object is edited by the editor.. this way we can fire an event and the app knows to update the source tabs
+	handleSelectedEdited(item){
+
+		//if this is the currently selected object, let's fire our change event
+		if(item.ID == this.selectedClassItem)
+			this.eventSelectionEdited.fire(item);
+	}
+
+
 
 	/* METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS */
 
@@ -118,6 +129,11 @@ class ClassItemManager {
 		//if this item changes it's name, the list should be updated:
 		var me=this;
 		item.onNameChange(function(){me.updateList();});
+
+		//if this item is edited at all, we should check if its the selected object
+		//and fire an event if it is
+		var me=this;
+		item.onChange(function(item){me.handleSelectedEdited(item);} );
 
 		//and rebuild our list:
 		this.updateList();
@@ -213,4 +229,10 @@ class ClassItemManager {
 	onSelectionChange(func){ return this.eventSelectionChange.register(func); }
 	unbindSelectionChange(id){ return this.eventSelectionChange.unregister(id); }
 
+	//allow functions to be un/registerd for our SelectedObjectEdited event
+	onSelectionEdited(func){ return this.eventSelectionEdited.register(func); }
+	unbindSelectionEdited(id){ return this.eventSelectionEdited.unregister(id); }
+
+
+	
 }

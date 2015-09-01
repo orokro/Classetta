@@ -17,7 +17,7 @@
 #divTabbedArea {
 	//SIZE AND POSITION
 	position: absolute;
-	left: 216px;
+	left: 209px;
 	right: 12px;
 	top: -2px;
 	bottom: 12px;
@@ -35,6 +35,7 @@ $iconPythonColor: #5B84A7;
 $iconRubyColor: #DA4242;
 $iconPHPColor: #7575AC;
 $iconJSColor: #E2D973;
+$iconVBColor: #6eb0af;
 
 
 //TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
@@ -192,6 +193,12 @@ $iconJSColor: #E2D973;
 			.tabIcon { 	background-position: -451px 0px;
 						width: 28px; }
 		}
+		.iconVB {
+			background: desaturate(lighten($iconVBColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconVBColor); }
+			.tabIcon { 	background-position: -485px 0px;
+						width: 28px; }
+		}
 	}
 }
 
@@ -239,6 +246,9 @@ $iconJSColor: #E2D973;
 .tabPageJSBG {
 	@include tabPageGradient($iconJSColor);
 }
+.tabPageVBBG {
+	@include tabPageGradient($iconVBColor);
+}
 
 // Make sure the initial tab page is visible
 
@@ -247,7 +257,7 @@ $iconJSColor: #E2D973;
 
 	//SIZE AND POSITION
 	position: absolute;
-	top: 10px;
+	top: 11px;
 	bottom: 10px;
 	left: 10px;
 	right: 10px;
@@ -261,5 +271,46 @@ $iconJSColor: #E2D973;
 
 	//hidden by default
 	display: none;
+
+}
+
+
+.GenHeader {
+
+	padding: 10px;
+
+	font-size: 14px;
+	color: #555;
+
+	label {
+		font-weight: 600;
+	}
+	.options {
+		padding: 8px 0px 2px 20px;
+	}
+}
+
+#tabPage_JS {
+
+	padding: 0px; 
+	margin: 0px;
+
+	.GenHeader {
+		background: #F5FFCB;
+		border-bottom: 1px solid #D9CE4B;
+	}
+	
+
+}
+
+#tabPage_VB {
+
+	padding: 0px; 
+	margin: 0px;
+
+	.GenHeader {
+		background: #CBE2E2;
+		border-bottom: 1px solid #549998;
+	}
 
 }

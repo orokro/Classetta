@@ -1,8 +1,11 @@
 var demoClasses = {
 
+	Blank: function(){
+		return new ClassItem(100);
+	},
 	CompleteDemo: function(){
 
-		var NewItem = new ClassItem(100);
+		var NewItem = new ClassItem(101);
 		NewItem.setName('ThoroughDemo');
 		NewItem.setAncestor('SomeClass');
 		NewItem.addInterface(['Demoable', 'Listable', 'Comparable']);
@@ -12,7 +15,7 @@ var demoClasses = {
 
 		//MEMBERS
 		NewItem.addMember(	{
-								mName: 'aInt',
+								mName: 'anInt',
 								access: PUBLIC,
 								isStatic: true,
 								isConst: true,
@@ -31,16 +34,16 @@ var demoClasses = {
 								mName: 'aLong',
 								access: PUBLIC,
 								isStatic: false,
-								isConst: false,
-								mType: INT,
+								isConst: true,
+								mType: LONG,
 								val: 123000000
 						   	});
 		NewItem.addMember(	{
 								mName: 'aByte',
-								access: PRIVATE,
+								access: PUBLIC,
 								isStatic: false,
 								isConst: false,
-								mType: INT,
+								mType: BYTE,
 								val: 123
 						   	});
 		NewItem.addMember(	{
@@ -48,7 +51,7 @@ var demoClasses = {
 								access: PRIVATE,
 								isStatic: false,
 								isConst: false,
-								mType: INT,
+								mType: FLOAT,
 								val: 3.14
 						   	});
 		NewItem.addMember(	{
@@ -56,7 +59,7 @@ var demoClasses = {
 								access: PRIVATE,
 								isStatic: false,
 								isConst: false,
-								mType: INT,
+								mType: DOUBLE,
 								val: 3.14159
 						   	});
 		NewItem.addMember(	{
@@ -73,7 +76,7 @@ var demoClasses = {
 								isStatic: false,
 								isConst: false,
 								mType: STRING,
-								val: "Class.Design Rules!"
+								val: "Classetta Rules!"
 						   	});
 		NewItem.addMember(	{
 								mName: 'aBoolean',
@@ -131,7 +134,7 @@ var demoClasses = {
 
 	RoboKitty: function(){
 
-		var NewItem = new ClassItem(101);
+		var NewItem = new ClassItem(102);
 		NewItem.setName('RoboKitty');
 		NewItem.setAncestor('Cat');
 		NewItem.addInterface(['Petable', 'Chargeable']);
@@ -224,6 +227,52 @@ var demoClasses = {
 								params: []
 						   	});
 
+		return NewItem;
+	},
+
+	OnlyMembers: function(){
+		var NewItem = new ClassItem(104);
+
+		NewItem.setName('OnlyMembers');
+		
+		NewItem.addMember('a');
+		NewItem.addMember('b');		
+		NewItem.addMember('c');
+		
+		return NewItem;
+	},
+
+	OnlyConstants: function(){
+		var NewItem = new ClassItem(105);
+
+		NewItem.setName('OnlyConstants');
+		
+		NewItem.addMember('a');
+		NewItem.getMemberByName('a').isConst=true;
+
+		NewItem.addMember('b');
+		NewItem.getMemberByName('b').isConst=true;
+		
+		NewItem.addMember('c');
+		NewItem.getMemberByName('c').isConst=true;
+		
+		return NewItem;
+	},
+
+	OnlyStatics: function(){
+		var NewItem = new ClassItem(106);
+
+		NewItem.setName('OnlyStatics');
+		
+		NewItem.addMember('a');
+		NewItem.getMemberByName('a').isStatic=true;
+
+		NewItem.addMember('b');
+		NewItem.getMemberByName('b').isStatic=true;
+		
+		NewItem.addMember('c');
+		NewItem.getMemberByName('c').isStatic=true;
+		
 		return NewItem;
 	}
 }

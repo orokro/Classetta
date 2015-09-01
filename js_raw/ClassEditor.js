@@ -283,10 +283,16 @@ class ClassEditor{
 
 	// get the details of a table item
 	tblItmDetails(elem){
+		var getName = function(str){
+			var itms = str.split('_');
+			itms = itms.splice(1);
+			str = itms.join('_');
+			return str;
+		}
 		return {
 					val: elem.val(),
 					propName: elem.parent().attr('class'),
-					mName: elem.parent().parent().attr('class').split(' ')[0].split('_')[1],
+					mName: getName(elem.parent().parent().attr('class').split(' ')[0]),
 					container: elem.parent(),
 					row: elem.parent().parent(),
 					table: elem.parent().parent()
@@ -304,8 +310,8 @@ class ClassEditor{
 
 			//get details of this table item
 			var details = this.tblItmDetails(elem);
-			if(details.val==='true') details.val=true;
-			if(details.val==='false') details.val=false;
+			if(details.val=='true') details.val=true;
+			if(details.val=='false') details.val=false;
 
 			//now we can update the item
 			f.apply(me.currentClassItem, [details.mName, details.propName, details.val]);

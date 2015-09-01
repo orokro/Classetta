@@ -27,6 +27,8 @@ body {
 	min-width: 1008px !important;
 }
 
+pre { margin: 0px; }
+
 //This is a pretty important div - it wraps both the sidebar and the tabs/editor portions of the screen.
 //It does not, however, include the header bar or the footer bar.
 #divMainContentArea {

@@ -1,15 +1,24 @@
+<!DOCTYPE html>
 <html>
 <head>
-	<title>Design.Class</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<title>Classetta - One Model, Many Languages</title>
+
+	<!-- favicon -->
+	<link rel="shortcut icon" href="http://classetta.com/favicon.ico" type="image/x-icon" />
 
 	<!-- fonts -->
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 
 	<!-- delicious CSS -->
 	<link rel="stylesheet" type="text/css" href="css/style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/hljs/googlecode.css"/>
 
 	<!-- required scripts -->
 	<script type="text/javascript" src="js/extern/jquery.js"></script>
+	<script type="text/javascript" src="js/extern/highlight.pack.js"></script>
 	<script type="text/javascript" src="js/script.js"></script>
 
 	<!-- app init script -->
@@ -24,7 +33,7 @@
 	<!-- HEADER AREA -->
 	<div id="divHeader">
 		<!-- main logo -->
-		<a href="http://class.design/"><div id="divLogo"></div></a>
+		<a href="http://classetta.com/"><div id="divLogo"></div></a>
 	</div>
 
 	<!-- MAIN CONTENT AREA -->
@@ -59,6 +68,7 @@
 					</li><li id="tab_Ruby" 		class="iconRuby"><div 	class="tabIcon"></div><div class="tabLabel">Ruby</div>
 					</li><li id="tab_PHP" 		class="iconPHP"><div 	class="tabIcon"></div><div class="tabLabel">PHP</div>
 					</li><li id="tab_JS" 		class="iconJS"><div 	class="tabIcon"></div><div class="tabLabel">JavaScript</div>
+					</li><li id="tab_VB" 		class="iconVB"><div 	class="tabIcon"></div><div class="tabLabel">VB</div>
 					</li>
 				</ul>
 			</div>
@@ -68,7 +78,7 @@
 
 				<!-- temporary welcome page, for times when no ClassItems exist to edit -->
 				<div id="divWelcome">
-					<h1>Welcome to Class.Design!</h1>
+					<h1>Welcome to Classetta!<span style="font-size:14px; font-weight:100;"> (\klasze-tə\)</span></h1>
 					<div class="indent">
 						<h2>Get Started</h2>
 						<div class="indent">
@@ -79,6 +89,12 @@
 										Give it a name, ancestors, Interfaces, Methods and Members!</li>
 									<li>Use the language tabs to see how the class looks like in each language!</li>
 								</ol>
+								<br>
+								Alternatively, load one of the demo Classes:
+								<ul>
+									<li><a href="#" id="aLoadThorough">ThoroughExample</a></li>
+									<li><a href="#" id="aLoadRoboKitty">RoboKitty</a></li>
+								</ul>
 							</p>
 						</div>
 					</div>
@@ -107,9 +123,9 @@
 					<h3 class="toggleBar">&#x25BC; General Class Properties</h3>
 					<div id="classname" class="toggleWrapper">
 						
-						<input type="checkbox" id="chkClassPublic"  name="chkClassPublic" checked/><label for="chkClassPublic">Public</label>
-						<input type="checkbox" id="chkClassFinal"  name="chkClassFinal"/><label for="chkClassFinal">Final</label>
-						<input type="checkbox" id="chkClassAbstract"  name="chkClassAbstract"/><label for="chkClassAbstract">Abstract</label>
+						<input type="checkbox" id="chkClassPublic"  	name="chkClassPublic" checked/><label for="chkClassPublic">Public</label>
+						<input type="checkbox" id="chkClassFinal"  		name="chkClassFinal"/><label for="chkClassFinal">Final</label>
+						<input type="checkbox" id="chkClassAbstract"  	name="chkClassAbstract"/><label for="chkClassAbstract">Abstract</label>
 						<p>Name your Class!</p>
 						<input type="text" placeholder="ClassName"></input>
 

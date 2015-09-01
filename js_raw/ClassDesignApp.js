@@ -36,13 +36,21 @@ class ClassDesignApp {
         this.codeGenerators.push( new RubyCodeGenerator(    $('#tabPage_Ruby')) );
         this.codeGenerators.push( new PHPCodeGenerator(     $('#tabPage_PHP')) );
         this.codeGenerators.push( new JSCodeGenerator(      $('#tabPage_JS')) );
+        this.codeGenerators.push( new VBCodeGenerator(      $('#tabPage_VB')) );
 
         //add default item for debugging
-        this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
+        this.ClassItmMgr.addClassItm(demoClasses.Blank());
+        this.ClassItmMgr.addClassItm(demoClasses.OnlyMembers());
+        this.ClassItmMgr.addClassItm(demoClasses.OnlyConstants());
+        this.ClassItmMgr.addClassItm(demoClasses.OnlyStatics());
         this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
-
-
-        this.TabMgr.setTab('PHP');
+        this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
+        
+        //bind click events for load demo class links
+        $('#aLoadThorough').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo()); });
+        $('#aLoadRoboKitty').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.RoboKitty()) });
+        
+        this.TabMgr.setTab('VB');
 
     }
 

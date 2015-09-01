@@ -33,7 +33,7 @@ class TabManager{
 			if(!tabCheck.length>0){
 
 				//create a new tab page
-				me.tabs[name] = $('<div id="tabPage_'+name+'" class="tabPage">Tab page for '+name+'!</div>');
+				me.tabs[name] = $('<div id="tabPage_'+name+'" class="tabPage"></div>');
 
 				//append it to the dom:
 				$(me.DOM).append(me.tabs[name]);
@@ -64,17 +64,23 @@ class TabManager{
 		//extract the name / keyword id for this tab:
 		var name = $(elem).attr('id').split('_')[1];
 
+		//change the tab by name
+		me.setTab(name);
+	}
+
+	//Change to a tab of given name
+	setTab(name){
 		//hide all other tabs:
-		me.pagesDOM.hide().removeClass('initialTabPage');
+		this.pagesDOM.hide().removeClass('initialTabPage');
 
 		//update the background
-		me.DOM.removeClass().addClass('tabPage'+name+'BG');
+		this.DOM.removeClass().addClass('tabPage'+name+'BG');
 
 		//update tab sytles:
-		me.tabsDOM.removeClass('activeTab');
-		$(elem).addClass('activeTab');
+		this.tabsDOM.removeClass('activeTab');
+		$('#tab_'+name).addClass('activeTab');
 
 		//show just the tab we care about:
-		me.tabs[name].show();
+		this.tabs[name].show();
 	}
 }

@@ -10,7 +10,7 @@ var gulp = require('gulp'),
 
 
 // Now we should set up some variables to hold the file pathes for our project
-var jsSources = ['js_raw/*.js'],
+var jsSources = ['js_raw/*.js', 'js_raw/code_generators/*.js'],
     sassSources = ['sass/*.scss'],
     mainSass = ['sass/style.scss'],
     htmlSources = ['*.html'],
