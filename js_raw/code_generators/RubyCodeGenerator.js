@@ -3,6 +3,24 @@ class RubyCodeGenerator extends CodeGenerator {
 	constructor(DOM){
 		super(DOM);	
 
+		//Make note of language name
+		this.langName = "Ruby";
+
+		//set up comment styles
+		this.singleLineComments = "# ";
+		this.multiLineComments = { 	  open: '=begin\n',
+									 close: '\n=end',
+									prefix: "\t"	};
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+							methods: {
+									 },
+							members: {
+									 }
+						};
+						
 		//build the area for the code:
 		this.DOM.append("<pre><code class=\"ruby\"></code></pre>");
 
@@ -16,18 +34,28 @@ class RubyCodeGenerator extends CodeGenerator {
 	//takes a class item and rebuilds the appropriate source code based on the class item for this language
 	update(item){
 
+		//if the item is null, just update with the default comment
+		if((typeof(item)==="undefined") || item==null){
+			this.buildDefaultComment();
+			hljs.highlightBlock(this.codeDOM[0]);
+			return;
+		}
+
+		//inspect useful data on our item:
+		var info = this.inspect(item);
+
 		//variable to build the code
-		var code = 	this.buildCode_Warnings(item) + "\n" + 
-					this.buildCode_Definition(item) +
-					this.buildCode_Constants(item) + 
-					this.buildCode_PublicMembers(item) + 
-					this.buildCode_StaticMembers(item) + "\n" + 
-					this.buildCode_Constructor(item) +
-					this.buildCode_Members(item) + "\n" +
+		var code = 	this.buildCode_Warnings(item, info) +
+					this.buildCode_Definition(item, info) +
+					this.buildCode_Constants(item, info) + 
+					this.buildCode_PublicMembers(item, info) + 
+					this.buildCode_StaticMembers(item, info) + "\n" + 
+					this.buildCode_Constructor(item, info) +
+					this.buildCode_Members(item, info) + "\n" +
 					"\t\t#...\n" + 
 					"\tend\n\n" + 
-					this.buildCode_PublicMethods(item) +
-					this.buildCode_PrivateMethods(item) + 
+					this.buildCode_PublicMethods(item, info) +
+					this.buildCode_PrivateMethods(item, info) + 
 					"end";
 
 
@@ -37,27 +65,6 @@ class RubyCodeGenerator extends CodeGenerator {
 		//apply the code highlighting
 		hljs.highlightBlock(this.codeDOM[0]);
 
-	}
-
-	//adds some comments with warnings
-	buildCode_Warnings(item){
-
-		var ret = 	"=begin\n" + 
-					"\tWarning! The following Ruby code is automatically generated and may contain errors.\n" + 
-					"\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + 
-					"\tGarbage In = Garbage Out. Make sure to use proper Ruby names, legal characters, not reserved words, etc.";
-
-		//check for warnings
-		if(item.getFinal())
-				ret += "\n\n\tWARNING: you specified this class to be Final. Ruby does not support Final classes.";
-		if(item.getInterfaces().length>0)
-				ret += "\n\n\tWARNING: you specified one or more Interfaces. Ruby does not have native Interface support.";
-
-
-		//finish up the comment
-		ret += "\n=end";
-
-		return ret;
 	}
 
 	//build essentially the first line of the class: the defition

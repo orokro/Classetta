@@ -13,7 +13,7 @@ class JSCodeGenerator extends CodeGenerator {
 							'<div class="options">' + 
 								'<input type="radio" name="optFlavJS" id="opt01" value="01" checked><label for="opt01">Vanilla JS</label> ' + 
 								'<input type="radio" name="optFlavJS" id="opt02" value="02"><label for="opt02">ES6 / Babel</label> ' + 
-								'<input type="radio" name="optFlavJS" id="opt03" value="03"><label for="opt03">Type Script</label> ' + 
+								'<input type="radio" name="optFlavJS" id="opt03" value="03"><label for="opt03">TypeScript</label> ' + 
 							'</div>' +
 						'</div>' +
 						'<div id="SubTab_01" class="SubTab"></div>' + 

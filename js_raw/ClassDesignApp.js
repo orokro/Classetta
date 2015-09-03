@@ -38,6 +38,14 @@ class ClassDesignApp {
         this.codeGenerators.push( new JSCodeGenerator(      $('#tabPage_JS')) );
         this.codeGenerators.push( new VBCodeGenerator(      $('#tabPage_VB')) );
 
+        //bind click events for load demo class links
+        $('#aLoadThorough').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo()); });
+        $('#aLoadRoboKitty').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.RoboKitty()) });
+
+        this.refreshCodeOutput();
+
+        //return;
+
         //add default item for debugging
         this.ClassItmMgr.addClassItm(demoClasses.Blank());
         this.ClassItmMgr.addClassItm(demoClasses.OnlyMembers());
@@ -46,9 +54,7 @@ class ClassDesignApp {
         this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
         this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
         
-        //bind click events for load demo class links
-        $('#aLoadThorough').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo()); });
-        $('#aLoadRoboKitty').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.RoboKitty()) });
+        
         
         this.TabMgr.setTab('VB');
 
@@ -70,16 +76,14 @@ class ClassDesignApp {
 
         }else{
 
-            //otherwise we better update the code sampels!
-            me.updateGenerators(newItem);
-
             //hide the weclome and show the editor screen
             $('#divWelcome').hide();
             $('#divEditor').show();
 
         }//endif
 
-
+        //update the code sampels!
+        me.updateGenerators(newItem);
     }
 
     //update the app appropriately when the selected ClassItem is edited in the editor
@@ -99,6 +103,11 @@ class ClassDesignApp {
             generator.update(item);
 
         }//next g
+    }
+
+    //refresh the code genreators!
+    refreshCodeOutput(){
+    	this.updateGenerators(this.currentClassItem);
     }
 
 

@@ -11,12 +11,12 @@ class VBCodeGenerator extends CodeGenerator {
 		this.DOM.html('<div class="GenHeader">' +
 							'Visual Basic has multiple implementations, choose your flavor!<br>' +
 							'<div class="options">' + 
-								'<input type="radio" name="optFlavVB" id="opt01v" value="01" checked><label for="opt01v">VB.NET</label> ' + 
-								'<input type="radio" name="optFlavVB" id="opt02v" value="02"><label for="opt02v">VB6</label> ' + 
+								'<input type="radio" name="optFlavVB" id="opt01v" value="01" ><label for="opt01v">VB.NET</label> ' + 
+								'<input type="radio" name="optFlavVB" id="opt02v" value="02"checked><label for="opt02v">VB6</label> ' + 
 							'</div>' +
 						'</div>' +
-						'<div id="SubTab_01" class="SubTab"></div>' + 
-						'<div id="SubTab_02" class="SubTab" style="display:none;"></div>'); 
+						'<div id="SubTab_01" class="SubTab" style="display:none;"></div>' + 
+						'<div id="SubTab_02" class="SubTab"></div>'); 
 		
 		//create generators for each type of JS
 		this.codeGenerators = [];

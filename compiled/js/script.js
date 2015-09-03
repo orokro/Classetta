@@ -140,14 +140,6 @@ var ClassDesignApp = (function () {
                 this.codeGenerators.push(new JSCodeGenerator($('#tabPage_JS')));
                 this.codeGenerators.push(new VBCodeGenerator($('#tabPage_VB')));
 
-                //add default item for debugging
-                this.ClassItmMgr.addClassItm(demoClasses.Blank());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyMembers());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyConstants());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyStatics());
-                this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
-                this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
-
                 //bind click events for load demo class links
                 $('#aLoadThorough').click(function (e) {
                         me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
@@ -155,6 +147,18 @@ var ClassDesignApp = (function () {
                 $('#aLoadRoboKitty').click(function (e) {
                         me.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
                 });
+
+                this.refreshCodeOutput();
+
+                //return;
+
+                //add default item for debugging
+                this.ClassItmMgr.addClassItm(demoClasses.Blank());
+                this.ClassItmMgr.addClassItm(demoClasses.OnlyMembers());
+                this.ClassItmMgr.addClassItm(demoClasses.OnlyConstants());
+                this.ClassItmMgr.addClassItm(demoClasses.OnlyStatics());
+                this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
+                this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
                 this.TabMgr.setTab('VB');
         }
@@ -176,13 +180,13 @@ var ClassDesignApp = (function () {
                                 $('#divWelcome').show();
                         } else {
 
-                                //otherwise we better update the code sampels!
-                                me.updateGenerators(newItem);
-
                                 //hide the weclome and show the editor screen
                                 $('#divWelcome').hide();
                                 $('#divEditor').show();
                         } //endif
+
+                        //update the code sampels!
+                        me.updateGenerators(newItem);
                 }
 
                 //update the app appropriately when the selected ClassItem is edited in the editor
@@ -205,6 +209,13 @@ var ClassDesignApp = (function () {
                                 //tell it to update it's class
                                 generator.update(item);
                         } //next g
+                }
+
+                //refresh the code genreators!
+        }, {
+                key: 'refreshCodeOutput',
+                value: function refreshCodeOutput() {
+                        this.updateGenerators(this.currentClassItem);
                 }
         }]);
 
@@ -780,6 +791,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var PRIVATE = 0;
 var PUBLIC = 1;
+var PROTECTED = 2;
 
 var VOID = 0;
 var INT = 1;
@@ -1046,6 +1058,7 @@ var ClassItem = (function () {
 						access: PUBLIC,
 						isStatic: false,
 						isConst: false,
+						isAbstract: false,
 						mType: VOID,
 						params: []
 					});
@@ -1484,107 +1497,244 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CodeGenerator = (function () {
-			function CodeGenerator(DOM) {
-						_classCallCheck(this, CodeGenerator);
+	function CodeGenerator(DOM) {
+		_classCallCheck(this, CodeGenerator);
 
-						//save reference to the dom element this code generator will reside in
-						this.DOM = DOM;
+		//save reference to the dom element this code generator will reside in
+		this.DOM = DOM;
+	}
+
+	//when generating warnings, or processing the lists of members and methods, some general pre-processing of the ClassItem would be useful
+
+	_createClass(CodeGenerator, [{
+		key: "inspect",
+		value: function inspect(item) {
+
+			//prevent some redundancy in the JSON
+			var _methods = item.getMethods();
+			var _publicMethods = _methods.filter(function (n) {
+				return n.access == PUBLIC;
+			});
+			var _privateMethods = _methods.filter(function (n) {
+				return n.access == PRIVATE;
+			});
+			var _protectedMethods = _methods.filter(function (n) {
+				return n.access == PROTECTED;
+			});
+			var _staticMethods = _methods.filter(function (n) {
+				return n.isStatic == true;
+			});
+			var _constMethods = _methods.filter(function (n) {
+				return n.isConst == true;
+			});
+			var _abstractMethods = _methods.filter(function (n) {
+				return n.isAbstract == true;
+			});
+			var _abstractFinalMethods = _methods.filter(function (n) {
+				return n.isAbstract == true && n.isFinal == true;
+			});
+
+			var _members = item.getMembers();
+			var _publicMembers = _members.filter(function (n) {
+				return n.access == PUBLIC;
+			});
+			var _privateMembers = _members.filter(function (n) {
+				return n.access == PRIVATE;
+			});
+			var _protectedMembers = _members.filter(function (n) {
+				return n.access == PROTECTED;
+			});
+			var _staticMembers = _members.filter(function (n) {
+				return n.isStatic == true;
+			});
+			var _constMembers = _members.filter(function (n) {
+				return n.isConst == true;
+			});
+			var _initMembers = _members.filter(function (n) {
+				return n.val != null;
+			});
+
+			//build one giant object of infos!
+			var ret = {
+
+				//pass through properties
+				name: item.getName(),
+				isPublic: item.getPublic(),
+				isAbstract: item.getAbstract(),
+				isFinal: item.getFinal(),
+
+				//inheritance realted info:
+				hasAncestor: item.getAncestor(),
+				ancestor: item.getAncestor(),
+
+				//interface related info:
+				hasInterfaces: item.getInterfaces().length > 0,
+				interfaces: item.getInterfaces(),
+
+				//member related info:
+				members: _members,
+				hasMembers: _members.length > 0,
+
+				publicMembers: _publicMembers,
+				hasPublicMembers: _publicMembers.length > 0,
+
+				privateMembers: _privateMembers,
+				hasPrivateMembers: _privateMembers.length > 0,
+
+				protectedMembers: _protectedMembers,
+				hasProtectedMembers: _protectedMembers.length > 0,
+
+				staticMembers: _staticMembers,
+				hasStaticMembers: _staticMembers.length > 0,
+
+				constMembers: _constMembers,
+				hasConstMembers: _constMembers.length > 0,
+
+				initMembers: _initMembers,
+				hasInitMembers: _initMembers.length > 0,
+
+				//method related info:
+				methods: _methods,
+				hasMethods: _methods.length > 0,
+
+				publicMethods: _publicMethods,
+				hasPublicMethods: _publicMethods.length > 0,
+
+				privateMethods: _privateMethods,
+				hasPrivateMethods: _privateMethods.length > 0,
+
+				protectedMethods: _protectedMethods,
+				hasProtectedMethods: _protectedMethods.length > 0,
+
+				staticMethods: _staticMethods,
+				hasStaticMethods: _staticMethods.length > 0,
+
+				constMethods: _constMethods,
+				hasConstMethods: _constMethods.length > 0,
+
+				abstractMethods: _abstractMethods,
+				hasAbstractMethods: _abstractMethods.length > 0,
+
+				abstractFinalMethods: _abstractFinalMethods,
+				hasAbstractFinalMethods: _abstractFinalMethods.length > 0
+
+			}; //var ret
+
+			return ret;
+		}
+		//inspect(item)
+
+		//make a comment
+	}, {
+		key: "comment",
+		value: function comment(str) {
+			return this.singleLineComments + str;
+		}
+
+		//wrap a string in multiline comments
+	}, {
+		key: "wrapMuliLineComment",
+		value: function wrapMuliLineComment(str) {
+
+			str = str.split("\n");
+			if (str[str.length - 1] == '') str = this.multiLineComments.prefix + str.slice(0, str.length - 1).join("\n" + this.multiLineComments.prefix);else str = this.multiLineComments.prefix + str.join("\n" + this.multiLineComments.prefix);
+
+			return this.multiLineComments.open + str + this.multiLineComments.close;
+		}
+
+		//check if this supports a feature or not
+	}, {
+		key: "checkSupports",
+		value: function checkSupports(feature) {
+			if (typeof feature === 'undefined' || feature != true && feature != false) return true;else return feature;
+		}
+
+		//build the default commenting telling the user to goto the editor tab, etc.
+	}, {
+		key: "buildDefaultComment",
+		value: function buildDefaultComment() {
+			this.codeDOM.html(this.wrapMuliLineComment("Please create a class on the left, and edit it with the Editor tab!\n" + "<-----"));
+		}
+
+		//adds some comments with warnings
+	}, {
+		key: "buildCode_Warnings",
+		value: function buildCode_Warnings(item, info) {
+
+			var ret = this.getWarningText(info);
+
+			//finish up the comment
+			ret = this.wrapMuliLineComment(ret) + "\n";
+
+			return ret;
+		}
+
+		//make the warning text bassed on the classes properities
+	}, {
+		key: "getWarningText",
+		value: function getWarningText(info) {
+			var ret = "Warning! The following " + this.langName + " code is automatically generated and may contain errors.\n" + "Classetta tries to be accurate as possible, but only provides minimal error checking.\n" + "Garbage In = Garbage Out. Make sure to use proper " + this.langName + " names, legal characters, not reserved words, etc.\n";
+
+			//make a handy private method to generate a warning line
+			var me = this;
+			var hasWarnings = false;
+			var warn = function warn(statement) {
+				ret += "\nWarning! " + statement;hasWarnings = true;
+			};
+
+			// CLASS LEVEL WARNINGS
+
+			if (info.isAbstract && info.isFinal) warn("You specified both Abstract and Final. That's probably not what you meant.");
+
+			if (info.isPublic == false && !this.checkSupports(this.features["private"])) warn(this.langName + " doesn't support Private classes.");
+
+			if (info.isFinal && !this.checkSupports(this.features.final)) warn(this.langName + " doesn't support Final classes.");
+
+			if (info.isAbstract && !this.checkSupports(this.features.abstract)) warn(this.langName + " doesn't support Abstract classes.");
+
+			if (info.hasAncestor && !this.checkSupports(this.features.inheritance)) warn(this.langName + " doesn't support Inheritance. Ignoring ancestor: " + info.ancestor);
+
+			if (info.hasInterfaces && !this.checkSupports(this.features.interfaces)) warn(this.langName + " doesn't support Interfaces. Ignoring: " + info.interfaces);
+
+			if (!this.checkSupports(this.features.types)) warn(this.langName + " is not a Typed language. Ignoring Method/Member Type declarations.");
+
+			// MEMBER LEVEL WARNINGS
+
+			if (info.hasConstMembers && !this.checkSupports(this.features.members.constants)) warn(this.langName + " doesn't support Constant Members! Declaring as regular Members instead.");
+
+			if (info.hasProtectedMembers && !this.checkSupports(this.features.members["protected"])) warn(this.langName + " doesn't support Protected Members! Declaring as Private Members instead.");
+
+			if (info.hasPrivateMembers && !this.checkSupports(this.features.members["private"])) warn(this.langName + " doesn't support Private Members! Declaring as regular Members instead.");
+
+			if (info.hasStaticMembers && !this.checkSupports(this.features.members["static"])) warn(this.langName + " doesn't support Static Members! Declaring as regular Members instead.");
+
+			// METHOD LEVEL WARNINGS
+
+			if (info.hasAbstractFinalMethods) {
+				var names = [];
+				for (var i = 0; i < info.abstractFinalMethods; i++) names.push(info.abstractFinalMethods[i].mName);
+				warn("The Methods: [" + names.join(', ') + "] were specified as both Abstract and Final.  That's probably not what you meant.");
 			}
 
-			//when generating warnings, or processing the lists of members and methods, some general pre-processing of the ClassItem would be useful
+			if (info.hasConstMethods && !this.checkSupports(this.features.methods.constants)) warn(this.langName + " doesn't support Final Methods! Declaring as regular Methods instead.");
 
-			_createClass(CodeGenerator, [{
-						key: "inspect",
-						value: function inspect(item) {
+			if (info.hasAbstractMethods && !this.checkSupports(this.features.methods.abstract)) warn(this.langName + " doesn't support Abstract Methods! Declaring as regular Methods instead.");
 
-									//prevent some redundancy in the JSON
-									var _methods = item.getMethods();
-									var _publicMethods = _methods.filter(function (n) {
-												return n.access == PUBLIC;
-									});
-									var _privateMethods = _methods.filter(function (n) {
-												return n.access == PRIVATE;
-									});
-									var _staticMethods = _methods.filter(function (n) {
-												return n.isStatic == true;
-									});
-									var _constMethods = _methods.filter(function (n) {
-												return n.isConst == true;
-									});
+			if (info.hasProtectedMethods && !this.checkSupports(this.features.methods["protected"])) warn(this.langName + " doesn't support Protected Methods! Declaring as Private Methods instead.");
 
-									var _members = item.getMembers();
-									var _publicMembers = _members.filter(function (n) {
-												return n.access == PUBLIC;
-									});
-									var _privateMembers = _members.filter(function (n) {
-												return n.access == PRIVATE;
-									});
-									var _staticMembers = _members.filter(function (n) {
-												return n.isStatic == true;
-									});
-									var _constMembers = _members.filter(function (n) {
-												return n.isConst == true;
-									});
-									var _initMembers = _members.filter(function (n) {
-												return n.val != null;
-									});
+			if (info.hasPrivateMethods && !this.checkSupports(this.features.methods["private"])) warn(this.langName + " doesn't support Private Methods! Declaring as regular Methods instead.");
 
-									var ret = {
+			if (info.hasStaticMethods && !this.checkSupports(this.features.methods["static"])) warn(this.langName + " doesn't support Static Methods! Declaring as regular Methods instead.");
 
-												//pass through properties
-												name: item.getName(),
-												isPulic: item.getPublic(),
-												isAbstract: item.getAbstract(),
-												isFinal: item.getFinal(),
+			//add extra newline if has warnings
+			if (hasWarnings) ret += "\n";
 
-												//interface related info:
-												hasInterfaces: item.getInterfaces().length > 0,
-												interfaces: item.getInterfaces(),
+			//return our list of warnings!
+			return ret;
+		}
+	}]);
 
-												//member related info:
-												members: _members,
-												hasMembers: _members.length > 0,
-
-												publicMembers: _publicMembers,
-												hasPublicMembers: _publicMembers.length > 0,
-
-												privateMembers: _privateMembers,
-												hasPrivateMembers: _privateMembers.length > 0,
-
-												staticMembers: _staticMembers,
-												hasStaticMembers: _staticMembers.length > 0,
-
-												constMembers: _constMembers,
-												hasConstMembers: _constMembers.length > 0,
-
-												initMembers: _initMembers,
-												hasInitMembers: _initMembers.length > 0,
-
-												//method related info:
-												methods: _methods,
-												hasMethods: _methods.length > 0,
-
-												publicMethods: _publicMethods,
-												hasPublicMethods: _publicMethods.length > 0,
-
-												privateMethods: _privateMethods,
-												hasPrivateMethods: _privateMethods.length > 0,
-
-												staticMethods: _staticMethods,
-												hasStaticMethods: _staticMethods.length > 0,
-
-												constMethods: _constMethods,
-												hasConstMethods: _constMethods.length > 0
-
-									}; //var ret
-
-									return ret;
-						}
-						//inspect(item)
-
-			}]);
-
-			return CodeGenerator;
+	return CodeGenerator;
 })();
 'use strict';
 
@@ -2028,193 +2178,203 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var CSharpCodeGenerator = (function (_CodeGenerator) {
-	_inherits(CSharpCodeGenerator, _CodeGenerator);
+		_inherits(CSharpCodeGenerator, _CodeGenerator);
 
-	function CSharpCodeGenerator(DOM) {
-		_classCallCheck(this, CSharpCodeGenerator);
+		function CSharpCodeGenerator(DOM) {
+				_classCallCheck(this, CSharpCodeGenerator);
 
-		_get(Object.getPrototypeOf(CSharpCodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(CSharpCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"cs\"></code></pre>");
+				//Make note of language name
+				this.langName = "C#";
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
-	}
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
 
-	_createClass(CSharpCodeGenerator, [{
-		key: "update",
-		value: function update(item) {
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"cs\"></code></pre>");
 
-			//variable to build the code
-			var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + "\n\n" + this.buildCode_Constructor(item) + "\n\n" + this.buildCode_Methods(item) + this.buildCode_Members(item) + "}";
-
-			//update the code inside the code tag
-			this.codeDOM.html(code);
-
-			//apply the code highlighting
-			hljs.highlightBlock(this.codeDOM[0]);
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 		}
 
-		//adds some comments with warnings
-	}, {
-		key: "buildCode_Warnings",
-		value: function buildCode_Warnings(item) {
+		//takes a class item and rebuilds the appropriate source code based on the class item for this language
 
-			var ret = "/*\n" + "\tWarning! The following C# code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper C# names, legal characters, not reserved words, etc.";
+		_createClass(CSharpCodeGenerator, [{
+				key: "update",
+				value: function update(item) {
 
-			//check for warnings
-			if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Sealed. That's probably not what you meant.";
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
 
-			//finish up the comment
-			ret += "\n*/";
+						//inspect useful data on our item:
+						var info = this.inspect(item);
 
-			return ret;
-		}
+						//variable to build the code
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
 
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+						//update the code inside the code tag
+						this.codeDOM.html(code);
 
-			//build the left part that usually looks like "public final class foo"
-			var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'sealed ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+						//apply the code highlighting
+						hljs.highlightBlock(this.codeDOM[0]);
+				}
 
-			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			var hasAncestor = ancestor != null && ancestor != '';
-			if (hasAncestor) ret += ' : ' + ancestor;
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item) {
 
-			//if it implements any interfaces, add those here:
-			var interfaces = item.getInterfaces();
-			if (interfaces.length > 0) {
-				if (hasAncestor) ret += ', ';else ret += ' : ';
-				for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
-				//truncate last two chars (', ')
-				ret = ret.substring(0, ret.length - 2);
-			}
+						//build the left part that usually looks like "public final class foo"
+						var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'sealed ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
 
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
+						//if it extends anything, add that here:
+						var ancestor = item.getAncestor();
+						var hasAncestor = ancestor != null && ancestor != '';
+						if (hasAncestor) ret += ' : ' + ancestor;
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
+						//if it implements any interfaces, add those here:
+						var interfaces = item.getInterfaces();
+						if (interfaces.length > 0) {
+								if (hasAncestor) ret += ', ';else ret += ' : ';
+								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+								//truncate last two chars (', ')
+								ret = ret.substring(0, ret.length - 2);
+						}
 
-			var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "()";
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
 
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += " : base()";
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item) {
 
-			ret += "{\n" + "\n\t\t//...\n" + "\t}";
-			return ret;
-		}
+						var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "()";
 
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += " : base()";
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public'];
+						ret += "{\n" + "\n\t\t//...\n" + "\t}";
+						return ret;
+				}
 
-			//get list of methods
-			var methods = item.getMethods();
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item) {
 
-			//code to return
-			var ret = '';
+						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
+						var accessToStr = ['private', 'public'];
 
-			if (methods.length > 0) {
+						//get list of methods
+						var methods = item.getMethods();
 
-				//code to return:
-				ret = "\t// Methods\n";
+						//code to return
+						var ret = '';
 
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
+						if (methods.length > 0) {
 
-					//get the method
-					var method = methods[i];
+								//code to return:
+								ret = "\t// Methods\n";
 
-					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-				} //next i
-			} //endif has methods
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
 
-			return ret;
-		}
+										//get the method
+										var method = methods[i];
 
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+								} //next i
+						} //endif has methods
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public'];
+						return ret;
+				}
 
-			//get list of methods
-			var members = item.getMembers();
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item) {
 
-			//code to return
-			var ret = '';
+						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
+						var accessToStr = ['private', 'public'];
 
-			if (members.length > 0) {
+						//get list of methods
+						var members = item.getMembers();
 
-				//code to return:
-				ret = "\t// Member Variables\n";
+						//code to return
+						var ret = '';
 
-				//loop over methods
-				for (var i = 0; i < members.length; i++) {
+						if (members.length > 0) {
 
-					//get the method
-					var member = members[i];
+								//code to return:
+								ret = "\t// Member Variables\n";
 
-					ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'const ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+								//loop over methods
+								for (var i = 0; i < members.length; i++) {
 
-					if (member.val != null) {
-						switch (parseInt(member.mType)) {
-							case INT:
-							case DOUBLE:
-								ret += " = " + member.val;
-								break;
-							case SHORT:
-								ret += " = (short)" + member.val;
-								break;
-							case LONG:
-								ret += " = (long)" + member.val;
-								break;
-							case BYTE:
-								ret += " = (byte)" + member.val;
-								break;
-							case FLOAT:
-								ret += " = " + member.val + 'f';
-								break;
+										//get the method
+										var member = members[i];
 
-							case CHAR:
-								ret += " = '" + member.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + member.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + member.val.toString();
-								break;
-						} //swatch
-					} //has default value
+										ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'const ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
 
-					//apply the semicolon and new line
-					ret += ";\n";
-				} //next i
-			} //endif has methods
+										if (member.val != null) {
+												switch (parseInt(member.mType)) {
+														case INT:
+														case DOUBLE:
+																ret += " = " + member.val;
+																break;
+														case SHORT:
+																ret += " = (short)" + member.val;
+																break;
+														case LONG:
+																ret += " = (long)" + member.val;
+																break;
+														case BYTE:
+																ret += " = (byte)" + member.val;
+																break;
+														case FLOAT:
+																ret += " = " + member.val + 'f';
+																break;
 
-			return ret;
-		}
-	}]);
+														case CHAR:
+																ret += " = '" + member.val + "'";
+																break;
+														case STRING:
+																ret += " = \"" + member.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + member.val.toString();
+																break;
+												} //swatch
+										} //has default value
 
-	return CSharpCodeGenerator;
+										//apply the semicolon and new line
+										ret += ";\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+		}]);
+
+		return CSharpCodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -2227,325 +2387,335 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ES6CodeGenerator = (function (_CodeGenerator) {
-	_inherits(ES6CodeGenerator, _CodeGenerator);
+		_inherits(ES6CodeGenerator, _CodeGenerator);
 
-	function ES6CodeGenerator(DOM) {
-		_classCallCheck(this, ES6CodeGenerator);
+		function ES6CodeGenerator(DOM) {
+				_classCallCheck(this, ES6CodeGenerator);
 
-		_get(Object.getPrototypeOf(ES6CodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(ES6CodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
+				//Make note of language name
+				this.langName = "JavaScript ES6";
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-		//colorize it
-		hljs.highlightBlock(this.codeDOM[0]);
-	}
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
 
-	_createClass(ES6CodeGenerator, [{
-		key: "update",
-		value: function update(item) {
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 
-			//variable to build the code
-			var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Constants(item) + this.buildCode_Definition(item) + "\n\n" + this.buildCode_Constructor(item) + "\n" + this.buildCode_Members(item) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item) + "}\n\n" + this.buildCode_StaticMembers(item) + this.buildCode_StaticMethods(item);
-
-			//update the code inside the code tag
-			this.codeDOM.html(code);
-
-			//apply the code highlighting
-			hljs.highlightBlock(this.codeDOM[0]);
+				//colorize it
+				hljs.highlightBlock(this.codeDOM[0]);
 		}
 
-		//adds some comments with warnings
-	}, {
-		key: "buildCode_Warnings",
-		value: function buildCode_Warnings(item) {
-
-			var ret = "/*\n" + "\tWarning! The following JavaScript ES6 code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper JavaScript ES6 names, legal characters, not reserved words, etc.";
-
-			//check for warnings
-			if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-			//finish up the comment
-			ret += "\n*/";
-
-			return ret;
-		}
-
-		//filter out and display constants before the class actually starts
-	}, {
-		key: "buildCode_Constants",
-		value: function buildCode_Constants(item) {
-
-			//get just constants
-			var constants = item.getMembers().filter(function (n) {
-				return n.isConst == true;
-			});
-
-			var ret = '';
+		//takes a class item and rebuilds the appropriate source code based on the class item for this language
+
+		_createClass(ES6CodeGenerator, [{
+				key: "update",
+				value: function update(item) {
+
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
+
+						//inspect useful data on our item:
+						var info = this.inspect(item);
+
+						//variable to build the code
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Constants(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Members(item, info) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item, info) + "}\n\n" + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
+
+						//update the code inside the code tag
+						this.codeDOM.html(code);
+
+						//apply the code highlighting
+						hljs.highlightBlock(this.codeDOM[0]);
+				}
+
+				//filter out and display constants before the class actually starts
+		}, {
+				key: "buildCode_Constants",
+				value: function buildCode_Constants(item) {
+
+						//get just constants
+						var constants = item.getMembers().filter(function (n) {
+								return n.isConst == true;
+						});
+
+						var ret = '';
+
+						if (constants.length > 0) {
 
-			if (constants.length > 0) {
+								ret += "\n// Constants\n" + "// NOTE: Unless I'm misunderstanding the documentation, class constants must actually be global to be used throughout the class.\n" + "// If they're defined in the constructor() they will only be available in the constructors scope... Way to go ES6 /s\n";
+
+								for (var i = 0; i < constants.length; i++) {
 
-				ret += "\n// Constants\n" + "// NOTE: Unless I'm misunderstanding the documentation, class constants must actually be global to be used throughout the class.\n" + "// If they're defined in the constructor() they will only be available in the constructors scope... Way to go ES6 /s\n";
+										var constant = constants[i];
 
-				for (var i = 0; i < constants.length; i++) {
+										ret += "const " + constants[i].mName;
 
-					var constant = constants[i];
+										if (constant.val != null) {
+												switch (parseInt(constant.mType)) {
+														case INT:
+														case DOUBLE:
+														case SHORT:
+														case LONG:
+														case BYTE:
+														case FLOAT:
+																ret += " = " + constant.val;
+																break;
+														case CHAR:
+																ret += " = '" + constant.val + "'";
+																break;
+														case STRING:
+																ret += " = \"" + constant.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + constant.val.toString();
+																break;
+												} //swatch
+										} else {
+														ret += " = null";
+												} //has default value
+
+										//add semicolon and new line
+										ret += ";\n";
+								} //next i
+
+								ret += "\n";
+						}
+
+						return ret;
+				}
+
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item) {
+
+						//build the left part that usually looks like "public final class foo"
+						var ret = 'class ' + item.getName();
+
+						//if it extends anything, add that here:
+						var ancestor = item.getAncestor();
+						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
+
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item) {
+
+						var ret = "\t// Constructor\n" + "\tconstructor(){\n";
+
+						//if this class is abstract when a put in the abstract hack
+						if (item.getAbstract() == true) {
+
+								ret += "\n\t\t// ES6 doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.\n" + "\t\t// Found here: http://tinyurl.com/om5xm8w\n" + "\t\tif (new.target === " + item.getName() + "){\n" + "\t\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t\t}\n";
+						}
+
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
+
+						return ret;
+				}
+
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item) {
+
+						//get list of methods and filter out static methods and constants
+						var members = item.getMembers().filter(function (n) {
+								return n.isStatic != true && n.isConst != true;
+						});
 
-					ret += "const " + constants[i].mName;
+						//code to return
+						var ret = '';
 
-					if (constant.val != null) {
-						switch (parseInt(constant.mType)) {
-							case INT:
-							case DOUBLE:
-							case SHORT:
-							case LONG:
-							case BYTE:
-							case FLOAT:
-								ret += " = " + constant.val;
-								break;
-							case CHAR:
-								ret += " = '" + constant.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + constant.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + constant.val.toString();
-								break;
-						} //swatch
-					} else {
-							ret += " = null";
-						} //has default value
-
-					//add semicolon and new line
-					ret += ";\n";
-				} //next i
-
-				ret += "\n";
-			}
-
-			return ret;
-		}
-
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
-
-			//build the left part that usually looks like "public final class foo"
-			var ret = 'class ' + item.getName();
-
-			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
-
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
-
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
-
-			var ret = "\t// Constructor\n" + "\tconstructor(){\n";
-
-			//if this class is abstract when a put in the abstract hack
-			if (item.getAbstract() == true) {
-
-				ret += "\n\t\t// ES6 doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.\n" + "\t\t// Found here: http://tinyurl.com/om5xm8w\n" + "\t\tif (new.target === " + item.getName() + "){\n" + "\t\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t\t}\n";
-			}
-
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
-
-			return ret;
-		}
-
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
-
-			//get list of methods and filter out static methods and constants
-			var members = item.getMembers().filter(function (n) {
-				return n.isStatic != true && n.isConst != true;
-			});
+						if (members.length > 0) {
 
-			//code to return
-			var ret = '';
+								//code to return:
+								ret = "\t\t// Member Variables\n";
 
-			if (members.length > 0) {
+								//loop over methods
+								for (var i = 0; i < members.length; i++) {
 
-				//code to return:
-				ret = "\t\t// Member Variables\n";
-
-				//loop over methods
-				for (var i = 0; i < members.length; i++) {
-
-					//get the method
-					var member = members[i];
-
-					ret += "\t\tthis." + member.mName;
-
-					if (member.val != null) {
-						switch (parseInt(member.mType)) {
-							case INT:
-							case DOUBLE:
-							case SHORT:
-							case LONG:
-							case BYTE:
-							case FLOAT:
-								ret += " = " + member.val;
-								break;
-							case CHAR:
-								ret += " = '" + member.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + member.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + member.val.toString();
-								break;
-						} //swatch
-					} else {
-							ret += " = null";
-						} //has default value
-
-					//apply the semicolon and new line
-					ret += ";\n";
-				} //next i
-
-				ret += "\n";
-			} //endif has methods
-
-			return ret;
-		}
-
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
-
-			//get list of methods and filter out static ones
-			var methods = item.getMethods().filter(function (n) {
-				return n.isStatic != true;
-			});
-
-			//code to return
-			var ret = '';
-
-			if (methods.length > 0) {
-
-				//code to return:
-				ret = "\t// Methods\n";
-
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
-
-					//get the method
-					var method = methods[i];
-
-					ret += "\t" + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-				} //next i
-			} //endif has methods
-
-			return ret;
-		}
-
-		//build out just the static members
-	}, {
-		key: "buildCode_StaticMembers",
-		value: function buildCode_StaticMembers(item) {
-
-			//get just static members`
-			var members = item.getMembers().filter(function (n) {
-				return n.isStatic == true;
-			});
-
-			var ret = '';
-
-			if (members.length > 0) {
-
-				ret += "// Static Members\n";
-
-				for (var i = 0; i < members.length; i++) {
-
-					var member = members[i];
-
-					ret += item.getName() + "." + members[i].mName;
-
-					if (member.val != null) {
-						switch (parseInt(member.mType)) {
-							case INT:
-							case DOUBLE:
-							case SHORT:
-							case LONG:
-							case BYTE:
-							case FLOAT:
-								ret += " = " + member.val;
-								break;
-							case CHAR:
-								ret += " = '" + member.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + member.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + member.val.toString();
-								break;
-						} //swatch
-					} else {
-							ret += " = null";
-						} //has default value
-
-					//add semicolon and new line
-					ret += ";\n";
-				} //next i
-
-				ret += "\n";
-			}
-
-			return ret;
-		}
-	}, {
-		key: "buildCode_StaticMethods",
-		value: function buildCode_StaticMethods(item) {
-
-			//get list of methods and filter only static ones
-			var methods = item.getMethods().filter(function (n) {
-				return n.isStatic == true;
-			});
-
-			//code to return
-			var ret = '';
-
-			if (methods.length > 0) {
-
-				//code to return:
-				ret = "// Static Methods\n";
-
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
-
-					//get the method
-					var method = methods[i];
-
-					ret += item.getName() + "." + method.mName + "(){\n" + "\t//...\n" + "}\n\n";
-				} //next i
-			} //endif has methods
-
-			return ret;
-		}
-	}]);
-
-	return ES6CodeGenerator;
+										//get the method
+										var member = members[i];
+
+										ret += "\t\tthis." + member.mName;
+
+										if (member.val != null) {
+												switch (parseInt(member.mType)) {
+														case INT:
+														case DOUBLE:
+														case SHORT:
+														case LONG:
+														case BYTE:
+														case FLOAT:
+																ret += " = " + member.val;
+																break;
+														case CHAR:
+																ret += " = '" + member.val + "'";
+																break;
+														case STRING:
+																ret += " = \"" + member.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + member.val.toString();
+																break;
+												} //swatch
+										} else {
+														ret += " = null";
+												} //has default value
+
+										//apply the semicolon and new line
+										ret += ";\n";
+								} //next i
+
+								ret += "\n";
+						} //endif has methods
+
+						return ret;
+				}
+
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item) {
+
+						//get list of methods and filter out static ones
+						var methods = item.getMethods().filter(function (n) {
+								return n.isStatic != true;
+						});
+
+						//code to return
+						var ret = '';
+
+						if (methods.length > 0) {
+
+								//code to return:
+								ret = "\t// Methods\n";
+
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
+
+										//get the method
+										var method = methods[i];
+
+										ret += "\t" + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+
+				//build out just the static members
+		}, {
+				key: "buildCode_StaticMembers",
+				value: function buildCode_StaticMembers(item) {
+
+						//get just static members`
+						var members = item.getMembers().filter(function (n) {
+								return n.isStatic == true;
+						});
+
+						var ret = '';
+
+						if (members.length > 0) {
+
+								ret += "// Static Members\n";
+
+								for (var i = 0; i < members.length; i++) {
+
+										var member = members[i];
+
+										ret += item.getName() + "." + members[i].mName;
+
+										if (member.val != null) {
+												switch (parseInt(member.mType)) {
+														case INT:
+														case DOUBLE:
+														case SHORT:
+														case LONG:
+														case BYTE:
+														case FLOAT:
+																ret += " = " + member.val;
+																break;
+														case CHAR:
+																ret += " = '" + member.val + "'";
+																break;
+														case STRING:
+																ret += " = \"" + member.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + member.val.toString();
+																break;
+												} //swatch
+										} else {
+														ret += " = null";
+												} //has default value
+
+										//add semicolon and new line
+										ret += ";\n";
+								} //next i
+
+								ret += "\n";
+						}
+
+						return ret;
+				}
+		}, {
+				key: "buildCode_StaticMethods",
+				value: function buildCode_StaticMethods(item) {
+
+						//get list of methods and filter only static ones
+						var methods = item.getMethods().filter(function (n) {
+								return n.isStatic == true;
+						});
+
+						//code to return
+						var ret = '';
+
+						if (methods.length > 0) {
+
+								//code to return:
+								ret = "// Static Methods\n";
+
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
+
+										//get the method
+										var method = methods[i];
+
+										ret += item.getName() + "." + method.mName + "(){\n" + "\t//...\n" + "}\n\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+		}]);
+
+		return ES6CodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -2558,192 +2728,202 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var JavaCodeGenerator = (function (_CodeGenerator) {
-	_inherits(JavaCodeGenerator, _CodeGenerator);
+		_inherits(JavaCodeGenerator, _CodeGenerator);
 
-	function JavaCodeGenerator(DOM) {
-		_classCallCheck(this, JavaCodeGenerator);
+		function JavaCodeGenerator(DOM) {
+				_classCallCheck(this, JavaCodeGenerator);
 
-		_get(Object.getPrototypeOf(JavaCodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(JavaCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"java\"></code></pre>");
+				//Make note of language name
+				this.langName = "Java";
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
-	}
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
 
-	_createClass(JavaCodeGenerator, [{
-		key: "update",
-		value: function update(item) {
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"java\"></code></pre>");
 
-			//variable to build the code
-			var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + "\n\n" + this.buildCode_Constructor(item) + "\n\n" + this.buildCode_Methods(item) + this.buildCode_Members(item) + "}";
-
-			//update the code inside the code tag
-			this.codeDOM.html(code);
-
-			//apply the code highlighting
-			hljs.highlightBlock(this.codeDOM[0]);
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 		}
 
-		//adds some comments with warnings
-	}, {
-		key: "buildCode_Warnings",
-		value: function buildCode_Warnings(item) {
+		//takes a class item and rebuilds the appropriate source code based on the class item for this language
 
-			var ret = "/*\n" + "\tWarning! The following java code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper java names, legal characters, not reserved words, etc.";
+		_createClass(JavaCodeGenerator, [{
+				key: "update",
+				value: function update(item) {
 
-			//check for warnings
-			if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
 
-			//finish up the comment
-			ret += "\n*/";
+						//inspect useful data on our item:
+						var info = this.inspect(item);
 
-			return ret;
-		}
+						//variable to build the code
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
 
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+						//update the code inside the code tag
+						this.codeDOM.html(code);
 
-			//build the left part that usually looks like "public final class foo"
-			var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+						//apply the code highlighting
+						hljs.highlightBlock(this.codeDOM[0]);
+				}
 
-			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item) {
 
-			//if it implements any interfaces, add those here:
-			var interfaces = item.getInterfaces();
-			if (interfaces.length > 0) {
-				ret += ' implements ';
-				for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
-				//truncate last two chars (', ')
-				ret = ret.substring(0, ret.length - 2);
-			}
+						//build the left part that usually looks like "public final class foo"
+						var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
 
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
+						//if it extends anything, add that here:
+						var ancestor = item.getAncestor();
+						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
+						//if it implements any interfaces, add those here:
+						var interfaces = item.getInterfaces();
+						if (interfaces.length > 0) {
+								ret += ' implements ';
+								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+								//truncate last two chars (', ')
+								ret = ret.substring(0, ret.length - 2);
+						}
 
-			var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "(){\n";
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
 
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item) {
 
-			ret += "\n\t\t//...\n" + "\t}";
-			return ret;
-		}
+						var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "(){\n";
 
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-			var accessToStr = ['private', 'public'];
+						ret += "\n\t\t//...\n" + "\t}";
+						return ret;
+				}
 
-			//get list of methods
-			var methods = item.getMethods();
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item) {
 
-			//code to return
-			var ret = '';
+						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
+						var accessToStr = ['private', 'public'];
 
-			if (methods.length > 0) {
+						//get list of methods
+						var methods = item.getMethods();
 
-				//code to return:
-				ret = "\t// Methods\n";
+						//code to return
+						var ret = '';
 
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
+						if (methods.length > 0) {
 
-					//get the method
-					var method = methods[i];
+								//code to return:
+								ret = "\t// Methods\n";
 
-					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-				} //next i
-			} //endif has methods
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
 
-			return ret;
-		}
+										//get the method
+										var method = methods[i];
 
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+								} //next i
+						} //endif has methods
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-			var accessToStr = ['private', 'public'];
+						return ret;
+				}
 
-			//get list of methods
-			var members = item.getMembers();
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item) {
 
-			//code to return
-			var ret = '';
+						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
+						var accessToStr = ['private', 'public'];
 
-			if (members.length > 0) {
+						//get list of methods
+						var members = item.getMembers();
 
-				//code to return:
-				ret = "\t// Member Variables\n";
+						//code to return
+						var ret = '';
 
-				//loop over methods
-				for (var i = 0; i < members.length; i++) {
+						if (members.length > 0) {
 
-					//get the method
-					var member = members[i];
+								//code to return:
+								ret = "\t// Member Variables\n";
 
-					ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'final ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+								//loop over methods
+								for (var i = 0; i < members.length; i++) {
 
-					if (member.val != null) {
-						switch (parseInt(member.mType)) {
-							case INT:
-							case DOUBLE:
-								ret += " = " + member.val;
-								break;
-							case SHORT:
-								ret += " = (short)" + member.val;
-								break;
-							case LONG:
-								ret += " = (long)" + member.val;
-								break;
-							case BYTE:
-								ret += " = (byte)" + member.val;
-								break;
-							case FLOAT:
-								ret += " = " + member.val + 'f';
-								break;
+										//get the method
+										var member = members[i];
 
-							case CHAR:
-								ret += " = '" + member.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + member.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + member.val.toString();
-								break;
-						} //swatch
-					} //has default value
+										ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'final ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
 
-					//apply the semicolon and new line
-					ret += ";\n";
-				} //next i
-			} //endif has methods
+										if (member.val != null) {
+												switch (parseInt(member.mType)) {
+														case INT:
+														case DOUBLE:
+																ret += " = " + member.val;
+																break;
+														case SHORT:
+																ret += " = (short)" + member.val;
+																break;
+														case LONG:
+																ret += " = (long)" + member.val;
+																break;
+														case BYTE:
+																ret += " = (byte)" + member.val;
+																break;
+														case FLOAT:
+																ret += " = " + member.val + 'f';
+																break;
 
-			return ret;
-		}
-	}]);
+														case CHAR:
+																ret += " = '" + member.val + "'";
+																break;
+														case STRING:
+																ret += " = \"" + member.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + member.val.toString();
+																break;
+												} //swatch
+										} //has default value
 
-	return JavaCodeGenerator;
+										//apply the semicolon and new line
+										ret += ";\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+		}]);
+
+		return JavaCodeGenerator;
 })(CodeGenerator);
 'use strict';
 
@@ -2768,7 +2948,7 @@ var JSCodeGenerator = (function (_CodeGenerator) {
 
 		//add an area to let the user pick between our three flavors of JS: Native, TypeScript, ES6
 		//as well as containers for our childen elements
-		this.DOM.html('<div class="GenHeader">' + 'JavaScript has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavJS" id="opt01" value="01" checked><label for="opt01">Vanilla JS</label> ' + '<input type="radio" name="optFlavJS" id="opt02" value="02"><label for="opt02">ES6 / Babel</label> ' + '<input type="radio" name="optFlavJS" id="opt03" value="03"><label for="opt03">Type Script</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab"></div>' + '<div id="SubTab_02" class="SubTab" style="display:none;"></div>' + '<div id="SubTab_03" class="SubTab" style="display:none;"></div>');
+		this.DOM.html('<div class="GenHeader">' + 'JavaScript has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavJS" id="opt01" value="01" checked><label for="opt01">Vanilla JS</label> ' + '<input type="radio" name="optFlavJS" id="opt02" value="02"><label for="opt02">ES6 / Babel</label> ' + '<input type="radio" name="optFlavJS" id="opt03" value="03"><label for="opt03">TypeScript</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab"></div>' + '<div id="SubTab_02" class="SubTab" style="display:none;"></div>' + '<div id="SubTab_03" class="SubTab" style="display:none;"></div>');
 
 		//create generators for each type of JS
 		this.codeGenerators = [];
@@ -2824,233 +3004,243 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var PHPCodeGenerator = (function (_CodeGenerator) {
-	_inherits(PHPCodeGenerator, _CodeGenerator);
+		_inherits(PHPCodeGenerator, _CodeGenerator);
 
-	function PHPCodeGenerator(DOM) {
-		_classCallCheck(this, PHPCodeGenerator);
+		function PHPCodeGenerator(DOM) {
+				_classCallCheck(this, PHPCodeGenerator);
 
-		_get(Object.getPrototypeOf(PHPCodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(PHPCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"php\"></code></pre>");
+				//Make note of language name
+				this.langName = "PHP";
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
-	}
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
 
-	_createClass(PHPCodeGenerator, [{
-		key: "update",
-		value: function update(item) {
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"php\"></code></pre>");
 
-			//variable to build the code
-			var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + "\n" + this.buildCode_Members(item) + "\n" + this.buildCode_Constructor(item) + "\n\n" + this.buildCode_Methods(item) + "}";
-
-			//update the code inside the code tag
-			this.codeDOM.html(code);
-
-			//apply the code highlighting
-			hljs.highlightBlock(this.codeDOM[0]);
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 		}
 
-		//adds some comments with warnings
-	}, {
-		key: "buildCode_Warnings",
-		value: function buildCode_Warnings(item) {
+		//takes a class item and rebuilds the appropriate source code based on the class item for this language
 
-			var ret = "/*\n" + "\tWarning! The following PHP code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper PHP names, legal characters, not reserved words, etc.";
+		_createClass(PHPCodeGenerator, [{
+				key: "update",
+				value: function update(item) {
 
-			//check for warnings
-			if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
 
-			//finish up the comment
-			ret += "\n*/";
+						//inspect useful data on our item:
+						var info = this.inspect(item);
 
-			return ret;
-		}
+						//variable to build the code
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + "\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "}";
 
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+						//update the code inside the code tag
+						this.codeDOM.html(code);
 
-			//build the left part that usually looks like "public final class foo"
-			var ret = (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
-			//((item.getPublic())?'public ':'private ') +
+						//apply the code highlighting
+						hljs.highlightBlock(this.codeDOM[0]);
+				}
 
-			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item) {
 
-			//if it implements any interfaces, add those here:
-			var interfaces = item.getInterfaces();
-			if (interfaces.length > 0) {
-				ret += ' implements ';
-				for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
-				//truncate last two chars (', ')
-				ret = ret.substring(0, ret.length - 2);
-			}
+						//build the left part that usually looks like "public final class foo"
+						var ret = (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+						//((item.getPublic())?'public ':'private ') +
 
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
+						//if it extends anything, add that here:
+						var ancestor = item.getAncestor();
+						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
+						//if it implements any interfaces, add those here:
+						var interfaces = item.getInterfaces();
+						if (interfaces.length > 0) {
+								ret += ' implements ';
+								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+								//truncate last two chars (', ')
+								ret = ret.substring(0, ret.length - 2);
+						}
 
-			var ret = "\t// Constructor\n" + "\tfunction __construct(){\n";
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
 
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tparent::__construct();\n";
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item) {
 
-			ret += "\n\t\t//...\n" + "\t}";
-			return ret;
-		}
+						var ret = "\t// Constructor\n" + "\tfunction __construct(){\n";
 
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tparent::__construct();\n";
 
-			var accessToStr = ['private', 'public'];
+						ret += "\n\t\t//...\n" + "\t}";
+						return ret;
+				}
 
-			//get list of methods
-			var methods = item.getMethods();
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item) {
 
-			//code to return
-			var ret = '';
+						var accessToStr = ['private', 'public'];
 
-			if (methods.length > 0) {
+						//get list of methods
+						var methods = item.getMethods();
 
-				//code to return:
-				ret = "\t// Methods\n";
+						//code to return
+						var ret = '';
 
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
+						if (methods.length > 0) {
 
-					//get the method
-					var method = methods[i];
+								//code to return:
+								ret = "\t// Methods\n";
 
-					ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-				} //next i
-			} //endif has methods
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
 
-			return ret;
-		}
+										//get the method
+										var method = methods[i];
 
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+										ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+								} //next i
+						} //endif has methods
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-			var accessToStr = ['private', 'public'];
+						return ret;
+				}
 
-			//get list of methods
-			var members = item.getMembers();
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item) {
 
-			//code to return
-			var ret = "";
+						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
+						var accessToStr = ['private', 'public'];
 
-			if (members.length > 0) {
+						//get list of methods
+						var members = item.getMembers();
 
-				//handle constants first since the syntax is slightly different
-				var constants = members.filter(function (n) {
-					return n.isConst == true;
-				});
-				if (constants.length > 0) {
+						//code to return
+						var ret = "";
 
-					ret += "\n\t// Class Constants\n";
-					for (var i = 0; i < constants.length; i++) {
+						if (members.length > 0) {
 
-						var constant = constants[i];
-						ret += "\tconst " + constant.mName;
+								//handle constants first since the syntax is slightly different
+								var constants = members.filter(function (n) {
+										return n.isConst == true;
+								});
+								if (constants.length > 0) {
 
-						if (constant.val != null) {
-							switch (parseInt(constant.mType)) {
-								case INT:
-								case DOUBLE:
-								case SHORT:
-								case LONG:
-								case BYTE:
-								case FLOAT:
-									ret += " = " + constant.val;
-									break;
-								case CHAR:
-									ret += " = '" + constant.val + "'";
-									break;
-								case STRING:
-									ret += " = \"" + constant.val + "\"";
-									break;
-								case BOOLEAN:
-									ret += " = " + constant.val.toString().toUpperCase();
-									break;
-							} //swatch
-						} else {
-								ret += ' = NULL';
-							} //has default value
+										ret += "\n\t// Class Constants\n";
+										for (var i = 0; i < constants.length; i++) {
 
-						ret += ";\n";
-					} //next i
+												var constant = constants[i];
+												ret += "\tconst " + constant.mName;
 
-					//ret += "\n";
-				} //end if has constants
+												if (constant.val != null) {
+														switch (parseInt(constant.mType)) {
+																case INT:
+																case DOUBLE:
+																case SHORT:
+																case LONG:
+																case BYTE:
+																case FLOAT:
+																		ret += " = " + constant.val;
+																		break;
+																case CHAR:
+																		ret += " = '" + constant.val + "'";
+																		break;
+																case STRING:
+																		ret += " = \"" + constant.val + "\"";
+																		break;
+																case BOOLEAN:
+																		ret += " = " + constant.val.toString().toUpperCase();
+																		break;
+														} //swatch
+												} else {
+																ret += ' = NULL';
+														} //has default value
 
-				//now that we handled constants, lets filter them out
-				members = members.filter(function (n) {
-					return n.isConst != true;
-				});
+												ret += ";\n";
+										} //next i
 
-				if (members.length > 0) {
+										//ret += "\n";
+								} //end if has constants
 
-					//code to return:
-					ret += "\n\t// Member Variables\n";
+								//now that we handled constants, lets filter them out
+								members = members.filter(function (n) {
+										return n.isConst != true;
+								});
 
-					//loop over methods
-					for (var i = 0; i < members.length; i++) {
+								if (members.length > 0) {
 
-						//get the method
-						var member = members[i];
+										//code to return:
+										ret += "\n\t// Member Variables\n";
 
-						ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + '$' + member.mName;
+										//loop over methods
+										for (var i = 0; i < members.length; i++) {
 
-						if (member.val != null) {
-							switch (parseInt(member.mType)) {
-								case INT:
-								case DOUBLE:
-								case SHORT:
-								case LONG:
-								case BYTE:
-								case FLOAT:
-									ret += " = " + member.val;
-									break;
-								case CHAR:
-									ret += " = '" + member.val + "'";
-									break;
-								case STRING:
-									ret += " = \"" + member.val + "\"";
-									break;
-								case BOOLEAN:
-									ret += " = " + member.val.toString().toUpperCase();
-									break;
-							} //swatch
-						} //has default value
+												//get the method
+												var member = members[i];
 
-						//apply the semicolon and new line
-						ret += ";\n";
-					} //next i
-				} //end if has non constants
-			} //endif has methods
+												ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + '$' + member.mName;
 
-			return ret;
-		}
-	}]);
+												if (member.val != null) {
+														switch (parseInt(member.mType)) {
+																case INT:
+																case DOUBLE:
+																case SHORT:
+																case LONG:
+																case BYTE:
+																case FLOAT:
+																		ret += " = " + member.val;
+																		break;
+																case CHAR:
+																		ret += " = '" + member.val + "'";
+																		break;
+																case STRING:
+																		ret += " = \"" + member.val + "\"";
+																		break;
+																case BOOLEAN:
+																		ret += " = " + member.val.toString().toUpperCase();
+																		break;
+														} //swatch
+												} //has default value
 
-	return PHPCodeGenerator;
+												//apply the semicolon and new line
+												ret += ";\n";
+										} //next i
+								} //end if has non constants
+						} //endif has methods
+
+						return ret;
+				}
+		}]);
+
+		return PHPCodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -3070,6 +3260,22 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 
 		_get(Object.getPrototypeOf(PythonCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
+		//Make note of language name
+		this.langName = "Python";
+
+		//set up comment styles
+		this.singleLineComments = "# ";
+		this.multiLineComments = { open: '\"\"\"\n',
+			close: '\n\"\"\"',
+			prefix: "\t" };
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			methods: {},
+			members: {}
+		};
+
 		//build the area for the code:
 		this.DOM.append("<pre><code class=\"python\"></code></pre>");
 
@@ -3083,31 +3289,24 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		key: "update",
 		value: function update(item) {
 
+			//if the item is null, just update with the default comment
+			if (typeof item === "undefined" || item == null) {
+				this.buildDefaultComment();
+				hljs.highlightBlock(this.codeDOM[0]);
+				return;
+			}
+
+			//inspect useful data on our item:
+			var info = this.inspect(item);
+
 			//variable to build the code
-			var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + this.buildCode_StaticMembers(item) + "\n" + this.buildCode_Constructor(item) + this.buildCode_Members(item) + "\n" + "\t\t#...\n\n" + this.buildCode_Methods(item);
+			var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t#...\n\n" + this.buildCode_Methods(item, info);
 
 			//update the code inside the code tag
 			this.codeDOM.html(code);
 
 			//apply the code highlighting
 			hljs.highlightBlock(this.codeDOM[0]);
-		}
-
-		//adds some comments with warnings
-	}, {
-		key: "buildCode_Warnings",
-		value: function buildCode_Warnings(item) {
-
-			var ret = "\"\"\"\n" + "\tWarning! The following Python code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper Python names, legal characters, not reserved words, etc.";
-
-			//check for warnings
-			if (item.getFinal()) ret += "\n\n\tWARNING: you specified this class to be Final. Python does not support Final classes.";
-			if (item.getInterfaces().length > 0) ret += "\n\n\tWARNING: you specified one or more Interfaces. Python does not have native Interface support.";
-
-			//finish up the comment
-			ret += "\n\"\"\"";
-
-			return ret;
 		}
 
 		//build essentially the first line of the class: the defition
@@ -3332,6 +3531,22 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 
 				_get(Object.getPrototypeOf(RubyCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
+				//Make note of language name
+				this.langName = "Ruby";
+
+				//set up comment styles
+				this.singleLineComments = "# ";
+				this.multiLineComments = { open: '=begin\n',
+						close: '\n=end',
+						prefix: "\t" };
+
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
+
 				//build the area for the code:
 				this.DOM.append("<pre><code class=\"ruby\"></code></pre>");
 
@@ -3348,31 +3563,24 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				key: "update",
 				value: function update(item) {
 
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
+
+						//inspect useful data on our item:
+						var info = this.inspect(item);
+
 						//variable to build the code
-						var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + this.buildCode_Constants(item) + this.buildCode_PublicMembers(item) + this.buildCode_StaticMembers(item) + "\n" + this.buildCode_Constructor(item) + this.buildCode_Members(item) + "\n" + "\t\t#...\n" + "\tend\n\n" + this.buildCode_PublicMethods(item) + this.buildCode_PrivateMethods(item) + "end";
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_Constants(item, info) + this.buildCode_PublicMembers(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t#...\n" + "\tend\n\n" + this.buildCode_PublicMethods(item, info) + this.buildCode_PrivateMethods(item, info) + "end";
 
 						//update the code inside the code tag
 						this.codeDOM.html(code);
 
 						//apply the code highlighting
 						hljs.highlightBlock(this.codeDOM[0]);
-				}
-
-				//adds some comments with warnings
-		}, {
-				key: "buildCode_Warnings",
-				value: function buildCode_Warnings(item) {
-
-						var ret = "=begin\n" + "\tWarning! The following Ruby code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper Ruby names, legal characters, not reserved words, etc.";
-
-						//check for warnings
-						if (item.getFinal()) ret += "\n\n\tWARNING: you specified this class to be Final. Ruby does not support Final classes.";
-						if (item.getInterfaces().length > 0) ret += "\n\n\tWARNING: you specified one or more Interfaces. Ruby does not have native Interface support.";
-
-						//finish up the comment
-						ret += "\n=end";
-
-						return ret;
 				}
 
 				//build essentially the first line of the class: the defition
@@ -3716,6 +3924,22 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 
 				_get(Object.getPrototypeOf(TypeScriptCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
+				//Make note of language name
+				this.langName = "TypeScript";
+
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
+
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
+
 				//build the area for the code:
 				this.DOM.append("<pre><code class=\"typescript\"></code></pre>");
 
@@ -3732,30 +3956,24 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 				key: "update",
 				value: function update(item) {
 
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
+
+						//inspect useful data on our item:
+						var info = this.inspect(item);
+
 						//variable to build the code
-						var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + "\n" + this.buildCode_Members(item) + this.buildCode_Constructor(item) + "\n" + this.buildCode_MemberAssignments(item) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item) + this.buildCode_Constants(item) + "}";
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_MemberAssignments(item, info) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Constants(item, info) + "}";
 
 						//update the code inside the code tag
 						this.codeDOM.html(code);
 
 						//apply the code highlighting
 						hljs.highlightBlock(this.codeDOM[0]);
-				}
-
-				//adds some comments with warnings
-		}, {
-				key: "buildCode_Warnings",
-				value: function buildCode_Warnings(item) {
-
-						var ret = "/*\n" + "\tWarning! The following TypeScript code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper TypeScript names, legal characters, not reserved words, etc.";
-
-						//check for warnings
-						if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-						//finish up the comment
-						ret += "\n*/";
-
-						return ret;
 				}
 
 				//build essentially the first line of the class: the defition
@@ -4058,6 +4276,21 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 
 				_get(Object.getPrototypeOf(VanillaJSCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
+				//Make note of language name
+				this.langName = "Vanilla JavaScript";
+
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
+
 				//build the area for the code:
 				this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
 
@@ -4074,30 +4307,24 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				key: "update",
 				value: function update(item) {
 
+						//if the item is null, just update with the default comment
+						if (typeof item === "undefined" || item == null) {
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
+								return;
+						}
+
+						//inspect useful data on our item:
+						var info = this.inspect(item);
+
 						//variable to build the code
-						var code = this.buildCode_Warnings(item) + "\n" + this.buildCode_Definition(item) + "\n\n" + this.buildCode_Constructor(item) + "\t//...\n" + "}\n\n" + this.buildCode_Prototype(item) + this.buildCode_Constants(item) + this.buildCode_StaticMembers(item) + this.buildCode_StaticMethods(item);
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\t//...\n" + "}\n\n" + this.buildCode_Prototype(item, info) + this.buildCode_Constants(item, info) + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
 
 						//update the code inside the code tag
 						this.codeDOM.html(code);
 
 						//apply the code highlighting
 						hljs.highlightBlock(this.codeDOM[0]);
-				}
-
-				//adds some comments with warnings
-		}, {
-				key: "buildCode_Warnings",
-				value: function buildCode_Warnings(item) {
-
-						var ret = "/*\n" + "\tWarning! The following JavaScript code is automatically generated and may contain errors.\n" + "\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + "\tGarbage In = Garbage Out. Make sure to use proper JavaScript names, legal characters, not reserved words, etc.";
-
-						//check for warnings
-						if (item.getFinal() && item.getAbstract) ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-						//finish up the comment
-						ret += "\n*/";
-
-						return ret;
 				}
 
 				//build essentially the first line of the class: the defition
@@ -4428,6 +4655,32 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				//Make note of language name
 				this.langName = "VB6";
 
+				//set up comment styles
+				this.singleLineComments = "'";
+				this.multiLineComments = { open: '',
+						close: '',
+						prefix: "'" };
+
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						inheritance: false,
+						final: false,
+						abstract: false,
+						"private": false,
+						methods: {
+								abstract: false,
+								final: false,
+								"static": false,
+								"protected": false
+						},
+						members: {
+								constants: true,
+								"static": false,
+								"protected": false
+						}
+				};
+
 				//build the area for the code:
 				this.DOM.append("<pre><code class=\"vbscript\"></code></pre>");
 
@@ -4443,7 +4696,8 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 
 						//if the item is null, just update with the default comment
 						if (typeof item === "undefined" || item == null) {
-								buildDefaultComment();
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
 								return;
 						}
 
@@ -4451,36 +4705,13 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 						var info = this.inspect(item);
 
 						//variable to build the code
-						var code = this.buildCode_Warnings(item, info) + "\n" + this.buildCode_Definition(item, info) + this.buildCode_Constants(item, info) + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Methods(item, info);
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_Constants(item, info) + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Methods(item, info);
 
 						//update the code inside the code tag
 						this.codeDOM.html(code);
 
 						//apply the code highlighting
 						hljs.highlightBlock(this.codeDOM[0]);
-				}
-
-				//build the default commenting telling the user to goto the editor tab, etc.
-		}, {
-				key: "buildDefaultComment",
-				value: function buildDefaultComment() {
-						this.codeDOM.html("'Please create a class on the left, and edit it with the Editor tab!\n" + "'<-----");
-				}
-
-				//adds some comments with warnings
-		}, {
-				key: "buildCode_Warnings",
-				value: function buildCode_Warnings(item) {
-
-						var ret = "'Warning! The following " + this.langName + " code is automatically generated and may contain errors.\n" + "'Classetta tries to be accurate as possible, but only provides minimal error checking.\n" + "'Garbage In = Garbage Out. Make sure to use proper " + this.langName + " names, legal characters, not reserved words, etc.";
-
-						//check for warnings
-						if (item.getFinal() && item.getAbstract) ret += "\n\n\t'WARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-						//finish up the comment
-						ret += "\n";
-
-						return ret;
 				}
 
 				//build essentially the first line of the class: the defition
@@ -4508,7 +4739,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode_Constants(item) {
 
 						var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-						var accessToStr = ['Private', 'Public'];
+						var accessToStr = ['Private', 'Public', 'Private'];
 						var typeDefaults = ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 						//get list of methods
@@ -4571,7 +4802,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode_Members(item) {
 
 						var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-						var accessToStr = ['Private', 'Public'];
+						var accessToStr = ['Private', 'Public', 'Private'];
 						var typeDefaults = ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 						//get list of methods
@@ -4605,7 +4836,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				key: "buildCode_Constructor",
 				value: function buildCode_Constructor(item) {
 
-						var ret = "' Constructor\n" + "Private Sub Class_Initialize()\n";
+						var ret = "'Constructor\n" + "'NOTE: VB6 Constructors cannot take parameters! \n" + "Private Sub Class_Initialize()\n";
 
 						//get list of methods
 						var items = item.getMembers().filter(function (n) {
@@ -4656,7 +4887,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode_Methods(item) {
 
 						var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-						var accessToStr = ['Private', 'Public'];
+						var accessToStr = ['Private', 'Public', 'Private'];
 
 						//get list of methods
 						var methods = item.getMethods();
@@ -4708,7 +4939,7 @@ var VBCodeGenerator = (function (_CodeGenerator) {
 
 		//add an area to let the user pick between our three flavors of JS: Native, TypeScript, ES6
 		//as well as containers for our childen elements
-		this.DOM.html('<div class="GenHeader">' + 'Visual Basic has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavVB" id="opt01v" value="01" checked><label for="opt01v">VB.NET</label> ' + '<input type="radio" name="optFlavVB" id="opt02v" value="02"><label for="opt02v">VB6</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab"></div>' + '<div id="SubTab_02" class="SubTab" style="display:none;"></div>');
+		this.DOM.html('<div class="GenHeader">' + 'Visual Basic has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavVB" id="opt01v" value="01" ><label for="opt01v">VB.NET</label> ' + '<input type="radio" name="optFlavVB" id="opt02v" value="02"checked><label for="opt02v">VB6</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab" style="display:none;"></div>' + '<div id="SubTab_02" class="SubTab"></div>');
 
 		//create generators for each type of JS
 		this.codeGenerators = [];
@@ -4773,6 +5004,19 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 				//Make note of language name
 				this.langName = "VB.NET";
 
+				//set up comment styles
+				this.singleLineComments = "'";
+				this.multiLineComments = { open: '',
+						close: '',
+						prefix: "'" };
+
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						methods: {},
+						members: {}
+				};
+
 				//build the area for the code:
 				this.DOM.append("<pre><code class=\"vbnet\"></code></pre>");
 
@@ -4788,7 +5032,8 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 
 						//if the item is null, just update with the default comment
 						if (typeof item === "undefined" || item == null) {
-								buildDefaultComment();
+								this.buildDefaultComment();
+								hljs.highlightBlock(this.codeDOM[0]);
 								return;
 						}
 
@@ -4796,36 +5041,13 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 						var info = this.inspect(item);
 
 						//variable to build the code
-						var code = this.buildCode_Warnings(item, info) + "\n" + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "End Class";
+						var code = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "End Class";
 
 						//update the code inside the code tag
 						this.codeDOM.html(code);
 
 						//apply the code highlighting
 						hljs.highlightBlock(this.codeDOM[0]);
-				}
-
-				//build the default commenting telling the user to goto the editor tab, etc.
-		}, {
-				key: "buildDefaultComment",
-				value: function buildDefaultComment() {
-						this.codeDOM.html("'Please create a class on the left, and edit it with the Editor tab!\n" + "'<-----");
-				}
-
-				//adds some comments with warnings
-		}, {
-				key: "buildCode_Warnings",
-				value: function buildCode_Warnings(item) {
-
-						var ret = "'Warning! The following " + this.langName + " code is automatically generated and may contain errors.\n" + "'Classetta tries to be accurate as possible, but only provides minimal error checking.\n" + "'Garbage In = Garbage Out. Make sure to use proper " + this.langName + " names, legal characters, not reserved words, etc.";
-
-						//check for warnings
-						if (item.getFinal() && item.getAbstract) ret += "\n\n'WARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-						//finish up the comment
-						ret += "\n";
-
-						return ret;
 				}
 
 				//build essentially the first line of the class: the defition

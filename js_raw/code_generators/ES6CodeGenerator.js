@@ -3,6 +3,24 @@ class ES6CodeGenerator extends CodeGenerator {
 	constructor(DOM){
 		super(DOM);	
 
+		//Make note of language name
+		this.langName = "JavaScript ES6";
+
+		//set up comment styles
+		this.singleLineComments = "// ";
+		this.multiLineComments = { 	  open: '/*\n',
+									 close: '\n*/',
+									prefix: "\t"	};
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+							methods: {
+									 },
+							members: {
+									 }
+						};
+						
 		//build the area for the code:
 		this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
 
@@ -17,19 +35,29 @@ class ES6CodeGenerator extends CodeGenerator {
 	//takes a class item and rebuilds the appropriate source code based on the class item for this language
 	update(item){
 
+		//if the item is null, just update with the default comment
+		if((typeof(item)==="undefined") || item==null){
+			this.buildDefaultComment();
+			hljs.highlightBlock(this.codeDOM[0]);
+			return;
+		}
+
+		//inspect useful data on our item:
+		var info = this.inspect(item);
+
 		//variable to build the code
-		var code = 	this.buildCode_Warnings(item) + "\n" + 
-					this.buildCode_Constants(item) +
-					this.buildCode_Definition(item) + "\n\n" +
-					this.buildCode_Constructor(item) + "\n" +
-					this.buildCode_Members(item) + 
+		var code = 	this.buildCode_Warnings(item, info) +
+					this.buildCode_Constants(item, info) +
+					this.buildCode_Definition(item, info) + "\n\n" +
+					this.buildCode_Constructor(item, info) + "\n" +
+					this.buildCode_Members(item, info) + 
 					"\t\t//...\n" + 
 					"\t}\n\n" + 
-					this.buildCode_Methods(item) + 
+					this.buildCode_Methods(item, info) + 
 					
 					"}\n\n" + 
-					this.buildCode_StaticMembers(item) +
-					this.buildCode_StaticMethods(item);
+					this.buildCode_StaticMembers(item, info) +
+					this.buildCode_StaticMethods(item, info);
 
 		//update the code inside the code tag
 		this.codeDOM.html(code);
@@ -37,24 +65,6 @@ class ES6CodeGenerator extends CodeGenerator {
 		//apply the code highlighting
 		hljs.highlightBlock(this.codeDOM[0]);
 
-	}
-
-	//adds some comments with warnings
-	buildCode_Warnings(item){
-
-		var ret = 	"/*\n" + 
-					"\tWarning! The following JavaScript ES6 code is automatically generated and may contain errors.\n" + 
-					"\tCode.Design tries to be accurate as possible, but only provides minimal error checking.\n" + 
-					"\tGarbage In = Garbage Out. Make sure to use proper JavaScript ES6 names, legal characters, not reserved words, etc.";
-
-		//check for warnings
-		if(item.getFinal() && item.getAbstract)
-				ret += "\n\n\tWARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-		//finish up the comment
-		ret += "\n*/";
-
-		return ret;
 	}
 
 	//filter out and display constants before the class actually starts

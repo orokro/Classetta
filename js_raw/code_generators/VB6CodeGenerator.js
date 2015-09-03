@@ -5,7 +5,34 @@ class VB6CodeGenerator extends CodeGenerator {
 
 		//Make note of language name
 		this.langName = "VB6";
-		
+
+		//set up comment styles
+		this.singleLineComments = "'";
+		this.multiLineComments = { 	  open: '',
+									 close: '',
+									prefix: "'"	};
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+							inheritance: false,
+							final: false,
+							abstract: false,
+							private: false,
+							methods: {
+										abstract: false,
+										final: false,
+										static: false,
+										protected: false
+									 },
+							members: {
+										constants: true,
+										static: false,
+										protected: false
+									 }
+						};
+
+
 		//build the area for the code:
 		this.DOM.append("<pre><code class=\"vbscript\"></code></pre>");
 
@@ -19,7 +46,8 @@ class VB6CodeGenerator extends CodeGenerator {
 
 		//if the item is null, just update with the default comment
 		if((typeof(item)==="undefined") || item==null){
-			buildDefaultComment();
+			this.buildDefaultComment();
+			hljs.highlightBlock(this.codeDOM[0]);
 			return;
 		}
 
@@ -27,7 +55,7 @@ class VB6CodeGenerator extends CodeGenerator {
 		var info = this.inspect(item);
 
 		//variable to build the code
-		var code = 	this.buildCode_Warnings(item, info) + "\n" + 
+		var code = 	this.buildCode_Warnings(item, info) + 
 					this.buildCode_Definition(item, info) + 
 					this.buildCode_Constants(item, info) + 
 					this.buildCode_Members(item, info) +
@@ -40,30 +68,6 @@ class VB6CodeGenerator extends CodeGenerator {
 		//apply the code highlighting
 		hljs.highlightBlock(this.codeDOM[0]);
 
-	}
-
-	//build the default commenting telling the user to goto the editor tab, etc.
-	buildDefaultComment(){
-		this.codeDOM.html(	"'Please create a class on the left, and edit it with the Editor tab!\n" + 
-							"'<-----" );
-	}
-
-	//adds some comments with warnings
-	buildCode_Warnings(item){
-
-		var ret = 	"'Warning! The following "+this.langName+" code is automatically generated and may contain errors.\n" + 
-					"'Classetta tries to be accurate as possible, but only provides minimal error checking.\n" + 
-					"'Garbage In = Garbage Out. Make sure to use proper "+this.langName+" names, legal characters, not reserved words, etc.";
-					
-
-		//check for warnings
-		if(item.getFinal() && item.getAbstract)
-				ret += "\n\n\t'WARNING: you specified this class as both Abstract and Final. That's probably not what you meant.";
-
-		//finish up the comment
-		ret += "\n";
-
-		return ret;
 	}
 
 	//build essentially the first line of the class: the defition
@@ -89,7 +93,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	buildCode_Constants(item){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-		var accessToStr = ['Private', 'Public'];
+		var accessToStr = ['Private', 'Public', 'Private'];
 		var typeDefaults =  ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 		//get list of methods
@@ -150,7 +154,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	buildCode_Members(item){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-		var accessToStr = ['Private', 'Public'];
+		var accessToStr = ['Private', 'Public', 'Private'];
 		var typeDefaults =  ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 		//get list of methods
@@ -178,12 +182,11 @@ class VB6CodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
-
-
 	//build a constructor method for the class:
 	buildCode_Constructor(item){
 
-		var ret="' Constructor\n" + 
+		var ret="'Constructor\n" + 
+				"'NOTE: VB6 Constructors cannot take parameters! \n" + 
 				"Private Sub Class_Initialize()\n";
 
 		//get list of methods
@@ -234,7 +237,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	buildCode_Methods(item){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-		var accessToStr = ['Private', 'Public'];
+		var accessToStr = ['Private', 'Public', 'Private'];
 
 		//get list of methods
 		var methods = item.getMethods();

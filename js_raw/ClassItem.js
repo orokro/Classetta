@@ -9,6 +9,7 @@
 //making these constants global because apparently ES6 constants are next-to-useless unless global
 const PRIVATE = 0;
 const PUBLIC = 1;
+const PROTECTED = 2;
 
 const VOID = 0;
 const INT = 1;
@@ -194,6 +195,7 @@ class ClassItem {
 												access: PUBLIC,
 												isStatic: false,
 												isConst: false,
+												isAbstract: false,
 												mType: VOID,
 												params: []
 											});
