@@ -75,12 +75,12 @@ class VBNetCodeGenerator extends CodeGenerator {
 		var typeDefaults =  ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 		//get list of methods
-		var members = info.methods;
+		var members = info.members;
 		
 		//code to return
 		var ret = '';
 
-		if(info.hasMethods){
+		if(info.hasMembers){
 
 			//code to return:
 			ret = "\t" + this.comment("Member Variables");
@@ -116,7 +116,7 @@ class VBNetCodeGenerator extends CodeGenerator {
 							ret += " = \"" + member.val + "\"";
 							break;
 						case BOOLEAN:
-							ret += " = " + member.val.toString().substr(0,1).toUpperCase() + member.val.toString().substr(1);
+							ret += " = " + this.firstToUpper(member.val);
 							break
 					}//swatch
 				}//has default value
@@ -139,7 +139,7 @@ class VBNetCodeGenerator extends CodeGenerator {
 
 		//if the class has an ancestor lets call super in the constructor!
 		if(info.hasAncestor)
-			ret += 	"\n\t\t" + this.comment("call super constructor") + 
+			ret += 	"\n\t\t" + this.comment("Call Super Constructor") + 
 					"\t\tMyBase.new()\n";
 
 		ret +=	"\n\t\t" + this.comment("...") +

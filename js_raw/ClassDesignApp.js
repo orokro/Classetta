@@ -53,10 +53,8 @@ class ClassDesignApp {
         this.ClassItmMgr.addClassItm(demoClasses.OnlyStatics());
         this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
         this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
-        
-        
-        
-        this.TabMgr.setTab('VB');
+
+        this.TabMgr.setTab('Java');
 
     }
 

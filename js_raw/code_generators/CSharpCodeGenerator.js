@@ -44,29 +44,26 @@ class CSharpCodeGenerator extends CodeGenerator {
 	}
 	
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	((item.getPublic())?'public ':'private ') +
-					((item.getFinal())?'sealed ':'') +
-					((item.getAbstract())?'abstract ':'')+
-					'class ' + item.getName();
+		var ret = 	((info.isPublic)?'public ':'private ') +
+					((info.isFinal)?'sealed ':'') +
+					((info.isAbstract)?'abstract ':'')+
+					'class ' + info.name;
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		var hasAncestor = (ancestor!=null && ancestor!='');
-		if(hasAncestor)
-			ret += ' : ' + ancestor;
+		if(info.hasAncestor)
+			ret += ' : ' + info.ancestor;
 
 		//if it implements any interfaces, add those here:
-		var interfaces = item.getInterfaces();
-		if(interfaces.length>0){
-			if(hasAncestor)
+		if(info.hasInterfaces){
+			if(info.hasAncestor)
 				ret += ', ';
 			else
 				ret += ' : ';
-			for(var i=0; i<interfaces.length; i++)
-				ret += interfaces[i].mName + ', ';
+			for(var i=0; i<info.interfaces.length; i++)
+				ret += info.interfaces[i].mName + ', ';
 			//truncate last two chars (', ')
 			ret = ret.substring(0, ret.length - 2);
 		}
@@ -78,37 +75,37 @@ class CSharpCodeGenerator extends CodeGenerator {
 	}
 
 	//build a constructor method for the class:
-	buildCode_Constructor(item){
+	buildCode_Constructor(item, info){
 
-		var ret="\t// Constructor\n" + 
-				"\tpublic " + item.getName() + "()";
+		var ret="\t" + this.comment("Constructor") + 
+				"\tpublic " + info.name + "()";
 
 		//if the class has an ancestor lets call super in the constructor!
-		if(item.getAncestor()!=null && item.getAncestor!="")
+		if(info.hasAncestor)
 			ret += 	" : base()";
 
 		ret +=	"{\n" + 
-				"\n\t\t//...\n" +
+				"\n\t\t" + this.comment("...") +
 				"\t}";
 		return ret;
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-		var accessToStr = ['private', 'public'];
+		var accessToStr = ['private', 'public', 'protected'];
 
 		//get list of methods
-		var methods = item.getMethods();
+		var methods = info.methods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "\t// Methods\n";
+			ret = "\t" + this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -122,7 +119,7 @@ class CSharpCodeGenerator extends CodeGenerator {
 						((method.isConst)?'sealed override ':'') +
 						typeToStr[parseInt(method.mType)] + ' ' + 
 						method.mName + "(){\n" + 
-						"\t\t//...\n" + 
+						"\t\t" + this.comment("...") + 
 						"\t}\n\n";
 			}//next i
 
@@ -132,21 +129,21 @@ class CSharpCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-		var accessToStr = ['private', 'public'];
+		var accessToStr = ['private', 'public', 'protected'];
 
 		//get list of methods
-		var members = item.getMembers();
+		var members = info.members;
 		
 		//code to return
 		var ret = '';
 
-		if(members.length>0){
+		if(info.hasMembers){
 
 			//code to return:
-			ret = "\t// Member Variables\n";
+			ret = "\t" + this.comment("Member Variables");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){

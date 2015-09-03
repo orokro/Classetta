@@ -26,7 +26,7 @@ class VB6CodeGenerator extends CodeGenerator {
 										protected: false
 									 },
 							members: {
-										constants: true,
+										final: true,
 										static: false,
 										protected: false
 									 }
@@ -116,7 +116,7 @@ class VB6CodeGenerator extends CodeGenerator {
 							ret += "\"" + itm.val + "\"";
 							break;
 						case BOOLEAN:
-							ret += itm.val.toString();
+							ret += this.firstToUpper(itm.val);
 							break
 					}//swatch
 				}else{
@@ -134,7 +134,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
 		var accessToStr = ['Private', 'Public', 'Private'];
@@ -166,7 +166,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	}
 
 	//build a constructor method for the class:
-	buildCode_Constructor(item){
+	buildCode_Constructor(item, info){
 
 		var ret=this.comment("Constructor") + 
 				this.comment("NOTE: VB6 Constructors cannot take parameters!") + 
@@ -201,7 +201,7 @@ class VB6CodeGenerator extends CodeGenerator {
 						ret += "\"" + itm.val + "\"";
 						break;
 					case BOOLEAN:
-						ret += itm.val.toString().charAt(0).toUpperCase() + itm.val.toString().slice(1).toLowerCase();
+						ret += this.firstToUpper(itm.val);
 						break
 				}//swatch
 

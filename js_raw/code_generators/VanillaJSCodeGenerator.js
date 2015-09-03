@@ -11,12 +11,26 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 		this.multiLineComments = { 	  open: '/*\n',
 									 close: '\n*/',
 									prefix: "\t"	};
+
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+							inheritance: false,
+							interfaces: false,
+							final: false,
+							abstract: false,
+							private: false,
+							types: false,
 							methods: {
+										final: false,
+										abstract: false,
+										private: false,
+										protected: false
 									 },
 							members: {
+										final: false,
+										private: false,
+										protected: false
 									 }
 						};
 						
@@ -37,21 +51,21 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 		var ret = 	this.buildCode_Warnings(item, info) + 
 					this.buildCode_Definition(item, info) + "\n\n" +
 					this.buildCode_Constructor(item, info) +
-					"\t//...\n" + 
+					"\t" + this.comment("...") + 
 					"}\n\n" + 
 					this.buildCode_Prototype(item, info) + 
 					this.buildCode_Constants(item, info) +
 					this.buildCode_StaticMembers(item, info) +
 					this.buildCode_StaticMethods(item, info);
-					
+
 		return ret;
 	}
 	
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	'var ' + item.getName() + " = function(){ ";
+		var ret = 	'var ' + info.name + " = function(){ ";
 
 		//if it extends anything, add that here:
 		//var ancestor = item.getAncestor();
@@ -59,11 +73,10 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 		//	ret += ' extends ' + ancestor;
 
 		//if it implements any interfaces, add those here:
-		var interfaces = item.getInterfaces();
-		if(interfaces.length>0){
-			ret += '//implements ';
-			for(var i=0; i<interfaces.length; i++)
-				ret += interfaces[i].mName + ', ';
+		if(info.hasInterfaces){
+			ret += this.comment('implements ', false);
+			for(var i=0; i<info.interfaces.length; i++)
+				ret += info.interfaces[i].mName + ', ';
 			//truncate last two chars (', ')
 			ret = ret.substring(0, ret.length - 2);
 		}
@@ -72,16 +85,16 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 	}
 
 	//build a constructor method for the class:
-	buildCode_Constructor(item){
+	buildCode_Constructor(item, info){
 
-		var ret="\t// Constructor\n";
+		var ret="\t" + this.comment("Constructor");
 
 		//if this class is abstract when a put in the abstract hack
-		if(item.getAbstract()==true){
+		if(info.isAbstract){
 
-			ret += 	"\n\t// JavaScript doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.\n"+
-					"\t// Found here: http://tinyurl.com/nhmhc4z\n" + 
-					"\tif (new.target === " + item.getName() + "){\n" + 
+			ret += 	"\n\t" + this.comment("JavaScript doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.") +
+					"\t" + this.comment("Found here: http://tinyurl.com/nhmhc4z") + 
+					"\tif (new.target === " + info.name + "){\n" + 
 					"\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + 
 					"\t}\n\n";
 
@@ -96,12 +109,12 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 	}
 	
 	//make the prototype
-	buildCode_Prototype(item){
+	buildCode_Prototype(item, info){
 
 		//use the otehr buildings to make the prototypes components
-		var ret = 	item.getName() + ".prototype = {\n\n" + 
-					this.buildCode_Members(item) + 
-					this.buildCode_Methods(item);
+		var ret = 	info.name + ".prototype = {\n\n" + 
+					this.buildCode_Members(item, info) + 
+					this.buildCode_Methods(item, info);
 
 		//remove the last comma:
 		ret = ret.split(',');
@@ -112,8 +125,9 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 
 		return ret;
 	}
+
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		var typeDefaults =  [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
@@ -125,7 +139,7 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 
 		if(members.length>0){
 
-			ret += 	"\t// Member Variables\n";
+			ret += 	"\t" + this.comment("Member Variables");
 
 			for(var i=0; i<members.length; i++){
 
@@ -169,7 +183,7 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		//get list of methods and filter out static ones
 		var methods = item.getMethods().filter(function(n){ return (n.isStatic!=true); });
@@ -180,7 +194,7 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 		if(methods.length>0){
 
 			//code to return:
-			ret = "\t// Methods\n";
+			ret = "\t" + this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -199,20 +213,20 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 	}
 
 	//filter out and display constants before the class actually starts
-	buildCode_Constants(item){
+	buildCode_Constants(item, info){
 
 		var typeDefaults =  [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
 		//get just constants
-		var constants = item.getMembers().filter(function(n){ return (n.isConst==true); });
+		var constants = info.constMembers;
 
 		var ret='';
 
-		if(constants.length>0){
+		if(info.hasConstMembers){
 
-			ret += 	"// Constants\n" + 
-					"// NOTE: JavaScript doesn't natively support constants.\n" +
-					"// Using all caps is a convention, but doesn't actually make them immutable.\n"; 
+			ret += 	this.comment("Constants") + 
+					this.comment("NOTE: JavaScript doesn't natively support constants.") +
+					this.comment("Using all caps is a convention, but doesn't actually make them immutable."); 
 
 			for(var i=0; i<constants.length; i++){
 
@@ -262,24 +276,24 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 	}
 
 	//build out just the static members
-	buildCode_StaticMembers(item){
+	buildCode_StaticMembers(item, info){
 
 		var typeDefaults =  [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
 		//get just static members`
-		var members = item.getMembers().filter(function(n){ return (n.isStatic==true); });
+		var members = info.staticMembers;
 
 		var ret='';
 
-		if(members.length>0){
+		if(info.hasStaticMembers){
 
-			ret += 	"// Static Members\n";
+			ret += 	this.comment("Static Members");
 
 			for(var i=0; i<members.length; i++){
 
 				var member = members[i];
 
-				ret +=  item.getName() + "." + members[i].mName;
+				ret +=  info.name + "." + members[i].mName;
 
 				if(member.val != null){
 					switch(parseInt(member.mType)){
@@ -316,18 +330,18 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
-	buildCode_StaticMethods(item){
+	buildCode_StaticMethods(item, info){
 		
 		//get list of methods and filter only static ones
-		var methods = item.getMethods().filter(function(n){ return (n.isStatic==true); });
+		var methods = info.staticMethods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasStaticMethods){
 
 			//code to return:
-			ret = "// Static Methods\n";
+			ret = this.comment("Static Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -335,7 +349,7 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 				//get the method
 				var method = methods[i];
 
-				ret += 	item.getName() + "." + method.mName + " = function(){\n" + 
+				ret += 	info.name + "." + method.mName + " = function(){\n" + 
 						"\t//...\n" + 
 						"}\n";
 			}//next i
@@ -344,7 +358,5 @@ class VanillaJSCodeGenerator extends CodeGenerator {
 
 		return ret;
 	}
-
-
 
 }

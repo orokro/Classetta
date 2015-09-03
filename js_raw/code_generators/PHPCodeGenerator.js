@@ -15,6 +15,8 @@ class PHPCodeGenerator extends CodeGenerator {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+							private: false,
+							types: false,
 							methods: {
 									 },
 							members: {
@@ -44,25 +46,23 @@ class PHPCodeGenerator extends CodeGenerator {
 	}
 	
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	((item.getFinal())?'final ':'') +
-					((item.getAbstract())?'abstract ':'')+
-					'class ' + item.getName();
+		var ret = 	((info.isFinal)?'final ':'') +
+					((info.isAbstract)?'abstract ':'')+
+					'class ' + info.name;
 		//((item.getPublic())?'public ':'private ') +
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		if(ancestor!=null && ancestor!='')
-			ret += ' extends ' + ancestor;
+		if(info.hasAncestor)
+			ret += ' extends ' + info.ancestor;
 
 		//if it implements any interfaces, add those here:
-		var interfaces = item.getInterfaces();
-		if(interfaces.length>0){
+		if(info.hasInterfaces){
 			ret += ' implements ';
-			for(var i=0; i<interfaces.length; i++)
-				ret += interfaces[i].mName + ', ';
+			for(var i=0; i<info.interfaces.length; i++)
+				ret += info.interfaces[i].mName + ', ';
 			//truncate last two chars (', ')
 			ret = ret.substring(0, ret.length - 2);
 		}
@@ -73,78 +73,24 @@ class PHPCodeGenerator extends CodeGenerator {
 
 	}
 
-	//build a constructor method for the class:
-	buildCode_Constructor(item){
-
-		var ret="\t// Constructor\n" + 
-				"\tfunction __construct(){\n";
-
-		//if the class has an ancestor lets call super in the constructor!
-		if(item.getAncestor()!=null && item.getAncestor!="")
-			ret += 	"\n\t\t// call super constructor\n" + 
-					"\t\tparent::__construct();\n";
-
-		ret +=	"\n\t\t//...\n" +
-				"\t}";
-		return ret;
-	}
-
-	//build out all the methods
-	buildCode_Methods(item){
-
-		var accessToStr = ['private', 'public'];
-
-		//get list of methods
-		var methods = item.getMethods();
-
-		//code to return
-		var ret = '';
-
-		if(methods.length>0){
-
-			//code to return:
-			ret = "\t// Methods\n";
-
-			//loop over methods
-			for(var i=0; i<methods.length; i++){
-
-				//get the method
-				var method = methods[i];
-
-				ret += 	"\t" + 
-						((method.isConst)?'final ':'') +
-						accessToStr[method.access] + ' ' +
-						((method.isStatic)?'static ':'') +
-						"function " + 
-						method.mName + "(){\n" + 
-						"\t\t//...\n" + 
-						"\t}\n\n";
-			}//next i
-
-		}//endif has methods
-
-		return ret;
-	}
-
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
-		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-		var accessToStr = ['private', 'public'];
+		var accessToStr = ['private', 'public', 'protected'];
 
 		//get list of methods
-		var members = item.getMembers();
+		var members = info.members;
 		
 		//code to return
 		var ret = "";
 
-		if(members.length>0){
+		if(info.hasMembers){
 
 			//handle constants first since the syntax is slightly different
 			var constants = members.filter(function(n){ return (n.isConst==true); });
 			if(constants.length>0){
 
-				ret += "\n\t// Class Constants\n";
+				ret += "\n\t" + this.comment("Class Constants");
 				for(var i=0; i<constants.length; i++){
 
 					var constant = constants[i];
@@ -187,7 +133,7 @@ class PHPCodeGenerator extends CodeGenerator {
 			if(members.length>0){
 
 				//code to return:
-				ret += "\n\t// Member Variables\n";
+				ret += "\n\t" + this.comment("Member Variables");
 
 				//loop over methods
 				for(var i=0; i<members.length; i++){
@@ -228,6 +174,59 @@ class PHPCodeGenerator extends CodeGenerator {
 				}//next i
 
 			}//end if has non constants
+
+		}//endif has methods
+
+		return ret;
+	}
+
+	//build a constructor method for the class:
+	buildCode_Constructor(item, info){
+
+		var ret="\t" + this.comment("Constructor") + 
+				"\tfunction __construct(){\n";
+
+		//if the class has an ancestor lets call super in the constructor!
+		if(item.getAncestor()!=null && item.getAncestor!="")
+			ret += 	"\n\t\t" + this.comment("Call Super Constructor") + 
+					"\t\tparent::__construct();\n";
+
+		ret +=	"\n\t\t" + this.comment("...") +
+				"\t}";
+		return ret;
+	}
+
+	//build out all the methods
+	buildCode_Methods(item, info){
+
+		var accessToStr = ['private', 'public', 'protected'];
+
+		//get list of methods
+		var methods = info.methods;
+
+		//code to return
+		var ret = '';
+
+		if(info.hasMethods){
+
+			//code to return:
+			ret = "\t" + this.comment("Methods");
+
+			//loop over methods
+			for(var i=0; i<methods.length; i++){
+
+				//get the method
+				var method = methods[i];
+
+				ret += 	"\t" + 
+						((method.isConst)?'final ':'') +
+						accessToStr[method.access] + ' ' +
+						((method.isStatic)?'static ':'') +
+						"function " + 
+						method.mName + "(){\n" + 
+						"\t\t" + this.comment("...") + 
+						"\t}\n\n";
+			}//next i
 
 		}//endif has methods
 

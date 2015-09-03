@@ -75,12 +75,14 @@ class CodeGenerator{
 			isAbstract: item.getAbstract(),
 			isFinal: item.getFinal(),
 
+
 			//inheritance realted info:
-			hasAncestor: item.getAncestor(),
+			hasAncestor: (typeof(item.getAncestor()!="undefined") && item.getAncestor()!=null),
 			ancestor: item.getAncestor(),
 
+
 			//interface related info:
-			hasInterfaces: item.getInterfaces().length>0,
+			hasInterfaces: (item.getInterfaces().length>0),
 			interfaces: item.getInterfaces(),
 
 
@@ -138,15 +140,23 @@ class CodeGenerator{
 
 	}//inspect(item)
 
+	//make the first letter of a string capitol
+	firstToUpper(str){
+		str = str.toString();
+		return str.toString().substr(0,1).toUpperCase() + str.toString().substr(1);
+	}
+
 	//make a comment
-	comment(str){
-		return this.singleLineComments + str + "\n";
+	comment(str, addNewLine=true){
+		return this.singleLineComments + str + (addNewLine?"\n":"");
 	}
 
 	//wrap a string in multiline comments
 	wrapMuliLineComment(str){
 
 		str = str.split("\n");
+
+		//truncate trailing newline if necessary
 		if(str[str.length-1]=='')
 			str = this.multiLineComments.prefix +  str.slice(0, str.length-1).join("\n"+this.multiLineComments.prefix);
 		else
@@ -157,6 +167,7 @@ class CodeGenerator{
 
 	//check if this supports a feature or not
 	checkSupports(feature){
+		//assume supports, otherwise return value set
 		if 	( 	(typeof(feature)==='undefined')
 		  		||
 				(feature!=true && feature!=false)
@@ -165,7 +176,6 @@ class CodeGenerator{
 		else
 			return feature;
 	}
-
 
 	//build the default commenting telling the user to goto the editor tab, etc.
 	buildDefaultComment(){
@@ -184,7 +194,6 @@ class CodeGenerator{
 
 		return ret;
 	}
-
 
 	//make the warning text bassed on the classes properities
 	getWarningText(info){
@@ -214,15 +223,20 @@ class CodeGenerator{
 			if(info.hasAncestor && !this.checkSupports(this.features.inheritance))
 				warn(this.langName+" doesn't support Inheritance. Ignoring ancestor: "+info.ancestor);
 
-			if(info.hasInterfaces && !this.checkSupports(this.features.interfaces))
-				warn(this.langName+" doesn't support Interfaces. Ignoring: "+info.interfaces);
+			if(info.hasInterfaces && !this.checkSupports(this.features.interfaces)){
+				var names = [];
+				for(var i=0; i<info.interfaces.length; i++)
+					names.push(info.interfaces[i].mName);
+				names = names.join(', ');
+				warn(this.langName+" doesn't support Interfaces. Ignoring: "+names);
+			}
 
-			if(!this.checkSupports(this.features.types))
+			if((info.hasMethods || info.hasMembers) && !this.checkSupports(this.features.types))
 				warn(this.langName+" is not a Typed language. Ignoring Method/Member Type declarations.");
 
 		// MEMBER LEVEL WARNINGS
 
-			if(info.hasConstMembers && !this.checkSupports(this.features.members.constants))
+			if(info.hasConstMembers && !this.checkSupports(this.features.members.final))
 				warn(this.langName+" doesn't support Constant Members! Declaring as regular Members instead.");
 
 			if(info.hasProtectedMembers && !this.checkSupports(this.features.members.protected))
@@ -238,12 +252,13 @@ class CodeGenerator{
 
 			if(info.hasAbstractFinalMethods){
 				var names = [];
-				for(var i=0; i<info.abstractFinalMethods; i++)
+				for(var i=0; i<info.abstractFinalMethods.length; i++)
 					names.push(info.abstractFinalMethods[i].mName);
-				warn("The Methods: [" + names.join(', ') + "] were specified as both Abstract and Final.  That's probably not what you meant.");
+				names = names.join(', ');
+				warn("The Methods: ["+names+"] were specified as both Abstract and Final.  That's probably not what you meant.");
 			}
 
-			if(info.hasConstMethods && !this.checkSupports(this.features.methods.constants))
+			if(info.hasConstMethods && !this.checkSupports(this.features.methods.final))
 				warn(this.langName+" doesn't support Final Methods! Declaring as regular Methods instead.");
 
 			if(info.hasAbstractMethods && !this.checkSupports(this.features.methods.abstract))

@@ -15,9 +15,18 @@ class RubyCodeGenerator extends CodeGenerator {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+							abstract: false,
+							final: false,
+							private: false,
+							protected: false,
+							types: false,
 							methods: {
+										abstract: false,
+										final: false,
+										protected: false
 									 },
 							members: {
+										protected: false
 									 }
 						};
 						
@@ -42,7 +51,7 @@ class RubyCodeGenerator extends CodeGenerator {
 					this.buildCode_StaticMembers(item, info) + "\n" + 
 					this.buildCode_Constructor(item, info) +
 					this.buildCode_Members(item, info) + "\n" +
-					"\t\t#...\n" + 
+					"\t\t" + this.comment("...") + 
 					"\tend\n\n" + 
 					this.buildCode_PublicMethods(item, info) +
 					this.buildCode_PrivateMethods(item, info) + 
@@ -52,16 +61,14 @@ class RubyCodeGenerator extends CodeGenerator {
 	}
 	
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	'class ' + item.getName(); 
+		var ret = 	'class ' + info.name; 
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		var hasAncestor = (ancestor!=null && ancestor!='');
-		if(hasAncestor)
-			ret += ' < ' + ancestor;
+		if(info.hasAncestor)
+			ret += ' < ' + info.ancestor;
 
 		//add newline
 		ret += "\n";
@@ -72,31 +79,17 @@ class RubyCodeGenerator extends CodeGenerator {
 
 	}
 
-	//build a constructor method for the class:
-	buildCode_Constructor(item){
-
-		var ret="\t# Constructor\n" + 
-				"\tdef initialize()\n"
-
-		//if the class has an ancestor lets call super in the constructor!
-		if(item.getAncestor()!=null && item.getAncestor!="")
-			ret += 	"\n\t\t# Call super\n" + 
-					"\t\tsuper()\n";
-
-		return ret;
-	}
-
 	//build out all the constant variables for this class... ugh
-	buildCode_Constants(item){
+	buildCode_Constants(item, info){
 
 		//filter out non-constants:
-		var constants = item.getMembers().filter(function(n){ return (n.isConst==true); });
+		var constants = info.constMembers;
 
 		var ret='';
 
-		if(constants.length>0){
+		if(info.hasConstMembers){
 
-			ret = '\n\t# Class Constants\n'
+			ret = "\n\t" + this.comment("Class Constants");
 
 			//loop over methods
 			for(var i=0; i<constants.length; i++){
@@ -105,8 +98,7 @@ class RubyCodeGenerator extends CodeGenerator {
 				var constant = constants[i];
 
 				//get the name of the constant and make sure it's first letter is uppercase:
-				var name = constant.mName.charAt(0).toUpperCase() + constant.mName.slice(1);
-				ret += "\t" + name;
+				ret += "\t" + this.firstToUpper(constant.mName);
 
 				if(constant.val != null){
 					switch(parseInt(constant.mType)){
@@ -144,7 +136,7 @@ class RubyCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the constant variables for this class... ugh
-	buildCode_PublicMembers(item){
+	buildCode_PublicMembers(item, info){
 
 		//filter out constant/static members:
 		var members = item.getMembers().filter(function(n){ return (n.isConst!=true && n.isStatic!=true); });
@@ -156,10 +148,10 @@ class RubyCodeGenerator extends CodeGenerator {
 
 		if(members.length>0){
 
-			ret = 	"\n\t# Public members\n" + 
-					"\t# NOTE: in addition to a 'attr_accessor', Ruby also implements:\n" + 
-					"\t# attr_reader (for public read access only)\n" +
-					"\t# attr_writer (for public write access only)\n";
+			ret = 	"\n\t" + this.comment("Public members") + 
+					"\t" + this.comment("NOTE: in addition to a 'attr_accessor', Ruby also implements:") + 
+					"\t" + this.comment("attr_reader (for public read access only)") +
+					"\t" + this.comment("attr_writer (for public write access only)");
 
 
 			//loop over methods
@@ -179,10 +171,10 @@ class RubyCodeGenerator extends CodeGenerator {
 
 
 	//in Ruby public member variables and static member variables have slightly different syntax than regular memember varaibles.
-	buildCode_StaticMembers(item){
+	buildCode_StaticMembers(item, info){
 
 		//get list of members
-		var members = item.getMembers();
+		var members = info.members;
 		
 		//code to return
 		var ret = '';
@@ -193,7 +185,7 @@ class RubyCodeGenerator extends CodeGenerator {
 		if(members.length>0){
 
 			//code to return:
-			ret = "\n\t# Class Variables (static)\n";
+			ret = "\n\t" + this.comment("Class Variables (static)");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
@@ -242,11 +234,25 @@ class RubyCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	//build a constructor method for the class:
+	buildCode_Constructor(item, info){
+
+		var ret="\t" + this.comment("Constructor") + 
+				"\tdef initialize()\n"
+
+		//if the class has an ancestor lets call super in the constructor!
+		if(info.hasAncestor)
+			ret += 	"\n\t\t" + this.comment("Call Super Constructor") + 
+					"\t\tsuper()\n";
+
+		return ret;
+	}
+
 	//build out all the member variables inside the initialize function in ruby
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		//get list of members
-		var members = item.getMembers();
+		var members = info.members;
 		
 		//filter out static and constant methods
 		members = members.filter(function(n){ return ( n.isStatic!=true && n.isConst!=true ); });
@@ -257,7 +263,7 @@ class RubyCodeGenerator extends CodeGenerator {
 		if(members.length>0){
 
 			//code to return:
-			ret = "\n\t\t# Instance Variables\n";
+			ret = "\n\t\t" + this.comment("Instance Variables");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
@@ -302,7 +308,7 @@ class RubyCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all public methods
-	buildCode_PublicMethods(item){
+	buildCode_PublicMethods(item, info){
 
 		//filter out just the public methods
 		var methods = item.getMethods().filter(function(n){ return (n.access==PUBLIC); });
@@ -311,7 +317,7 @@ class RubyCodeGenerator extends CodeGenerator {
 
 		if(methods.length>0){
 
-			ret += 	"\t# Public Methods\n" + 
+			ret += 	"\t" + this.comment("Public Methods") + 
 					"\tpublic\n\n";
 
 			//build the methods
@@ -323,17 +329,17 @@ class RubyCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all private methods
-	buildCode_PrivateMethods(item){
+	buildCode_PrivateMethods(item, info){
 
 		//filter out just the public methods
-		var methods = item.getMethods().filter(function(n){ return (n.access==PRIVATE); });
+		var methods = item.getMethods().filter(function(n){ return (n.access==PRIVATE || n.access==PROTECTED); });
 
 		var ret='';
 
 		if(methods.length>0){
 
-			ret += 	"\t# Private Methods\n" + 
-					"\tpublic\n\n";
+			ret += 	"\t" + this.comment("Private Methods") + 
+					"\tprivate\n\n";
 
 			//build the methods
 			ret += this.buildCode_Methods(methods);
@@ -343,7 +349,7 @@ class RubyCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
-	//build out all the methods
+	//helper function for buildCode_PublicMethods and buildCode_PrivateMethods build out all the methods
 	buildCode_Methods(methods){
 
 		//code to return
@@ -357,8 +363,8 @@ class RubyCodeGenerator extends CodeGenerator {
 				//get the method
 				var method = methods[i];
 
-				ret += 	"\tdef " + ((method.isStatic)?'':'self.') + method.mName + "()\n" + 
-						"\t\t#...\n" +
+				ret += 	"\tdef " + ((method.isStatic)?'self.':'') + method.mName + "()\n" + 
+						"\t\t" + this.comment("...") +
 						"\tend\n\n";
 
 			}//next i

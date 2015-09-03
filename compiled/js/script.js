@@ -160,7 +160,7 @@ var ClassDesignApp = (function () {
                 this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
                 this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-                this.TabMgr.setTab('VB');
+                this.TabMgr.setTab('Java');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -1592,7 +1592,7 @@ var CodeGenerator = (function () {
 				isFinal: item.getFinal(),
 
 				//inheritance realted info:
-				hasAncestor: item.getAncestor(),
+				hasAncestor: typeof (item.getAncestor() != "undefined") && item.getAncestor() != null,
 				ancestor: item.getAncestor(),
 
 				//interface related info:
@@ -1652,11 +1652,21 @@ var CodeGenerator = (function () {
 		}
 		//inspect(item)
 
+		//make the first letter of a string capitol
+	}, {
+		key: "firstToUpper",
+		value: function firstToUpper(str) {
+			str = str.toString();
+			return str.toString().substr(0, 1).toUpperCase() + str.toString().substr(1);
+		}
+
 		//make a comment
 	}, {
 		key: "comment",
 		value: function comment(str) {
-			return this.singleLineComments + str + "\n";
+			var addNewLine = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+			return this.singleLineComments + str + (addNewLine ? "\n" : "");
 		}
 
 		//wrap a string in multiline comments
@@ -1665,6 +1675,8 @@ var CodeGenerator = (function () {
 		value: function wrapMuliLineComment(str) {
 
 			str = str.split("\n");
+
+			//truncate trailing newline if necessary
 			if (str[str.length - 1] == '') str = this.multiLineComments.prefix + str.slice(0, str.length - 1).join("\n" + this.multiLineComments.prefix);else str = this.multiLineComments.prefix + str.join("\n" + this.multiLineComments.prefix);
 
 			return this.multiLineComments.open + str + this.multiLineComments.close;
@@ -1674,6 +1686,7 @@ var CodeGenerator = (function () {
 	}, {
 		key: "checkSupports",
 		value: function checkSupports(feature) {
+			//assume supports, otherwise return value set
 			if (typeof feature === 'undefined' || feature != true && feature != false) return true;else return feature;
 		}
 
@@ -1722,13 +1735,18 @@ var CodeGenerator = (function () {
 
 			if (info.hasAncestor && !this.checkSupports(this.features.inheritance)) warn(this.langName + " doesn't support Inheritance. Ignoring ancestor: " + info.ancestor);
 
-			if (info.hasInterfaces && !this.checkSupports(this.features.interfaces)) warn(this.langName + " doesn't support Interfaces. Ignoring: " + info.interfaces);
+			if (info.hasInterfaces && !this.checkSupports(this.features.interfaces)) {
+				var names = [];
+				for (var i = 0; i < info.interfaces.length; i++) names.push(info.interfaces[i].mName);
+				names = names.join(', ');
+				warn(this.langName + " doesn't support Interfaces. Ignoring: " + names);
+			}
 
-			if (!this.checkSupports(this.features.types)) warn(this.langName + " is not a Typed language. Ignoring Method/Member Type declarations.");
+			if ((info.hasMethods || info.hasMembers) && !this.checkSupports(this.features.types)) warn(this.langName + " is not a Typed language. Ignoring Method/Member Type declarations.");
 
 			// MEMBER LEVEL WARNINGS
 
-			if (info.hasConstMembers && !this.checkSupports(this.features.members.constants)) warn(this.langName + " doesn't support Constant Members! Declaring as regular Members instead.");
+			if (info.hasConstMembers && !this.checkSupports(this.features.members.final)) warn(this.langName + " doesn't support Constant Members! Declaring as regular Members instead.");
 
 			if (info.hasProtectedMembers && !this.checkSupports(this.features.members["protected"])) warn(this.langName + " doesn't support Protected Members! Declaring as Private Members instead.");
 
@@ -1740,11 +1758,12 @@ var CodeGenerator = (function () {
 
 			if (info.hasAbstractFinalMethods) {
 				var names = [];
-				for (var i = 0; i < info.abstractFinalMethods; i++) names.push(info.abstractFinalMethods[i].mName);
-				warn("The Methods: [" + names.join(', ') + "] were specified as both Abstract and Final.  That's probably not what you meant.");
+				for (var i = 0; i < info.abstractFinalMethods.length; i++) names.push(info.abstractFinalMethods[i].mName);
+				names = names.join(', ');
+				warn("The Methods: [" + names + "] were specified as both Abstract and Final.  That's probably not what you meant.");
 			}
 
-			if (info.hasConstMethods && !this.checkSupports(this.features.methods.constants)) warn(this.langName + " doesn't support Final Methods! Declaring as regular Methods instead.");
+			if (info.hasConstMethods && !this.checkSupports(this.features.methods.final)) warn(this.langName + " doesn't support Final Methods! Declaring as regular Methods instead.");
 
 			if (info.hasAbstractMethods && !this.checkSupports(this.features.methods.abstract)) warn(this.langName + " doesn't support Abstract Methods! Declaring as regular Methods instead.");
 
@@ -2251,21 +2270,18 @@ var CSharpCodeGenerator = (function (_CodeGenerator) {
 		//build essentially the first line of the class: the defition
 	}, {
 		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'sealed ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+			var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'sealed ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
 
 			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			var hasAncestor = ancestor != null && ancestor != '';
-			if (hasAncestor) ret += ' : ' + ancestor;
+			if (info.hasAncestor) ret += ' : ' + info.ancestor;
 
 			//if it implements any interfaces, add those here:
-			var interfaces = item.getInterfaces();
-			if (interfaces.length > 0) {
-				if (hasAncestor) ret += ', ';else ret += ' : ';
-				for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+			if (info.hasInterfaces) {
+				if (info.hasAncestor) ret += ', ';else ret += ' : ';
+				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
 				//truncate last two chars (', ')
 				ret = ret.substring(0, ret.length - 2);
 			}
@@ -2278,35 +2294,35 @@ var CSharpCodeGenerator = (function (_CodeGenerator) {
 		//build a constructor method for the class:
 	}, {
 		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
+		value: function buildCode_Constructor(item, info) {
 
-			var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "()";
+			var ret = "\t" + this.comment("Constructor") + "\tpublic " + info.name + "()";
 
 			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += " : base()";
+			if (info.hasAncestor) ret += " : base()";
 
-			ret += "{\n" + "\n\t\t//...\n" + "\t}";
+			ret += "{\n" + "\n\t\t" + this.comment("...") + "\t}";
 			return ret;
 		}
 
 		//build out all the methods
 	}, {
 		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
+		value: function buildCode_Methods(item, info) {
 
 			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public'];
+			var accessToStr = ['private', 'public', 'protected'];
 
 			//get list of methods
-			var methods = item.getMethods();
+			var methods = info.methods;
 
 			//code to return
 			var ret = '';
 
-			if (methods.length > 0) {
+			if (info.hasMethods) {
 
 				//code to return:
-				ret = "\t// Methods\n";
+				ret = "\t" + this.comment("Methods");
 
 				//loop over methods
 				for (var i = 0; i < methods.length; i++) {
@@ -2314,7 +2330,7 @@ var CSharpCodeGenerator = (function (_CodeGenerator) {
 					//get the method
 					var method = methods[i];
 
-					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
 				} //next i
 			} //endif has methods
 
@@ -2324,21 +2340,21 @@ var CSharpCodeGenerator = (function (_CodeGenerator) {
 		//build out all the member variables
 	}, {
 		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+		value: function buildCode_Members(item, info) {
 
 			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public'];
+			var accessToStr = ['private', 'public', 'protected'];
 
 			//get list of methods
-			var members = item.getMembers();
+			var members = info.members;
 
 			//code to return
 			var ret = '';
 
-			if (members.length > 0) {
+			if (info.hasMembers) {
 
 				//code to return:
-				ret = "\t// Member Variables\n";
+				ret = "\t" + this.comment("Member Variables");
 
 				//loop over methods
 				for (var i = 0; i < members.length; i++) {
@@ -2401,321 +2417,327 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ES6CodeGenerator = (function (_CodeGenerator) {
-		_inherits(ES6CodeGenerator, _CodeGenerator);
+	_inherits(ES6CodeGenerator, _CodeGenerator);
 
-		function ES6CodeGenerator(DOM) {
-				_classCallCheck(this, ES6CodeGenerator);
+	function ES6CodeGenerator(DOM) {
+		_classCallCheck(this, ES6CodeGenerator);
 
-				_get(Object.getPrototypeOf(ES6CodeGenerator.prototype), "constructor", this).call(this, DOM);
+		_get(Object.getPrototypeOf(ES6CodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-				//Make note of language name
-				this.langName = "JavaScript ES6";
+		//Make note of language name
+		this.langName = "JavaScript ES6";
 
-				//set up comment styles
-				this.singleLineComments = "// ";
-				this.multiLineComments = { open: '/*\n',
-						close: '\n*/',
-						prefix: "\t" };
+		//set up comment styles
+		this.singleLineComments = "// ";
+		this.multiLineComments = { open: '/*\n',
+			close: '\n*/',
+			prefix: "\t" };
 
-				//set up what this class supports:
-				//Note: support is assumed by default, so this only has to disable features
-				this.features = {
-						methods: {},
-						members: {}
-				};
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			interfaces: false,
+			abstract: false,
+			final: false,
+			"private": false,
+			types: false,
+			methods: {
+				final: false,
+				abstract: false,
+				"private": false,
+				"protected": false
+			},
+			members: {
+				"private": false,
+				"protected": false
+			}
+		};
 
-				//build the area for the code:
-				this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
+		//build the area for the code:
+		this.DOM.append("<pre><code class=\"javascript\"></code></pre>");
 
-				//cache reference to the PRE tag
-				this.codeDOM = $(this.DOM.find('code'));
+		//cache reference to the PRE tag
+		this.codeDOM = $(this.DOM.find('code'));
 
-				//colorize it
-				hljs.highlightBlock(this.codeDOM[0]);
+		//colorize it
+		hljs.highlightBlock(this.codeDOM[0]);
+	}
+
+	//builds the code!
+
+	_createClass(ES6CodeGenerator, [{
+		key: "buildCode",
+		value: function buildCode(item, info) {
+
+			//variable to build the code
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Constants(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Members(item, info) + "\t\t" + this.comment("...") + "\t}\n\n" + this.buildCode_Methods(item, info) + "}\n\n" + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
+
+			return ret;
 		}
 
-		//builds the code!
-
-		_createClass(ES6CodeGenerator, [{
-				key: "buildCode",
-				value: function buildCode(item, info) {
-
-						//variable to build the code
-						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Constants(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Members(item, info) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item, info) + "}\n\n" + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
-
-						return ret;
-				}
-
-				//filter out and display constants before the class actually starts
-		}, {
-				key: "buildCode_Constants",
-				value: function buildCode_Constants(item) {
-
-						//get just constants
-						var constants = item.getMembers().filter(function (n) {
-								return n.isConst == true;
-						});
-
-						var ret = '';
+		//filter out and display constants before the class actually starts
+	}, {
+		key: "buildCode_Constants",
+		value: function buildCode_Constants(item, info) {
 
-						if (constants.length > 0) {
+			//get just constants
+			var constants = info.constMembers;
 
-								ret += "\n// Constants\n" + "// NOTE: Unless I'm misunderstanding the documentation, class constants must actually be global to be used throughout the class.\n" + "// If they're defined in the constructor() they will only be available in the constructors scope... Way to go ES6 /s\n";
+			var ret = '';
+
+			if (info.hasConstMembers) {
 
-								for (var i = 0; i < constants.length; i++) {
+				ret += "\n" + this.comment("Constants") + this.comment("NOTE: Unless I'm misunderstanding the documentation, class constants must actually be global to be used throughout the class.") + this.comment("If they're defined in the constructor() they will only be available in the constructors scope... Way to go ES6 /s");
 
-										var constant = constants[i];
+				for (var i = 0; i < constants.length; i++) {
 
-										ret += "const " + constants[i].mName;
+					var constant = constants[i];
 
-										if (constant.val != null) {
-												switch (parseInt(constant.mType)) {
-														case INT:
-														case DOUBLE:
-														case SHORT:
-														case LONG:
-														case BYTE:
-														case FLOAT:
-																ret += " = " + constant.val;
-																break;
-														case CHAR:
-																ret += " = '" + constant.val + "'";
-																break;
-														case STRING:
-																ret += " = \"" + constant.val + "\"";
-																break;
-														case BOOLEAN:
-																ret += " = " + constant.val.toString();
-																break;
-												} //swatch
-										} else {
-														ret += " = null";
-												} //has default value
-
-										//add semicolon and new line
-										ret += ";\n";
-								} //next i
-
-								ret += "\n";
-						}
-
-						return ret;
-				}
-
-				//build essentially the first line of the class: the defition
-		}, {
-				key: "buildCode_Definition",
-				value: function buildCode_Definition(item) {
-
-						//build the left part that usually looks like "public final class foo"
-						var ret = 'class ' + item.getName();
-
-						//if it extends anything, add that here:
-						var ancestor = item.getAncestor();
-						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
-
-						//finally add the '{'
-						ret += ' {';
-						return ret;
-				}
-
-				//build a constructor method for the class:
-		}, {
-				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item) {
-
-						var ret = "\t// Constructor\n" + "\tconstructor(){\n";
-
-						//if this class is abstract when a put in the abstract hack
-						if (item.getAbstract() == true) {
-
-								ret += "\n\t\t// ES6 doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.\n" + "\t\t// Found here: http://tinyurl.com/om5xm8w\n" + "\t\tif (new.target === " + item.getName() + "){\n" + "\t\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t\t}\n";
-						}
-
-						//if the class has an ancestor lets call super in the constructor!
-						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
-
-						return ret;
-				}
-
-				//build out all the member variables
-		}, {
-				key: "buildCode_Members",
-				value: function buildCode_Members(item) {
-
-						//get list of methods and filter out static methods and constants
-						var members = item.getMembers().filter(function (n) {
-								return n.isStatic != true && n.isConst != true;
-						});
+					ret += "const " + constants[i].mName;
 
-						//code to return
-						var ret = '';
+					if (constant.val != null) {
+						switch (parseInt(constant.mType)) {
+							case INT:
+							case DOUBLE:
+							case SHORT:
+							case LONG:
+							case BYTE:
+							case FLOAT:
+								ret += " = " + constant.val;
+								break;
+							case CHAR:
+								ret += " = '" + constant.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + constant.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + constant.val.toString();
+								break;
+						} //swatch
+					} else {
+							ret += " = null";
+						} //has default value
+
+					//add semicolon and new line
+					ret += ";\n";
+				} //next i
+
+				ret += "\n";
+			}
+
+			return ret;
+		}
+
+		//build essentially the first line of the class: the defition
+	}, {
+		key: "buildCode_Definition",
+		value: function buildCode_Definition(item, info) {
+
+			//build the left part that usually looks like "public final class foo"
+			var ret = 'class ' + info.name;
+
+			//if it extends anything, add that here:
+			if (info.hasAncestor) ret += ' extends ' + info.ancestor;
+
+			//finally add the '{'
+			ret += ' {';
+			return ret;
+		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = "\t" + this.comment("Constructor") + "\tconstructor(){\n";
+
+			//if this class is abstract when a put in the abstract hack
+			if (info.isAbstract) {
+
+				ret += "\n\t\t" + this.comment("ES6 doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.") + "\t\t" + this.comment("Found here: http://tinyurl.com/om5xm8w") + "\t\tif (new.target === " + info.name + "){\n" + "\t\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t\t}\n";
+			}
+
+			//if the class has an ancestor lets call super in the constructor!
+			if (info.hasAncestor) ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper();\n";
+
+			return ret;
+		}
+
+		//build out all the member variables
+	}, {
+		key: "buildCode_Members",
+		value: function buildCode_Members(item, info) {
+
+			//get list of methods and filter out static methods and constants
+			var members = item.getMembers().filter(function (n) {
+				return n.isStatic != true && n.isConst != true;
+			});
 
-						if (members.length > 0) {
+			//code to return
+			var ret = '';
 
-								//code to return:
-								ret = "\t\t// Member Variables\n";
+			if (members.length > 0) {
 
-								//loop over methods
-								for (var i = 0; i < members.length; i++) {
+				//code to return:
+				ret = "\t\t" + this.comment("Member Variables");
 
-										//get the method
-										var member = members[i];
-
-										ret += "\t\tthis." + member.mName;
-
-										if (member.val != null) {
-												switch (parseInt(member.mType)) {
-														case INT:
-														case DOUBLE:
-														case SHORT:
-														case LONG:
-														case BYTE:
-														case FLOAT:
-																ret += " = " + member.val;
-																break;
-														case CHAR:
-																ret += " = '" + member.val + "'";
-																break;
-														case STRING:
-																ret += " = \"" + member.val + "\"";
-																break;
-														case BOOLEAN:
-																ret += " = " + member.val.toString();
-																break;
-												} //swatch
-										} else {
-														ret += " = null";
-												} //has default value
-
-										//apply the semicolon and new line
-										ret += ";\n";
-								} //next i
-
-								ret += "\n";
-						} //endif has methods
-
-						return ret;
-				}
-
-				//build out all the methods
-		}, {
-				key: "buildCode_Methods",
-				value: function buildCode_Methods(item) {
-
-						//get list of methods and filter out static ones
-						var methods = item.getMethods().filter(function (n) {
-								return n.isStatic != true;
-						});
-
-						//code to return
-						var ret = '';
-
-						if (methods.length > 0) {
-
-								//code to return:
-								ret = "\t// Methods\n";
-
-								//loop over methods
-								for (var i = 0; i < methods.length; i++) {
-
-										//get the method
-										var method = methods[i];
-
-										ret += "\t" + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-								} //next i
-						} //endif has methods
-
-						return ret;
-				}
-
-				//build out just the static members
-		}, {
-				key: "buildCode_StaticMembers",
-				value: function buildCode_StaticMembers(item) {
-
-						//get just static members`
-						var members = item.getMembers().filter(function (n) {
-								return n.isStatic == true;
-						});
-
-						var ret = '';
-
-						if (members.length > 0) {
-
-								ret += "// Static Members\n";
-
-								for (var i = 0; i < members.length; i++) {
-
-										var member = members[i];
-
-										ret += item.getName() + "." + members[i].mName;
-
-										if (member.val != null) {
-												switch (parseInt(member.mType)) {
-														case INT:
-														case DOUBLE:
-														case SHORT:
-														case LONG:
-														case BYTE:
-														case FLOAT:
-																ret += " = " + member.val;
-																break;
-														case CHAR:
-																ret += " = '" + member.val + "'";
-																break;
-														case STRING:
-																ret += " = \"" + member.val + "\"";
-																break;
-														case BOOLEAN:
-																ret += " = " + member.val.toString();
-																break;
-												} //swatch
-										} else {
-														ret += " = null";
-												} //has default value
-
-										//add semicolon and new line
-										ret += ";\n";
-								} //next i
-
-								ret += "\n";
-						}
-
-						return ret;
-				}
-		}, {
-				key: "buildCode_StaticMethods",
-				value: function buildCode_StaticMethods(item) {
-
-						//get list of methods and filter only static ones
-						var methods = item.getMethods().filter(function (n) {
-								return n.isStatic == true;
-						});
-
-						//code to return
-						var ret = '';
-
-						if (methods.length > 0) {
-
-								//code to return:
-								ret = "// Static Methods\n";
-
-								//loop over methods
-								for (var i = 0; i < methods.length; i++) {
-
-										//get the method
-										var method = methods[i];
-
-										ret += item.getName() + "." + method.mName + "(){\n" + "\t//...\n" + "}\n\n";
-								} //next i
-						} //endif has methods
-
-						return ret;
-				}
-		}]);
-
-		return ES6CodeGenerator;
+				//loop over methods
+				for (var i = 0; i < members.length; i++) {
+
+					//get the method
+					var member = members[i];
+
+					ret += "\t\tthis." + member.mName;
+
+					if (member.val != null) {
+						switch (parseInt(member.mType)) {
+							case INT:
+							case DOUBLE:
+							case SHORT:
+							case LONG:
+							case BYTE:
+							case FLOAT:
+								ret += " = " + member.val;
+								break;
+							case CHAR:
+								ret += " = '" + member.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + member.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + member.val.toString();
+								break;
+						} //swatch
+					} else {
+							ret += " = null";
+						} //has default value
+
+					//apply the semicolon and new line
+					ret += ";\n";
+				} //next i
+
+				ret += "\n";
+			} //endif has methods
+
+			return ret;
+		}
+
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(item, info) {
+
+			//get list of methods and filter out static ones
+			var methods = item.getMethods().filter(function (n) {
+				return n.isStatic != true;
+			});
+
+			//code to return
+			var ret = '';
+
+			if (methods.length > 0) {
+
+				//code to return:
+				ret = "\t" + this.comment("Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					ret += "\t" + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+
+		//build out just the static members
+	}, {
+		key: "buildCode_StaticMembers",
+		value: function buildCode_StaticMembers(item, info) {
+
+			//get just static members
+			var members = info.staticMembers;
+
+			var ret = '';
+
+			if (info.hasStaticMembers) {
+
+				ret += this.comment("Static Members");
+
+				for (var i = 0; i < members.length; i++) {
+
+					var member = members[i];
+
+					ret += info.name + "." + members[i].mName;
+
+					if (member.val != null) {
+						switch (parseInt(member.mType)) {
+							case INT:
+							case DOUBLE:
+							case SHORT:
+							case LONG:
+							case BYTE:
+							case FLOAT:
+								ret += " = " + member.val;
+								break;
+							case CHAR:
+								ret += " = '" + member.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + member.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + member.val.toString();
+								break;
+						} //swatch
+					} else {
+							ret += " = null";
+						} //has default value
+
+					//add semicolon and new line
+					ret += ";\n";
+				} //next i
+
+				ret += "\n";
+			}
+
+			return ret;
+		}
+	}, {
+		key: "buildCode_StaticMethods",
+		value: function buildCode_StaticMethods(item, info) {
+
+			//get list of methods and filter only static ones
+			var methods = info.staticMethods;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasStaticMethods) {
+
+				//code to return:
+				ret = this.comment("Static Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					ret += info.name + "." + method.mName + "(){\n" + "\t" + this.comment("...") + "}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+	}]);
+
+	return ES6CodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -2773,20 +2795,18 @@ var JavaCodeGenerator = (function (_CodeGenerator) {
 				//build essentially the first line of the class: the defition
 		}, {
 				key: "buildCode_Definition",
-				value: function buildCode_Definition(item) {
+				value: function buildCode_Definition(item, info) {
 
 						//build the left part that usually looks like "public final class foo"
-						var ret = (item.getPublic() ? 'public ' : 'private ') + (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+						var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
 
 						//if it extends anything, add that here:
-						var ancestor = item.getAncestor();
-						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+						if (info.hasAncestor) ret += ' extends ' + info.ancestor;
 
 						//if it implements any interfaces, add those here:
-						var interfaces = item.getInterfaces();
-						if (interfaces.length > 0) {
+						if (info.hasInterfaces) {
 								ret += ' implements ';
-								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
 								//truncate last two chars (', ')
 								ret = ret.substring(0, ret.length - 2);
 						}
@@ -2799,35 +2819,35 @@ var JavaCodeGenerator = (function (_CodeGenerator) {
 				//build a constructor method for the class:
 		}, {
 				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item) {
+				value: function buildCode_Constructor(item, info) {
 
-						var ret = "\t// Constructor\n" + "\tpublic " + item.getName() + "(){\n";
+						var ret = "\t" + this.comment("Constructor") + "\tpublic " + item.getName() + "(){\n";
 
 						//if the class has an ancestor lets call super in the constructor!
-						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper();\n";
 
-						ret += "\n\t\t//...\n" + "\t}";
+						ret += "\n\t\t" + this.comment("...") + "\t}";
 						return ret;
 				}
 
 				//build out all the methods
 		}, {
 				key: "buildCode_Methods",
-				value: function buildCode_Methods(item) {
+				value: function buildCode_Methods(item, info) {
 
 						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-						var accessToStr = ['private', 'public'];
+						var accessToStr = ['private', 'public', 'protected'];
 
 						//get list of methods
-						var methods = item.getMethods();
+						var methods = info.methods;
 
 						//code to return
 						var ret = '';
 
-						if (methods.length > 0) {
+						if (info.hasMethods) {
 
 								//code to return:
-								ret = "\t// Methods\n";
+								ret = "\t" + this.comment("Methods");
 
 								//loop over methods
 								for (var i = 0; i < methods.length; i++) {
@@ -2835,7 +2855,7 @@ var JavaCodeGenerator = (function (_CodeGenerator) {
 										//get the method
 										var method = methods[i];
 
-										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
+										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
 								} //next i
 						} //endif has methods
 
@@ -2845,21 +2865,21 @@ var JavaCodeGenerator = (function (_CodeGenerator) {
 				//build out all the member variables
 		}, {
 				key: "buildCode_Members",
-				value: function buildCode_Members(item) {
+				value: function buildCode_Members(item, info) {
 
 						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-						var accessToStr = ['private', 'public'];
+						var accessToStr = ['private', 'public', 'protected'];
 
 						//get list of methods
-						var members = item.getMembers();
+						var members = info.members;
 
 						//code to return
 						var ret = '';
 
-						if (members.length > 0) {
+						if (info.hasMembers) {
 
 								//code to return:
-								ret = "\t// Member Variables\n";
+								ret = "\t" + this.comment("Member Variables");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -3010,6 +3030,8 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+			"private": false,
+			types: false,
 			methods: {},
 			members: {}
 		};
@@ -3036,21 +3058,19 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 		//build essentially the first line of the class: the defition
 	}, {
 		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = (item.getFinal() ? 'final ' : '') + (item.getAbstract() ? 'abstract ' : '') + 'class ' + item.getName();
+			var ret = (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
 			//((item.getPublic())?'public ':'private ') +
 
 			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+			if (info.hasAncestor) ret += ' extends ' + info.ancestor;
 
 			//if it implements any interfaces, add those here:
-			var interfaces = item.getInterfaces();
-			if (interfaces.length > 0) {
+			if (info.hasInterfaces) {
 				ret += ' implements ';
-				for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
 				//truncate last two chars (', ')
 				ret = ret.substring(0, ret.length - 2);
 			}
@@ -3060,66 +3080,20 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 			return ret;
 		}
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
-
-			var ret = "\t// Constructor\n" + "\tfunction __construct(){\n";
-
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tparent::__construct();\n";
-
-			ret += "\n\t\t//...\n" + "\t}";
-			return ret;
-		}
-
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
-
-			var accessToStr = ['private', 'public'];
-
-			//get list of methods
-			var methods = item.getMethods();
-
-			//code to return
-			var ret = '';
-
-			if (methods.length > 0) {
-
-				//code to return:
-				ret = "\t// Methods\n";
-
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
-
-					//get the method
-					var method = methods[i];
-
-					ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t//...\n" + "\t}\n\n";
-				} //next i
-			} //endif has methods
-
-			return ret;
-		}
-
 		//build out all the member variables
 	}, {
 		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+		value: function buildCode_Members(item, info) {
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-			var accessToStr = ['private', 'public'];
+			var accessToStr = ['private', 'public', 'protected'];
 
 			//get list of methods
-			var members = item.getMembers();
+			var members = info.members;
 
 			//code to return
 			var ret = "";
 
-			if (members.length > 0) {
+			if (info.hasMembers) {
 
 				//handle constants first since the syntax is slightly different
 				var constants = members.filter(function (n) {
@@ -3127,7 +3101,7 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 				});
 				if (constants.length > 0) {
 
-					ret += "\n\t// Class Constants\n";
+					ret += "\n\t" + this.comment("Class Constants");
 					for (var i = 0; i < constants.length; i++) {
 
 						var constant = constants[i];
@@ -3171,7 +3145,7 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 				if (members.length > 0) {
 
 					//code to return:
-					ret += "\n\t// Member Variables\n";
+					ret += "\n\t" + this.comment("Member Variables");
 
 					//loop over methods
 					for (var i = 0; i < members.length; i++) {
@@ -3211,6 +3185,51 @@ var PHPCodeGenerator = (function (_CodeGenerator) {
 
 			return ret;
 		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = "\t" + this.comment("Constructor") + "\tfunction __construct(){\n";
+
+			//if the class has an ancestor lets call super in the constructor!
+			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tparent::__construct();\n";
+
+			ret += "\n\t\t" + this.comment("...") + "\t}";
+			return ret;
+		}
+
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(item, info) {
+
+			var accessToStr = ['private', 'public', 'protected'];
+
+			//get list of methods
+			var methods = info.methods;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMethods) {
+
+				//code to return:
+				ret = "\t" + this.comment("Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
 	}]);
 
 	return PHPCodeGenerator;
@@ -3245,8 +3264,20 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
-			methods: {},
-			members: {}
+			"private": false,
+			final: false,
+			interfaces: false,
+			types: false,
+			methods: {
+				final: false,
+				"private": false,
+				"protected": false
+			},
+			members: {
+				final: false,
+				"private": false,
+				"protected": false
+			}
 		};
 
 		//build the area for the code:
@@ -3263,7 +3294,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		value: function buildCode(item, info) {
 
 			//variable to build the code
-			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t#...\n\n" + this.buildCode_Methods(item, info);
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t" + this.comment("...") + "\n" + this.buildCode_Methods(item, info);
 
 			return ret;
 		}
@@ -3271,59 +3302,40 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		//build essentially the first line of the class: the defition
 	}, {
 		key: "buildCode_Definition",
-		value: function buildCode_Definition(item) {
+		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = 'class ' + (item.getPublic() ? '' : '_') + item.getName();
+			var ret = 'class ' + (info.isPublic ? '' : '_') + info.name;
 
 			//if it extends anything, add that here:
-			var ancestor = item.getAncestor();
-			var hasAncestor = ancestor != null && ancestor != '';
-			if (hasAncestor) ret += '(' + ancestor + ')';
+			if (info.hasAncestor) ret += '(' + info.ancestor + ')';
 
 			//add the colon and new line before a possible abstract class definition
 			ret += ":\n";
 
 			//if this class is abstract, use the Python ABC thingy
-			if (item.getAbstract()) {
+			if (info.isAbstract) {
 				ret = "from abc import ABCMeta, abstractmethod\n\n" + ret;
 				ret += "\t__metaclass__ = ABCMeta\n";
 			}
 			return ret;
 		}
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
-
-			var ret = "\t# Constructor\n" + "\tdef __init__(self):\n";
-
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t# Call super\n" + "\t\t" + item.getAncestor() + ".__init__(self)\n";
-			return ret;
-		}
-
 		//in python the static members are declared seperately from the isntance variables, so here a sperate method to do that
 	}, {
 		key: "buildCode_StaticMembers",
-		value: function buildCode_StaticMembers(item) {
+		value: function buildCode_StaticMembers(item, info) {
 
 			//get list of members
-			var members = item.getMembers();
+			var members = info.staticMembers;
 
 			//code to return
 			var ret = '';
 
-			//filter out just static members
-			members = members.filter(function (n) {
-				return n.isStatic == true;
-			});
-
-			if (members.length > 0) {
+			if (info.hasStaticMembers) {
 
 				//code to return:
-				ret = "\n\t# Class Variables (static)\n";
+				ret = "\n\t" + this.comment("Class Variables (static)");
 
 				//loop over methods
 				for (var i = 0; i < members.length; i++) {
@@ -3333,7 +3345,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 
 					if (member.isStatic) {
 
-						ret += "\t" + (member.access ? '' : '_') + member.mName;
+						ret += "\t" + (member.access == PUBLIC ? '' : '_') + member.mName;
 
 						if (member.val != null) {
 							switch (parseInt(member.mType)) {
@@ -3352,7 +3364,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 									ret += " = \"" + member.val + "\"";
 									break;
 								case BOOLEAN:
-									ret += " = " + member.val.toString();
+									ret += " = " + this.firstToUpper(member.val);
 									break;
 							} //swatch
 						} else {
@@ -3368,13 +3380,28 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 			return ret;
 		}
 
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = "\t" + this.comment("Constructor") + "\tdef __init__(self):\n";
+
+			//if the class has an ancestor lets call super in the constructor!
+			if (info.hasAncestor) ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tself.super(self, " + info.name + ").__init__()\n";
+			//"\t\t" + info.ancestor + ".__init__(self)\n";
+			return ret;
+		}
+
 		//build out all the member variables
 	}, {
 		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+		value: function buildCode_Members(item, info) {
 
 			//get list of members
-			var members = item.getMembers();
+			var members = info.members.filter(function (n) {
+				return n.isStatic != true;
+			});
 
 			//code to return
 			var ret = '';
@@ -3382,7 +3409,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 			if (members.length > 0) {
 
 				//code to return:
-				ret = "\n\t\t# Instance Variables\n";
+				ret = "\n\t\t" + this.comment("Instance Variables");
 
 				//loop over methods
 				for (var i = 0; i < members.length; i++) {
@@ -3392,7 +3419,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 
 					if (!member.isStatic) {
 
-						ret += "\t\tself." + (member.access ? '' : '_') + member.mName;
+						ret += "\t\tself." + (member.access == PUBLIC ? '' : '_') + member.mName;
 
 						if (member.val != null) {
 							switch (parseInt(member.mType)) {
@@ -3411,7 +3438,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 									ret += " = \"" + member.val + "\"";
 									break;
 								case BOOLEAN:
-									ret += " = " + member.val.toString();
+									ret += " = " + this.firstToUpper(member.val);
 									break;
 							} //swatch
 						} else {
@@ -3430,21 +3457,18 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		//build out all the methods
 	}, {
 		key: "buildCode_Methods",
-		value: function buildCode_Methods(item) {
+		value: function buildCode_Methods(item, info) {
 
 			//get list of methods
-			var methods = item.getMethods();
+			var methods = info.methods;
 
 			//code to return
 			var ret = '';
 
-			if (methods.length > 0) {
+			if (info.hasMethods) {
 
 				//code to return:
-				ret = "\t# Methods\n";
-
-				//keep track of static methods as we go...
-				var staticMethods = [];
+				ret = "\t" + this.comment("Methods");
 
 				//loop over methods
 				for (var i = 0; i < methods.length; i++) {
@@ -3452,18 +3476,15 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 					//get the method
 					var method = methods[i];
 
-					ret += "\tdef " + (method.access ? '' : '_') + method.mName + "(self):\n" + "\t\t#...\n\n";
+					if (method.isStatic) ret += "\t@staticmethod\n";
+					if (method.isAbstract) ret += "\t@abc.abstractmethod\n";
 
-					//if it's a static method, save it for later, this is important
-					if (method.isStatic) staticMethods.push(method);
+					ret += "\tdef " + (method.access == PUBLIC ? '' : '_') + method.mName + (method.isStatic ? "()" : "(self)") + ":\n";
+
+					if (method.isAbstract) ret += "\t\t\"\"\"Abstract Method: " + method.mName + " Documentation...\"\"\"\n" + "\t\treturn\n\n";
+
+					ret += "\t\t#...\n\n";
 				} //next i
-
-				//if there were static methods, let's declare them now
-				if (staticMethods.length > 0) {
-
-					ret += "\t# Static Methods\n";
-					for (var i = 0; i < staticMethods.length; i++) ret += "\t" + staticMethods[i].mName + ' = staticmethod(' + staticMethods[i].mName + ')\n';
-				} //endif has static
 			} //endif has methods
 
 			return ret;
@@ -3502,8 +3523,19 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//set up what this class supports:
 				//Note: support is assumed by default, so this only has to disable features
 				this.features = {
-						methods: {},
-						members: {}
+						abstract: false,
+						final: false,
+						"private": false,
+						"protected": false,
+						types: false,
+						methods: {
+								abstract: false,
+								final: false,
+								"protected": false
+						},
+						members: {
+								"protected": false
+						}
 				};
 
 				//build the area for the code:
@@ -3523,7 +3555,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode(item, info) {
 
 						//variable to build the code
-						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_Constants(item, info) + this.buildCode_PublicMembers(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t#...\n" + "\tend\n\n" + this.buildCode_PublicMethods(item, info) + this.buildCode_PrivateMethods(item, info) + "end";
+						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + this.buildCode_Constants(item, info) + this.buildCode_PublicMembers(item, info) + this.buildCode_StaticMembers(item, info) + "\n" + this.buildCode_Constructor(item, info) + this.buildCode_Members(item, info) + "\n" + "\t\t" + this.comment("...") + "\tend\n\n" + this.buildCode_PublicMethods(item, info) + this.buildCode_PrivateMethods(item, info) + "end";
 
 						return ret;
 				}
@@ -3531,15 +3563,13 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//build essentially the first line of the class: the defition
 		}, {
 				key: "buildCode_Definition",
-				value: function buildCode_Definition(item) {
+				value: function buildCode_Definition(item, info) {
 
 						//build the left part that usually looks like "public final class foo"
-						var ret = 'class ' + item.getName();
+						var ret = 'class ' + info.name;
 
 						//if it extends anything, add that here:
-						var ancestor = item.getAncestor();
-						var hasAncestor = ancestor != null && ancestor != '';
-						if (hasAncestor) ret += ' < ' + ancestor;
+						if (info.hasAncestor) ret += ' < ' + info.ancestor;
 
 						//add newline
 						ret += "\n";
@@ -3549,34 +3579,19 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 						// just a note: Ruby doesn't natively support private classes, final classes, abstract classes, or interfaces.
 				}
 
-				//build a constructor method for the class:
-		}, {
-				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item) {
-
-						var ret = "\t# Constructor\n" + "\tdef initialize()\n";
-
-						//if the class has an ancestor lets call super in the constructor!
-						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t# Call super\n" + "\t\tsuper()\n";
-
-						return ret;
-				}
-
 				//build out all the constant variables for this class... ugh
 		}, {
 				key: "buildCode_Constants",
-				value: function buildCode_Constants(item) {
+				value: function buildCode_Constants(item, info) {
 
 						//filter out non-constants:
-						var constants = item.getMembers().filter(function (n) {
-								return n.isConst == true;
-						});
+						var constants = info.constMembers;
 
 						var ret = '';
 
-						if (constants.length > 0) {
+						if (info.hasConstMembers) {
 
-								ret = '\n\t# Class Constants\n';
+								ret = "\n\t" + this.comment("Class Constants");
 
 								//loop over methods
 								for (var i = 0; i < constants.length; i++) {
@@ -3585,8 +3600,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 										var constant = constants[i];
 
 										//get the name of the constant and make sure it's first letter is uppercase:
-										var name = constant.mName.charAt(0).toUpperCase() + constant.mName.slice(1);
-										ret += "\t" + name;
+										ret += "\t" + this.firstToUpper(constant.mName);
 
 										if (constant.val != null) {
 												switch (parseInt(constant.mType)) {
@@ -3623,7 +3637,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//build out all the constant variables for this class... ugh
 		}, {
 				key: "buildCode_PublicMembers",
-				value: function buildCode_PublicMembers(item) {
+				value: function buildCode_PublicMembers(item, info) {
 
 						//filter out constant/static members:
 						var members = item.getMembers().filter(function (n) {
@@ -3639,7 +3653,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 
 						if (members.length > 0) {
 
-								ret = "\n\t# Public members\n" + "\t# NOTE: in addition to a 'attr_accessor', Ruby also implements:\n" + "\t# attr_reader (for public read access only)\n" + "\t# attr_writer (for public write access only)\n";
+								ret = "\n\t" + this.comment("Public members") + "\t" + this.comment("NOTE: in addition to a 'attr_accessor', Ruby also implements:") + "\t" + this.comment("attr_reader (for public read access only)") + "\t" + this.comment("attr_writer (for public write access only)");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -3657,10 +3671,10 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//in Ruby public member variables and static member variables have slightly different syntax than regular memember varaibles.
 		}, {
 				key: "buildCode_StaticMembers",
-				value: function buildCode_StaticMembers(item) {
+				value: function buildCode_StaticMembers(item, info) {
 
 						//get list of members
-						var members = item.getMembers();
+						var members = info.members;
 
 						//code to return
 						var ret = '';
@@ -3673,7 +3687,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 						if (members.length > 0) {
 
 								//code to return:
-								ret = "\n\t# Class Variables (static)\n";
+								ret = "\n\t" + this.comment("Class Variables (static)");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -3718,13 +3732,26 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 						return ret;
 				}
 
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item, info) {
+
+						var ret = "\t" + this.comment("Constructor") + "\tdef initialize()\n";
+
+						//if the class has an ancestor lets call super in the constructor!
+						if (info.hasAncestor) ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper()\n";
+
+						return ret;
+				}
+
 				//build out all the member variables inside the initialize function in ruby
 		}, {
 				key: "buildCode_Members",
-				value: function buildCode_Members(item) {
+				value: function buildCode_Members(item, info) {
 
 						//get list of members
-						var members = item.getMembers();
+						var members = info.members;
 
 						//filter out static and constant methods
 						members = members.filter(function (n) {
@@ -3737,7 +3764,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 						if (members.length > 0) {
 
 								//code to return:
-								ret = "\n\t\t# Instance Variables\n";
+								ret = "\n\t\t" + this.comment("Instance Variables");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -3782,7 +3809,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//build out all public methods
 		}, {
 				key: "buildCode_PublicMethods",
-				value: function buildCode_PublicMethods(item) {
+				value: function buildCode_PublicMethods(item, info) {
 
 						//filter out just the public methods
 						var methods = item.getMethods().filter(function (n) {
@@ -3793,7 +3820,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 
 						if (methods.length > 0) {
 
-								ret += "\t# Public Methods\n" + "\tpublic\n\n";
+								ret += "\t" + this.comment("Public Methods") + "\tpublic\n\n";
 
 								//build the methods
 								ret += this.buildCode_Methods(methods);
@@ -3805,18 +3832,18 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 				//build out all private methods
 		}, {
 				key: "buildCode_PrivateMethods",
-				value: function buildCode_PrivateMethods(item) {
+				value: function buildCode_PrivateMethods(item, info) {
 
 						//filter out just the public methods
 						var methods = item.getMethods().filter(function (n) {
-								return n.access == PRIVATE;
+								return n.access == PRIVATE || n.access == PROTECTED;
 						});
 
 						var ret = '';
 
 						if (methods.length > 0) {
 
-								ret += "\t# Private Methods\n" + "\tpublic\n\n";
+								ret += "\t" + this.comment("Private Methods") + "\tprivate\n\n";
 
 								//build the methods
 								ret += this.buildCode_Methods(methods);
@@ -3825,7 +3852,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 						return ret;
 				}
 
-				//build out all the methods
+				//helper function for buildCode_PublicMethods and buildCode_PrivateMethods build out all the methods
 		}, {
 				key: "buildCode_Methods",
 				value: function buildCode_Methods(methods) {
@@ -3841,7 +3868,7 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 										//get the method
 										var method = methods[i];
 
-										ret += "\tdef " + (method.isStatic ? '' : 'self.') + method.mName + "()\n" + "\t\t#...\n" + "\tend\n\n";
+										ret += "\tdef " + (method.isStatic ? 'self.' : '') + method.mName + "()\n" + "\t\t" + this.comment("...") + "\tend\n\n";
 								} //next i
 						} //endif has methods
 
@@ -3881,7 +3908,13 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 				//set up what this class supports:
 				//Note: support is assumed by default, so this only has to disable features
 				this.features = {
-						methods: {},
+						abstract: false,
+						final: false,
+						"private": false,
+						methods: {
+								final: false,
+								abstract: false
+						},
 						members: {}
 				};
 
@@ -3902,7 +3935,7 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode(item, info) {
 
 						//variable to build the code
-						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_MemberAssignments(item, info) + "\t\t//...\n" + "\t}\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Constants(item, info) + "}";
+						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_MemberAssignments(item, info) + "\t\t" + this.comment("...") + "\t}\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Constants(item, info) + "}";
 
 						return ret;
 				}
@@ -3910,20 +3943,18 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 				//build essentially the first line of the class: the defition
 		}, {
 				key: "buildCode_Definition",
-				value: function buildCode_Definition(item) {
+				value: function buildCode_Definition(item, info) {
 
 						//build the left part that usually looks like "public final class foo"
-						var ret = 'class ' + item.getName();
+						var ret = 'class ' + info.name;
 
 						//if it extends anything, add that here:
-						var ancestor = item.getAncestor();
-						if (ancestor != null && ancestor != '') ret += ' extends ' + ancestor;
+						if (info.hasAncestor) ret += ' extends ' + info.ancestor;
 
 						//if it implements any interfaces, add those here:
-						var interfaces = item.getInterfaces();
-						if (interfaces.length > 0) {
+						if (info.hasInterfaces) {
 								ret += ' implements ';
-								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
 								//truncate last two chars (', ')
 								ret = ret.substring(0, ret.length - 2);
 						}
@@ -3933,26 +3964,14 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						return ret;
 				}
 
-				//build a constructor method for the class:
-		}, {
-				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item) {
-
-						var ret = "\n\t// Constructor\n" + "\tconstructor(){\n";
-
-						//if the class has an ancestor lets call super in the constructor!
-						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t// call super constructor\n" + "\t\tsuper();\n";
-						return ret;
-				}
-
 				//build out all the member variables
 		}, {
 				key: "buildCode_Members",
-				value: function buildCode_Members(item) {
+				value: function buildCode_Members(item, info) {
 
 						var typeToStr = ['void', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'string', 'boolean'];
 						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
-						var accessToStr = ['private', 'public'];
+						var accessToStr = ['private', 'public', 'protected'];
 
 						//get list of members and filter statics
 						var statics = item.getMembers().filter(function (n) {
@@ -3965,7 +3984,7 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						if (statics.length > 0) {
 
 								//code to return:
-								ret = "\n\t// Static Member Variables\n";
+								ret = "\n\t" + this.comment("Static Member Variables");
 
 								//loop over methods
 								for (var i = 0; i < statics.length; i++) {
@@ -4012,7 +4031,7 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						if (members.length > 0) {
 
 								//code to return:
-								ret += "\n\t// Member Variables\n";
+								ret += "\n\t" + this.comment("Member Variables");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -4027,42 +4046,22 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						return ret;
 				}
 
-				//build out all the methods
+				//build a constructor method for the class:
 		}, {
-				key: "buildCode_Methods",
-				value: function buildCode_Methods(item) {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item, info) {
 
-						var typeToStr = ['void', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'string', 'boolean'];
-						var accessToStr = ['private', 'public'];
+						var ret = "\n\t" + this.comment("Constructor") + "\tconstructor(){\n";
 
-						//get list of methods
-						var methods = item.getMethods();
-
-						//code to return
-						var ret = '';
-
-						if (methods.length > 0) {
-
-								//code to return:
-								ret = "\t// Methods\n";
-
-								//loop over methods
-								for (var i = 0; i < methods.length; i++) {
-
-										//get the method
-										var method = methods[i];
-
-										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + method.mName + "(): " + typeToStr[parseInt(method.mType)] + "{\n" + "\t\t//...\n" + "\t}\n\n";
-								} //next i
-						} //endif has methods
-
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper();\n";
 						return ret;
 				}
 
 				//build out all the member variables
 		}, {
 				key: "buildCode_MemberAssignments",
-				value: function buildCode_MemberAssignments(item) {
+				value: function buildCode_MemberAssignments(item, info) {
 
 						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
 
@@ -4082,7 +4081,7 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						if (members.length > 0) {
 
 								//code to return:
-								ret = "\t\t// Initialize Member Variables\n";
+								ret = "\t\t" + this.comment("Initialize Member Variables");
 
 								//loop over methods
 								for (var i = 0; i < members.length; i++) {
@@ -4123,26 +4122,56 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 
 						return ret;
 				}
+
+				//build out all the methods
 		}, {
-				key: "buildCode_Constants",
-				value: function buildCode_Constants(item) {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item, info) {
 
 						var typeToStr = ['void', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'string', 'boolean'];
-						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 						var accessToStr = ['private', 'public'];
 
-						//get list of members and filter statics
-						var constants = item.getMembers().filter(function (n) {
-								return n.isConst == true;
-						});
+						//get list of methods
+						var methods = item.getMethods();
 
 						//code to return
 						var ret = '';
 
-						if (constants.length > 0) {
+						if (methods.length > 0) {
 
 								//code to return:
-								ret = "\t// Constants\n" + "\t// NOTE: TypeScript does not natively support constants.\n" + "\t// This section is a workaround described here: http://tinyurl.com/op776sg\n";
+								ret = "\t" + this.comment("Methods");
+
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
+
+										//get the method
+										var method = methods[i];
+
+										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + method.mName + "(): " + typeToStr[parseInt(method.mType)] + "{\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+		}, {
+				key: "buildCode_Constants",
+				value: function buildCode_Constants(item, info) {
+
+						var typeToStr = ['void', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'string', 'boolean'];
+						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
+						var accessToStr = ['private', 'public', 'protected'];
+
+						//get list of members and filter statics
+						var constants = info.constMembers;
+
+						//code to return
+						var ret = '';
+
+						if (info.hasConstMembers) {
+
+								//code to return:
+								ret = "\t" + this.comment("Constants") + "\t" + this.comment("NOTE: TypeScript does not natively support constants.") + "\t" + this.comment("This section is a workaround described here: http://tinyurl.com/op776sg");
 
 								//loop over methods
 								for (var i = 0; i < constants.length; i++) {
@@ -4215,11 +4244,27 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				this.multiLineComments = { open: '/*\n',
 						close: '\n*/',
 						prefix: "\t" };
+
 				//set up what this class supports:
 				//Note: support is assumed by default, so this only has to disable features
 				this.features = {
-						methods: {},
-						members: {}
+						inheritance: false,
+						interfaces: false,
+						final: false,
+						abstract: false,
+						"private": false,
+						types: false,
+						methods: {
+								final: false,
+								abstract: false,
+								"private": false,
+								"protected": false
+						},
+						members: {
+								final: false,
+								"private": false,
+								"protected": false
+						}
 				};
 
 				//build the area for the code:
@@ -4239,7 +4284,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				value: function buildCode(item, info) {
 
 						//variable to build the code
-						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\t//...\n" + "}\n\n" + this.buildCode_Prototype(item, info) + this.buildCode_Constants(item, info) + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
+						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\t" + this.comment("...") + "}\n\n" + this.buildCode_Prototype(item, info) + this.buildCode_Constants(item, info) + this.buildCode_StaticMembers(item, info) + this.buildCode_StaticMethods(item, info);
 
 						return ret;
 				}
@@ -4247,10 +4292,10 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//build essentially the first line of the class: the defition
 		}, {
 				key: "buildCode_Definition",
-				value: function buildCode_Definition(item) {
+				value: function buildCode_Definition(item, info) {
 
 						//build the left part that usually looks like "public final class foo"
-						var ret = 'var ' + item.getName() + " = function(){ ";
+						var ret = 'var ' + info.name + " = function(){ ";
 
 						//if it extends anything, add that here:
 						//var ancestor = item.getAncestor();
@@ -4258,10 +4303,9 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 						//	ret += ' extends ' + ancestor;
 
 						//if it implements any interfaces, add those here:
-						var interfaces = item.getInterfaces();
-						if (interfaces.length > 0) {
-								ret += '//implements ';
-								for (var i = 0; i < interfaces.length; i++) ret += interfaces[i].mName + ', ';
+						if (info.hasInterfaces) {
+								ret += this.comment('implements ', false);
+								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
 								//truncate last two chars (', ')
 								ret = ret.substring(0, ret.length - 2);
 						}
@@ -4272,14 +4316,14 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//build a constructor method for the class:
 		}, {
 				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item) {
+				value: function buildCode_Constructor(item, info) {
 
-						var ret = "\t// Constructor\n";
+						var ret = "\t" + this.comment("Constructor");
 
 						//if this class is abstract when a put in the abstract hack
-						if (item.getAbstract() == true) {
+						if (info.isAbstract) {
 
-								ret += "\n\t// JavaScript doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.\n" + "\t// Found here: http://tinyurl.com/nhmhc4z\n" + "\tif (new.target === " + item.getName() + "){\n" + "\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t}\n\n";
+								ret += "\n\t" + this.comment("JavaScript doesn't natively support Abstract classes, but this solution is a hack that attempts to solve that.") + "\t" + this.comment("Found here: http://tinyurl.com/nhmhc4z") + "\tif (new.target === " + info.name + "){\n" + "\t\tthrow new TypeError(\"Cannot construct Abstract instances directly\");\n" + "\t}\n\n";
 						}
 						/*
       //if the class has an ancestor lets call super in the constructor!
@@ -4293,10 +4337,10 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//make the prototype
 		}, {
 				key: "buildCode_Prototype",
-				value: function buildCode_Prototype(item) {
+				value: function buildCode_Prototype(item, info) {
 
 						//use the otehr buildings to make the prototypes components
-						var ret = item.getName() + ".prototype = {\n\n" + this.buildCode_Members(item) + this.buildCode_Methods(item);
+						var ret = info.name + ".prototype = {\n\n" + this.buildCode_Members(item, info) + this.buildCode_Methods(item, info);
 
 						//remove the last comma:
 						ret = ret.split(',');
@@ -4311,7 +4355,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//build out all the member variables
 		}, {
 				key: "buildCode_Members",
-				value: function buildCode_Members(item) {
+				value: function buildCode_Members(item, info) {
 
 						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
@@ -4325,7 +4369,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 
 						if (members.length > 0) {
 
-								ret += "\t// Member Variables\n";
+								ret += "\t" + this.comment("Member Variables");
 
 								for (var i = 0; i < members.length; i++) {
 
@@ -4370,7 +4414,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//build out all the methods
 		}, {
 				key: "buildCode_Methods",
-				value: function buildCode_Methods(item) {
+				value: function buildCode_Methods(item, info) {
 
 						//get list of methods and filter out static ones
 						var methods = item.getMethods().filter(function (n) {
@@ -4383,7 +4427,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 						if (methods.length > 0) {
 
 								//code to return:
-								ret = "\t// Methods\n";
+								ret = "\t" + this.comment("Methods");
 
 								//loop over methods
 								for (var i = 0; i < methods.length; i++) {
@@ -4401,20 +4445,18 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//filter out and display constants before the class actually starts
 		}, {
 				key: "buildCode_Constants",
-				value: function buildCode_Constants(item) {
+				value: function buildCode_Constants(item, info) {
 
 						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
 						//get just constants
-						var constants = item.getMembers().filter(function (n) {
-								return n.isConst == true;
-						});
+						var constants = info.constMembers;
 
 						var ret = '';
 
-						if (constants.length > 0) {
+						if (info.hasConstMembers) {
 
-								ret += "// Constants\n" + "// NOTE: JavaScript doesn't natively support constants.\n" + "// Using all caps is a convention, but doesn't actually make them immutable.\n";
+								ret += this.comment("Constants") + this.comment("NOTE: JavaScript doesn't natively support constants.") + this.comment("Using all caps is a convention, but doesn't actually make them immutable.");
 
 								for (var i = 0; i < constants.length; i++) {
 
@@ -4464,26 +4506,24 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				//build out just the static members
 		}, {
 				key: "buildCode_StaticMembers",
-				value: function buildCode_StaticMembers(item) {
+				value: function buildCode_StaticMembers(item, info) {
 
 						var typeDefaults = [null, 0, 0, 0, 0, '0.0', '0.0', '', '', 'false'];
 
 						//get just static members`
-						var members = item.getMembers().filter(function (n) {
-								return n.isStatic == true;
-						});
+						var members = info.staticMembers;
 
 						var ret = '';
 
-						if (members.length > 0) {
+						if (info.hasStaticMembers) {
 
-								ret += "// Static Members\n";
+								ret += this.comment("Static Members");
 
 								for (var i = 0; i < members.length; i++) {
 
 										var member = members[i];
 
-										ret += item.getName() + "." + members[i].mName;
+										ret += info.name + "." + members[i].mName;
 
 										if (member.val != null) {
 												switch (parseInt(member.mType)) {
@@ -4520,20 +4560,18 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 				}
 		}, {
 				key: "buildCode_StaticMethods",
-				value: function buildCode_StaticMethods(item) {
+				value: function buildCode_StaticMethods(item, info) {
 
 						//get list of methods and filter only static ones
-						var methods = item.getMethods().filter(function (n) {
-								return n.isStatic == true;
-						});
+						var methods = info.staticMethods;
 
 						//code to return
 						var ret = '';
 
-						if (methods.length > 0) {
+						if (info.hasStaticMethods) {
 
 								//code to return:
-								ret = "// Static Methods\n";
+								ret = this.comment("Static Methods");
 
 								//loop over methods
 								for (var i = 0; i < methods.length; i++) {
@@ -4541,7 +4579,7 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 										//get the method
 										var method = methods[i];
 
-										ret += item.getName() + "." + method.mName + " = function(){\n" + "\t//...\n" + "}\n";
+										ret += info.name + "." + method.mName + " = function(){\n" + "\t//...\n" + "}\n";
 								} //next i
 						} //endif has methods
 
@@ -4592,7 +4630,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 				"protected": false
 			},
 			members: {
-				constants: true,
+				final: true,
 				"static": false,
 				"protected": false
 			}
@@ -4679,7 +4717,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 								ret += "\"" + itm.val + "\"";
 								break;
 							case BOOLEAN:
-								ret += itm.val.toString();
+								ret += this.firstToUpper(itm.val);
 								break;
 						} //swatch
 					} else {
@@ -4698,7 +4736,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 		//build out all the member variables
 	}, {
 		key: "buildCode_Members",
-		value: function buildCode_Members(item) {
+		value: function buildCode_Members(item, info) {
 
 			var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
 			var accessToStr = ['Private', 'Public', 'Private'];
@@ -4733,7 +4771,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 		//build a constructor method for the class:
 	}, {
 		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item) {
+		value: function buildCode_Constructor(item, info) {
 
 			var ret = this.comment("Constructor") + this.comment("NOTE: VB6 Constructors cannot take parameters!") + "Private Sub Class_Initialize()\n";
 
@@ -4768,7 +4806,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 							ret += "\"" + itm.val + "\"";
 							break;
 						case BOOLEAN:
-							ret += itm.val.toString().charAt(0).toUpperCase() + itm.val.toString().slice(1).toLowerCase();
+							ret += this.firstToUpper(itm.val);
 							break;
 					} //swatch
 
@@ -4838,7 +4876,7 @@ var VBCodeGenerator = (function (_CodeGenerator) {
 
 		//add an area to let the user pick between our three flavors of JS: Native, TypeScript, ES6
 		//as well as containers for our childen elements
-		this.DOM.html('<div class="GenHeader">' + 'Visual Basic has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavVB" id="opt01v" value="01" ><label for="opt01v">VB.NET</label> ' + '<input type="radio" name="optFlavVB" id="opt02v" value="02"checked><label for="opt02v">VB6</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab" style="display:none;"></div>' + '<div id="SubTab_02" class="SubTab"></div>');
+		this.DOM.html('<div class="GenHeader">' + 'Visual Basic has multiple implementations, choose your flavor!<br>' + '<div class="options">' + '<input type="radio" name="optFlavVB" id="opt01v" value="01" checked><label for="opt01v">VB.NET</label> ' + '<input type="radio" name="optFlavVB" id="opt02v" value="02"><label for="opt02v">VB6</label> ' + '</div>' + '</div>' + '<div id="SubTab_01" class="SubTab"></div>' + '<div id="SubTab_02" class="SubTab" style="display:none;"></div>');
 
 		//create generators for each type of JS
 		this.codeGenerators = [];
@@ -4966,12 +5004,12 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 						var typeDefaults = ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 						//get list of methods
-						var members = info.methods;
+						var members = info.members;
 
 						//code to return
 						var ret = '';
 
-						if (info.hasMethods) {
+						if (info.hasMembers) {
 
 								//code to return:
 								ret = "\t" + this.comment("Member Variables");
@@ -5001,7 +5039,7 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 																ret += " = \"" + member.val + "\"";
 																break;
 														case BOOLEAN:
-																ret += " = " + member.val.toString().substr(0, 1).toUpperCase() + member.val.toString().substr(1);
+																ret += " = " + this.firstToUpper(member.val);
 																break;
 												} //swatch
 										} //has default value
@@ -5023,7 +5061,7 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 						var ret = "\t" + this.comment("Constructor") + "\tPublic Sub New()\n";
 
 						//if the class has an ancestor lets call super in the constructor!
-						if (info.hasAncestor) ret += "\n\t\t" + this.comment("call super constructor") + "\t\tMyBase.new()\n";
+						if (info.hasAncestor) ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tMyBase.new()\n";
 
 						ret += "\n\t\t" + this.comment("...") + "\tEnd Sub";
 						return ret;

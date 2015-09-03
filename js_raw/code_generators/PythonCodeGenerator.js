@@ -15,9 +15,19 @@ class PythonCodeGenerator extends CodeGenerator {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+							private: false,
+							final: false,
+							interfaces: false,
+							types: false,
 							methods: {
+										final: false,
+										private: false,
+										protected: false
 									 },
 							members: {
+										final: false,
+										private: false,
+										protected: false
 									 }
 						};
 						
@@ -38,29 +48,27 @@ class PythonCodeGenerator extends CodeGenerator {
 					this.buildCode_StaticMembers(item, info) + "\n" + 
 					this.buildCode_Constructor(item, info) +
 					this.buildCode_Members(item, info) + "\n" +
-					"\t\t#...\n\n" + 
+					"\t\t" + this.comment("...") + "\n" + 
 					this.buildCode_Methods(item, info);
 
 		return ret;
 	}
 	
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	'class ' + ((item.getPublic())?'':'_') + item.getName(); 
+		var ret = 	'class ' + ((info.isPublic)?'':'_') + info.name; 
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		var hasAncestor = (ancestor!=null && ancestor!='');
-		if(hasAncestor)
-			ret += '(' + ancestor + ')';
+		if(info.hasAncestor)
+			ret += '(' + info.ancestor + ')';
 
 		//add the colon and new line before a possible abstract class definition
 		ret += ":\n";
 
 		//if this class is abstract, use the Python ABC thingy
-		if(item.getAbstract()){
+		if(info.isAbstract){
 			ret = "from abc import ABCMeta, abstractmethod\n\n" + ret;
 			ret += "\t__metaclass__ = ABCMeta\n";
 		}
@@ -68,35 +76,19 @@ class PythonCodeGenerator extends CodeGenerator {
 
 	}
 
-	//build a constructor method for the class:
-	buildCode_Constructor(item){
-
-		var ret="\t# Constructor\n" + 
-				"\tdef __init__(self):\n"
-
-		//if the class has an ancestor lets call super in the constructor!
-		if(item.getAncestor()!=null && item.getAncestor!="")
-			ret += 	"\n\t\t# Call super\n" + 
-					"\t\t" + item.getAncestor() + ".__init__(self)\n";
-		return ret;
-	}
-
 	//in python the static members are declared seperately from the isntance variables, so here a sperate method to do that
-	buildCode_StaticMembers(item){
+	buildCode_StaticMembers(item, info){
 
 		//get list of members
-		var members = item.getMembers();
+		var members = info.staticMembers;
 		
 		//code to return
 		var ret = '';
 
-		//filter out just static members
-		members = members.filter(function(n){ return (n.isStatic==true); });
-		
-		if(members.length>0){
+		if(info.hasStaticMembers){
 
 			//code to return:
-			ret = "\n\t# Class Variables (static)\n";
+			ret = "\n\t" + this.comment("Class Variables (static)");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
@@ -106,7 +98,7 @@ class PythonCodeGenerator extends CodeGenerator {
 
 				if(member.isStatic){
 
-					ret += "\t" + ((member.access)?'':'_') + member.mName;
+					ret += "\t" + ((member.access==PUBLIC)?'':'_') + member.mName;
 
 					if(member.val != null){
 						switch(parseInt(member.mType)){
@@ -125,7 +117,7 @@ class PythonCodeGenerator extends CodeGenerator {
 								ret += " = \"" + member.val + "\"";
 								break;
 							case BOOLEAN:
-								ret += " = " + member.val.toString();
+								ret += " = " + this.firstToUpper(member.val);
 								break
 						}//swatch
 				
@@ -145,11 +137,25 @@ class PythonCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	//build a constructor method for the class:
+	buildCode_Constructor(item, info){
+
+		var ret="\t" + this.comment("Constructor") + 
+				"\tdef __init__(self):\n"
+
+		//if the class has an ancestor lets call super in the constructor!
+		if(info.hasAncestor)
+			ret += 	"\n\t\t" + this.comment("Call Super Constructor") + 
+					"\t\tself.super(self, " + info.name + ").__init__()\n";
+					//"\t\t" + info.ancestor + ".__init__(self)\n";
+		return ret;
+	}
+
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		//get list of members
-		var members = item.getMembers();
+		var members = info.members.filter(function(n){ return (n.isStatic!=true); });
 		
 		//code to return
 		var ret = '';
@@ -157,7 +163,7 @@ class PythonCodeGenerator extends CodeGenerator {
 		if(members.length>0){
 
 			//code to return:
-			ret = "\n\t\t# Instance Variables\n";
+			ret = "\n\t\t" + this.comment("Instance Variables");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
@@ -167,7 +173,7 @@ class PythonCodeGenerator extends CodeGenerator {
 
 				if(!member.isStatic){
 
-					ret += "\t\tself." + ((member.access)?'':'_') + member.mName;
+					ret += "\t\tself." + ((member.access==PUBLIC)?'':'_') + member.mName;
 
 					if(member.val != null){
 						switch(parseInt(member.mType)){
@@ -186,7 +192,7 @@ class PythonCodeGenerator extends CodeGenerator {
 								ret += " = \"" + member.val + "\"";
 								break;
 							case BOOLEAN:
-								ret += " = " + member.val.toString();
+								ret += " = " + this.firstToUpper(member.val);
 								break
 						}//swatch
 					}else{
@@ -206,21 +212,18 @@ class PythonCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		//get list of methods
-		var methods = item.getMethods();
+		var methods = info.methods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "\t# Methods\n";
-
-			//keep track of static methods as we go...
-			var staticMethods = [];
+			ret = "\t" + this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -228,23 +231,20 @@ class PythonCodeGenerator extends CodeGenerator {
 				//get the method
 				var method = methods[i];
 
-				ret += 	"\tdef " + ((method.access)?'':'_') + method.mName + "(self):\n" + 
-						"\t\t#...\n\n";
-
-				//if it's a static method, save it for later, this is important
 				if(method.isStatic)
-					staticMethods.push(method);
+					ret +=	"\t@staticmethod\n";
+				if(method.isAbstract)
+					ret += 	"\t@abc.abstractmethod\n";
+				
+				ret += 		"\tdef " + ((method.access==PUBLIC)?'':'_') + method.mName + ((method.isStatic)?"()":"(self)") + ":\n";
+
+				if(method.isAbstract)
+					ret +=	"\t\t\"\"\"Abstract Method: "+ method.mName +" Documentation...\"\"\"\n"+
+							"\t\treturn\n\n";
+
+				ret +=		"\t\t#...\n\n";
 
 			}//next i
-
-			//if there were static methods, let's declare them now
-			if(staticMethods.length>0){
-
-				ret += "\t# Static Methods\n";
-				for(var i=0; i<staticMethods.length; i++)
-					ret += "\t" + staticMethods[i].mName + ' = staticmethod(' + staticMethods[i].mName + ')\n';
-
-			}//endif has static
 
 		}//endif has methods
 

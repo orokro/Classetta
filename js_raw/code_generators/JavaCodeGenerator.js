@@ -44,25 +44,23 @@ class JavaCodeGenerator extends CodeGenerator {
 	}
 
 	//build essentially the first line of the class: the defition
-	buildCode_Definition(item){
+	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	((item.getPublic())?'public ':'private ') +
-					((item.getFinal())?'final ':'') +
-					((item.getAbstract())?'abstract ':'')+
-					'class ' + item.getName();
+		var ret = 	((info.isPublic)?'public ':'private ') +
+					((info.isFinal)?'final ':'') +
+					((info.isAbstract)?'abstract ':'')+
+					'class ' + info.name;
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		if(ancestor!=null && ancestor!='')
-			ret += ' extends ' + ancestor;
+		if(info.hasAncestor)
+			ret += ' extends ' + info.ancestor;
 
 		//if it implements any interfaces, add those here:
-		var interfaces = item.getInterfaces();
-		if(interfaces.length>0){
+		if(info.hasInterfaces){
 			ret += ' implements ';
-			for(var i=0; i<interfaces.length; i++)
-				ret += interfaces[i].mName + ', ';
+			for(var i=0; i<info.interfaces.length; i++)
+				ret += info.interfaces[i].mName + ', ';
 			//truncate last two chars (', ')
 			ret = ret.substring(0, ret.length - 2);
 		}
@@ -74,37 +72,37 @@ class JavaCodeGenerator extends CodeGenerator {
 	}
 
 	//build a constructor method for the class:
-	buildCode_Constructor(item){
+	buildCode_Constructor(item, info){
 
-		var ret="\t// Constructor\n" + 
+		var ret="\t" + this.comment("Constructor") + 
 				"\tpublic " + item.getName() + "(){\n";
 
 		//if the class has an ancestor lets call super in the constructor!
 		if(item.getAncestor()!=null && item.getAncestor!="")
-			ret += 	"\n\t\t// call super constructor\n" + 
+			ret += 	"\n\t\t" + this.comment("Call Super Constructor") + 
 					"\t\tsuper();\n";
 
-		ret +=	"\n\t\t//...\n" +
+		ret +=	"\n\t\t" + this.comment("...") +
 				"\t}";
 		return ret;
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-		var accessToStr = ['private', 'public'];
+		var accessToStr = ['private', 'public', 'protected'];
 
 		//get list of methods
-		var methods = item.getMethods();
+		var methods = info.methods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "\t// Methods\n";
+			ret = "\t" + this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -118,7 +116,7 @@ class JavaCodeGenerator extends CodeGenerator {
 						((method.isConst)?'final ':'') +
 						typeToStr[parseInt(method.mType)] + ' ' + 
 						method.mName + "(){\n" + 
-						"\t\t//...\n" + 
+						"\t\t" + this.comment("...") + 
 						"\t}\n\n";
 			}//next i
 
@@ -128,21 +126,21 @@ class JavaCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-		var accessToStr = ['private', 'public'];
+		var accessToStr = ['private', 'public', 'protected'];
 
 		//get list of methods
-		var members = item.getMembers();
+		var members = info.members;
 		
 		//code to return
 		var ret = '';
 
-		if(members.length>0){
+		if(info.hasMembers){
 
 			//code to return:
-			ret = "\t// Member Variables\n";
+			ret = "\t" + this.comment("Member Variables");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
