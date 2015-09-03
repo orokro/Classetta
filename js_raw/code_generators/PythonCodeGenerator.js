@@ -29,21 +29,11 @@ class PythonCodeGenerator extends CodeGenerator {
 
 	}
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
-	update(item){
-
-		//if the item is null, just update with the default comment
-		if((typeof(item)==="undefined") || item==null){
-			this.buildDefaultComment();
-			hljs.highlightBlock(this.codeDOM[0]);
-			return;
-		}
-
-		//inspect useful data on our item:
-		var info = this.inspect(item);
+	//builds the code!
+	buildCode(item, info){
 
 		//variable to build the code
-		var code = 	this.buildCode_Warnings(item, info) +
+		var ret = 	this.buildCode_Warnings(item, info) +
 					this.buildCode_Definition(item, info) +
 					this.buildCode_StaticMembers(item, info) + "\n" + 
 					this.buildCode_Constructor(item, info) +
@@ -51,12 +41,7 @@ class PythonCodeGenerator extends CodeGenerator {
 					"\t\t#...\n\n" + 
 					this.buildCode_Methods(item, info);
 
-		//update the code inside the code tag
-		this.codeDOM.html(code);
-
-		//apply the code highlighting
-		hljs.highlightBlock(this.codeDOM[0]);
-
+		return ret;
 	}
 	
 	//build essentially the first line of the class: the defition

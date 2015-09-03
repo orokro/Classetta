@@ -29,35 +29,20 @@ class VBNetCodeGenerator extends CodeGenerator {
 
 	}
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
-	update(item){
-
-		//if the item is null, just update with the default comment
-		if((typeof(item)==="undefined") || item==null){
-			this.buildDefaultComment();
-			hljs.highlightBlock(this.codeDOM[0]);
-			return;
-		}
-
-		//inspect useful data on our item:
-		var info = this.inspect(item);
+	//builds the code!
+	buildCode(item, info){
 
 		//variable to build the code
-		var code = 	this.buildCode_Warnings(item, info) +
+		var ret = 	this.buildCode_Warnings(item, info) +
 					this.buildCode_Definition(item, info) + "\n\n" +
 					this.buildCode_Members(item, info) +
 					this.buildCode_Constructor(item, info) + "\n\n" +
 					this.buildCode_Methods(item, info) + 
 					"End Class";
 
-		//update the code inside the code tag
-		this.codeDOM.html(code);
-
-		//apply the code highlighting
-		hljs.highlightBlock(this.codeDOM[0]);
-
+		return ret;
 	}
-
+	
 	//build essentially the first line of the class: the defition
 	buildCode_Definition(item, info){
 
@@ -68,15 +53,13 @@ class VBNetCodeGenerator extends CodeGenerator {
 					'Class ' + info.name;
 
 		//if it extends anything, add that here:
-		var ancestor = item.getAncestor();
-		if(ancestor!=null && ancestor!='')
-			ret += '\n\tInherits ' + ancestor;
+		if(info.hasAncestor)
+			ret += '\n\tInherits ' + info.ancestor;
 
 		//if it implements any interfaces, add those here:
-		var interfaces = item.getInterfaces();
-		if(interfaces.length>0){
-			for(var i=0; i<interfaces.length; i++)
-				ret += "\n\tImplements " + interfaces[i].mName;
+		if(info.hasInterfaces){
+			for(var i=0; i<info.interfaces.length; i++)
+				ret += "\n\tImplements " + info.interfaces[i].mName;
 		}
 
 		return ret;
@@ -84,23 +67,23 @@ class VBNetCodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the member variables
-	buildCode_Members(item){
+	buildCode_Members(item, info){
 
 		//var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-		var accessToStr = ['Private', 'Public'];
+		var accessToStr = ['Private', 'Public', 'Protected'];
 		var typeDefaults =  ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 		//get list of methods
-		var members = item.getMembers();
+		var members = info.methods;
 		
 		//code to return
 		var ret = '';
 
-		if(members.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "\t'Member Variables\n";
+			ret = "\t" + this.comment("Member Variables");
 
 			//loop over methods
 			for(var i=0; i<members.length; i++){
@@ -149,37 +132,37 @@ class VBNetCodeGenerator extends CodeGenerator {
 	}
 
 	//build a constructor method for the class:
-	buildCode_Constructor(item){
+	buildCode_Constructor(item, info){
 
-		var ret="\t'Constructor\n" + 
+		var ret="\t" + this.comment("Constructor") + 
 				"\tPublic Sub New()\n";
 
 		//if the class has an ancestor lets call super in the constructor!
-		if(item.getAncestor()!=null && item.getAncestor!="")
-			ret += 	"\n\t\t'call super constructor\n" + 
+		if(info.hasAncestor)
+			ret += 	"\n\t\t" + this.comment("call super constructor") + 
 					"\t\tMyBase.new()\n";
 
-		ret +=	"\n\t\t'...\n" +
+		ret +=	"\n\t\t" + this.comment("...") +
 				"\tEnd Sub";
 		return ret;
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
-		var accessToStr = ['Private', 'Public'];
+		var accessToStr = ['Private', 'Public', 'Protected'];
 
 		//get list of methods
-		var methods = item.getMethods();
+		var methods = info.methods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "\t'Methods\n";
+			ret = "\t" + this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -196,7 +179,7 @@ class VBNetCodeGenerator extends CodeGenerator {
 						VBMethodType + " " + 
 						method.mName + "()" + 
 						((method.mType==VOID)?"":" As " + typeToStr[parseInt(method.mType)]) + "\n" + 
-						"\t\t'...\n" + 
+						"\t\t" + this.comment("...") + 
 						"\tEnd " + VBMethodType + "\n\n";
 			}//next i
 

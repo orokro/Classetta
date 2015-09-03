@@ -1,18 +1,47 @@
 /*
 	This the parent class for all the language code generators.
-	Each language supported will extend this class and only write the method to generate code
+
+	This class is ABSTRACT and must be subclassed, since the buildcode() function as well as private member variables will only be defined in the individual code generators.
+
+	Each language supported will extend this class and only write the methods to generate code and of course the constructor to initialize variables
 
 	Code generators have the following responsibilities:
 		- Manage the DOM for the area where the code will be displayed (in tabs..)
 		- Generate code when given a new ClassItem object
 
 */
+//Abstract!
 class CodeGenerator{
 
 	constructor(DOM){
 
 		//save reference to the dom element this code generator will reside in
 		this.DOM = DOM;
+
+	}
+
+	//takes a class item and rebuilds the appropriate source code based on the class item for this language
+	update(item){
+
+		var code;
+
+		//if the item is null, just update with the default comment
+		if((typeof(item)==="undefined") || item==null)
+			code = this.buildDefaultComment();
+		else{
+
+			//inspect useful data on our item:
+			var info = this.inspect(item);
+
+			//variable to build the code
+			code = 	this.buildCode(item, info);
+		}
+
+		//update the code inside the code tag
+		this.codeDOM.html(code);
+
+		//apply the code highlighting
+		hljs.highlightBlock(this.codeDOM[0]);
 
 	}
 
@@ -111,9 +140,9 @@ class CodeGenerator{
 
 	//make a comment
 	comment(str){
-		return this.singleLineComments + str;
+		return this.singleLineComments + str + "\n";
 	}
-	
+
 	//wrap a string in multiline comments
 	wrapMuliLineComment(str){
 
@@ -140,9 +169,9 @@ class CodeGenerator{
 
 	//build the default commenting telling the user to goto the editor tab, etc.
 	buildDefaultComment(){
-		this.codeDOM.html(	this.wrapMuliLineComment(
-								"Please create a class on the left, and edit it with the Editor tab!\n" + 
-								"<-----" ));
+		return	this.wrapMuliLineComment(
+					"Please create a class on the left, and edit it with the Editor tab!\n" + 
+					"<-----" );
 	}
 
 	//adds some comments with warnings

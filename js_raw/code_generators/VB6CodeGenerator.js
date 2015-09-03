@@ -41,40 +41,23 @@ class VB6CodeGenerator extends CodeGenerator {
 
 	}
 
-	//takes a class item and rebuilds the appropriate source code based on the class item for this language
-	update(item){
-
-		//if the item is null, just update with the default comment
-		if((typeof(item)==="undefined") || item==null){
-			this.buildDefaultComment();
-			hljs.highlightBlock(this.codeDOM[0]);
-			return;
-		}
-
-		//inspect useful data on our item:
-		var info = this.inspect(item);
-
-		//variable to build the code
-		var code = 	this.buildCode_Warnings(item, info) + 
+	//builds the code!
+	buildCode(item, info){
+		var ret = 	this.buildCode_Warnings(item, info) + 
 					this.buildCode_Definition(item, info) + 
 					this.buildCode_Constants(item, info) + 
 					this.buildCode_Members(item, info) +
 					this.buildCode_Constructor(item, info) + "\n" +
 					this.buildCode_Methods(item, info);
 
-		//update the code inside the code tag
-		this.codeDOM.html(code);
-
-		//apply the code highlighting
-		hljs.highlightBlock(this.codeDOM[0]);
-
+		return ret;
 	}
 
 	//build essentially the first line of the class: the defition
 	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	"'NOTE: VB6 doesn't have syntax for definging a class. This code belongs in a file called: \"" + item.getName() + ".cls\".\n";
+		var ret = 	this.comment("NOTE: VB6 doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".cls\".");
 
 		//if it has interfaces, lets spit em out
 		if(info.hasInterfaces){
@@ -90,23 +73,23 @@ class VB6CodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the member variables
-	buildCode_Constants(item){
+	buildCode_Constants(item, info){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
 		var accessToStr = ['Private', 'Public', 'Private'];
 		var typeDefaults =  ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
 
 		//get list of methods
-		var items = item.getMembers().filter(function(n){ return (n.isConst==true);});
+		var items = info.constMembers;
 		
 		//code to return
 		var ret = '';
 
-		if(items.length>0){
+		if(info.hasConstMembers>0){
 
 			//code to return:
-			ret = 	"'Constants\n" + 
-					"'NOTE: In VB6 Class Constants can only be private.\n";
+			ret = 	this.comment("Constants") + 
+					this.comment("NOTE: In VB6 Class Constants can only be private.");
 
 			//loop over methods
 			for(var i=0; i<items.length; i++){
@@ -166,7 +149,7 @@ class VB6CodeGenerator extends CodeGenerator {
 		if(items.length>0){
 
 			//code to return:
-			ret = 	"'Members\n";
+			ret = 	this.comment("Members");
 
 			//loop over methods
 			for(var i=0; i<items.length; i++){
@@ -185,8 +168,8 @@ class VB6CodeGenerator extends CodeGenerator {
 	//build a constructor method for the class:
 	buildCode_Constructor(item){
 
-		var ret="'Constructor\n" + 
-				"'NOTE: VB6 Constructors cannot take parameters! \n" + 
+		var ret=this.comment("Constructor") + 
+				this.comment("NOTE: VB6 Constructors cannot take parameters!") + 
 				"Private Sub Class_Initialize()\n";
 
 		//get list of methods
@@ -194,7 +177,7 @@ class VB6CodeGenerator extends CodeGenerator {
 		
 		if(items.length>0){
 
-			ret += "\n\t'Intitlize our Member Variables\n";
+			ret += "\n\t" + this.comment("Intitlize our Member Variables");
 
 			//loop over methods
 			for(var i=0; i<items.length; i++){
@@ -234,21 +217,21 @@ class VB6CodeGenerator extends CodeGenerator {
 	}
 
 	//build out all the methods
-	buildCode_Methods(item){
+	buildCode_Methods(item, info){
 
 		var typeToStr = ['Void', 'Integer', 'Integer', 'Long', 'Byte', 'Single', 'Double', 'String', 'String', 'Boolean'];
 		var accessToStr = ['Private', 'Public', 'Private'];
 
 		//get list of methods
-		var methods = item.getMethods();
+		var methods = info.methods;
 
 		//code to return
 		var ret = '';
 
-		if(methods.length>0){
+		if(info.hasMethods){
 
 			//code to return:
-			ret = "'Methods\n";
+			ret = this.comment("Methods");
 
 			//loop over methods
 			for(var i=0; i<methods.length; i++){
@@ -259,13 +242,13 @@ class VB6CodeGenerator extends CodeGenerator {
 				if(method.mType==VOID)
 					ret += 	accessToStr[method.access] + ' Sub ' +
 							method.mName + "()\n" + 
-							"\t'...\n" + 
+							"\t" + this.comment("...") + 
 							"End Sub\n\n";
 				else
 					ret += 	accessToStr[method.access] + ' Function ' +
 							method.mName + "() As " + 
 							typeToStr[parseInt(method.mType)] + "\n" + 
-							"\t'...\n" + 
+							"\t" + this.comment("...") + 
 							"End Sub\n\n";
 			}//next i
 

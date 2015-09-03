@@ -39,6 +39,7 @@ class VBCodeGenerator extends CodeGenerator {
 
 	}
 
+	//OVERRIDE the parents update method, so we can update all of our children!
 	//takes a class item and rebuilds the appropriate source code based on the class item for this language
 	update(item){
 		
