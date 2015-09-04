@@ -122,7 +122,7 @@ class PerlCodeGenerator extends CodeGenerator {
 							break
 					}//swatch
 				}else{
-					ret += " = undef"
+					ret += " = undef";
 				}//has default value
 
 				//apply the new line

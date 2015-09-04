@@ -36,8 +36,10 @@ $iconRubyColor: #DA4242;
 $iconPHPColor: #7575AC;
 $iconJSColor: #E2D973;
 $iconVBColor: #6eb0af;
-$iconPerlColor: #1E81B5;
-
+$iconPerlColor: #4D93B7; //#1E81B5;
+$iconCppColor: #78A8D4; //#659AC3;
+$iconObjCColor: #8E8E8E; //#aeaeae;
+$iconSwiftColor: #EF8172; //#fc9565;
 
 //TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
 //TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
@@ -203,7 +205,25 @@ $iconPerlColor: #1E81B5;
 		.iconPerl {
 			background: desaturate(lighten($iconPerlColor, 5%), 10%);
 			&.activeTab, &:hover { @include tabGradient($iconPerlColor); }
-			.tabIcon { 	background-position: -516px 0px;
+			.tabIcon { 	background-position: -517px 0px;
+						width: 30px; }
+		}
+		.iconCpp {
+			background: desaturate(lighten($iconCppColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconCppColor); }
+			.tabIcon { 	background-position: -553px 0px;
+						width: 27px; }
+		}
+		.iconObjC {
+			background: desaturate(lighten($iconObjCColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconObjCColor); }
+			.tabIcon { 	background-position: -586px 0px;
+						width: 23px; }
+		}
+		.iconSwift {
+			background: desaturate(lighten($iconSwiftColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconSwiftColor); }
+			.tabIcon { 	background-position: -615px 0px;
 						width: 30px; }
 		}
 	}
@@ -232,33 +252,18 @@ $iconPerlColor: #1E81B5;
 
 
 //Tab Page styles...
-.tabPageEditorBG {
-	@include tabPageGradient($iconEditorColor);
-}
-.tabPageJavaBG {
-	@include tabPageGradient($iconJavaColor);
-}
-.tabPageCSharpBG {
-	@include tabPageGradient($iconCSharpColor);
-}
-.tabPagePythonBG {
-	@include tabPageGradient($iconPythonColor);
-}
-.tabPageRubyBG {
-	@include tabPageGradient($iconRubyColor);
-}
-.tabPagePHPBG {
-	@include tabPageGradient($iconPHPColor);
-}
-.tabPageJSBG {
-	@include tabPageGradient($iconJSColor);
-}
-.tabPageVBBG {
-	@include tabPageGradient($iconVBColor);
-}
-.tabPagePerlBG {
-	@include tabPageGradient($iconPerlColor);
-}
+.tabPageEditorBG { 	@include tabPageGradient($iconEditorColor); }
+.tabPageJavaBG {	@include tabPageGradient($iconJavaColor); }
+.tabPageCSharpBG {	@include tabPageGradient($iconCSharpColor); }
+.tabPagePythonBG {	@include tabPageGradient($iconPythonColor); }
+.tabPageRubyBG {	@include tabPageGradient($iconRubyColor); }
+.tabPagePHPBG {		@include tabPageGradient($iconPHPColor); }
+.tabPageJSBG {		@include tabPageGradient($iconJSColor); }
+.tabPageVBBG {		@include tabPageGradient($iconVBColor); }
+.tabPagePerlBG {	@include tabPageGradient($iconPerlColor); }
+.tabPageCppBG {		@include tabPageGradient($iconCppColor); }
+.tabPageObjCBG {	@include tabPageGradient($iconObjCColor); }
+.tabPageSwiftBG {	@include tabPageGradient($iconSwiftColor); }
 
 // Make sure the initial tab page is visible
 

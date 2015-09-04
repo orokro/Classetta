@@ -413,26 +413,92 @@
         background-position: -485px 0px;
         width: 28px; }
     #topTabsContainer #topTabs .iconPerl {
-      background: #2d8dbf; }
+      background: #6a9ab3; }
       #topTabsContainer #topTabs .iconPerl.activeTab, #topTabsContainer #topTabs .iconPerl:hover {
-        background: #1E81B5;
+        background: #4D93B7;
         /* Old browsers */
-        background: linear-gradient(to bottom, #98d0ee 0%, #40a9df 50%, #1E81B5 51%, #176289 100%);
+        background: linear-gradient(to bottom, #cce0ea 0%, #83b4cd 50%, #4D93B7 51%, #3c7795 100%);
         /* W3C */
-        background: -moz-linear-gradient(top, #98d0ee 0%, #40a9df 50%, #1E81B5 51%, #176289 100%);
+        background: -moz-linear-gradient(top, #cce0ea 0%, #83b4cd 50%, #4D93B7 51%, #3c7795 100%);
         /* FF3.6+ */
-        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #98d0ee), color-stop(50%, #40a9df), color-stop(51%, #1E81B5), color-stop(100%, #176289));
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cce0ea), color-stop(50%, #83b4cd), color-stop(51%, #4D93B7), color-stop(100%, #3c7795));
         /* Chrome,Safari4+ */
-        background: -webkit-linear-gradient(top, #98d0ee 0%, #40a9df 50%, #1E81B5 51%, #176289 100%);
+        background: -webkit-linear-gradient(top, #cce0ea 0%, #83b4cd 50%, #4D93B7 51%, #3c7795 100%);
         /* Chrome10+,Safari5.1+ */
-        background: -o-linear-gradient(top, #98d0ee 0%, #40a9df 50%, #1E81B5 51%, #176289 100%);
+        background: -o-linear-gradient(top, #cce0ea 0%, #83b4cd 50%, #4D93B7 51%, #3c7795 100%);
         /* Opera 11.10+ */
-        background: -ms-linear-gradient(top, #98d0ee 0%, #40a9df 50%, #1E81B5 51%, #176289 100%);
+        background: -ms-linear-gradient(top, #cce0ea 0%, #83b4cd 50%, #4D93B7 51%, #3c7795 100%);
         /* IE10+ */
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
         /* IE6-9 */ }
       #topTabsContainer #topTabs .iconPerl .tabIcon {
-        background-position: -516px 0px;
+        background-position: -517px 0px;
+        width: 30px; }
+    #topTabsContainer #topTabs .iconCpp {
+      background: #93b4d3; }
+      #topTabsContainer #topTabs .iconCpp.activeTab, #topTabsContainer #topTabs .iconCpp:hover {
+        background: #78A8D4;
+        /* Old browsers */
+        background: linear-gradient(to bottom, white 0%, #b2cde6 50%, #78A8D4 51%, #518fc8 100%);
+        /* W3C */
+        background: -moz-linear-gradient(top, white 0%, #b2cde6 50%, #78A8D4 51%, #518fc8 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(50%, #b2cde6), color-stop(51%, #78A8D4), color-stop(100%, #518fc8));
+        /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, white 0%, #b2cde6 50%, #78A8D4 51%, #518fc8 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, white 0%, #b2cde6 50%, #78A8D4 51%, #518fc8 100%);
+        /* Opera 11.10+ */
+        background: -ms-linear-gradient(top, white 0%, #b2cde6 50%, #78A8D4 51%, #518fc8 100%);
+        /* IE10+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
+        /* IE6-9 */ }
+      #topTabsContainer #topTabs .iconCpp .tabIcon {
+        background-position: -553px 0px;
+        width: 27px; }
+    #topTabsContainer #topTabs .iconObjC {
+      background: #9b9b9b; }
+      #topTabsContainer #topTabs .iconObjC.activeTab, #topTabsContainer #topTabs .iconObjC:hover {
+        background: #8E8E8E;
+        /* Old browsers */
+        background: linear-gradient(to bottom, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
+        /* W3C */
+        background: -moz-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e7e7e7), color-stop(50%, #b4b4b4), color-stop(51%, #8E8E8E), color-stop(100%, #757575));
+        /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
+        /* Opera 11.10+ */
+        background: -ms-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
+        /* IE10+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
+        /* IE6-9 */ }
+      #topTabsContainer #topTabs .iconObjC .tabIcon {
+        background-position: -586px 0px;
+        width: 23px; }
+    #topTabsContainer #topTabs .iconSwift {
+      background: #eb9a8f; }
+      #topTabsContainer #topTabs .iconSwift.activeTab, #topTabsContainer #topTabs .iconSwift:hover {
+        background: #EF8172;
+        /* Old browsers */
+        background: linear-gradient(to bottom, white 0%, #f7beb7 50%, #EF8172 51%, #ea5844 100%);
+        /* W3C */
+        background: -moz-linear-gradient(top, white 0%, #f7beb7 50%, #EF8172 51%, #ea5844 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(50%, #f7beb7), color-stop(51%, #EF8172), color-stop(100%, #ea5844));
+        /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, white 0%, #f7beb7 50%, #EF8172 51%, #ea5844 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, white 0%, #f7beb7 50%, #EF8172 51%, #ea5844 100%);
+        /* Opera 11.10+ */
+        background: -ms-linear-gradient(top, white 0%, #f7beb7 50%, #EF8172 51%, #ea5844 100%);
+        /* IE10+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
+        /* IE6-9 */ }
+      #topTabsContainer #topTabs .iconSwift .tabIcon {
+        background-position: -615px 0px;
         width: 30px; }
 
 .tabPageEditorBG {
@@ -580,19 +646,73 @@
   /* IE6-9 */ }
 
 .tabPagePerlBG {
-  background: #1E81B5;
+  background: #4D93B7;
   /* Old browsers */
-  background: linear-gradient(to bottom, #176289 0%, #b6def3 100%);
+  background: linear-gradient(to bottom, #3c7795 0%, #e6f0f5 100%);
   /* W3C */
-  background: -moz-linear-gradient(top, #176289 0%, #b6def3 100%);
+  background: -moz-linear-gradient(top, #3c7795 0%, #e6f0f5 100%);
   /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #176289), color-stop(100%, #b6def3));
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3c7795), color-stop(100%, #e6f0f5));
   /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #176289 0%, #b6def3 100%);
+  background: -webkit-linear-gradient(top, #3c7795 0%, #e6f0f5 100%);
   /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #176289 0%, #b6def3 100%);
+  background: -o-linear-gradient(top, #3c7795 0%, #e6f0f5 100%);
   /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #176289 0%, #b6def3 100%);
+  background: -ms-linear-gradient(top, #3c7795 0%, #e6f0f5 100%);
+  /* IE10+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
+  /* IE6-9 */ }
+
+.tabPageCppBG {
+  background: #78A8D4;
+  /* Old browsers */
+  background: linear-gradient(to bottom, #518fc8 0%, white 100%);
+  /* W3C */
+  background: -moz-linear-gradient(top, #518fc8 0%, white 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #518fc8), color-stop(100%, white));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #518fc8 0%, white 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #518fc8 0%, white 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #518fc8 0%, white 100%);
+  /* IE10+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
+  /* IE6-9 */ }
+
+.tabPageObjCBG {
+  background: #8E8E8E;
+  /* Old browsers */
+  background: linear-gradient(to bottom, #757575 0%, #f9f9f9 100%);
+  /* W3C */
+  background: -moz-linear-gradient(top, #757575 0%, #f9f9f9 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #757575), color-stop(100%, #f9f9f9));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #757575 0%, #f9f9f9 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #757575 0%, #f9f9f9 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #757575 0%, #f9f9f9 100%);
+  /* IE10+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
+  /* IE6-9 */ }
+
+.tabPageSwiftBG {
+  background: #EF8172;
+  /* Old browsers */
+  background: linear-gradient(to bottom, #ea5844 0%, white 100%);
+  /* W3C */
+  background: -moz-linear-gradient(top, #ea5844 0%, white 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ea5844), color-stop(100%, white));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #ea5844 0%, white 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #ea5844 0%, white 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #ea5844 0%, white 100%);
   /* IE10+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
   /* IE6-9 */ }
