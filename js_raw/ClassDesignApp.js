@@ -45,7 +45,7 @@ class ClassDesignApp {
 
         this.refreshCodeOutput();
 
-        //return;
+        return;
 
         //add default item for debugging
         this.ClassItmMgr.addClassItm(demoClasses.Blank());

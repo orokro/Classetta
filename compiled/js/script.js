@@ -151,7 +151,7 @@ var ClassDesignApp = (function () {
 
                 this.refreshCodeOutput();
 
-                //return;
+                return;
 
                 //add default item for debugging
                 this.ClassItmMgr.addClassItm(demoClasses.Blank());
