@@ -57,7 +57,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	this.comment("NOTE: VB6 doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".cls\".");
+		var ret = 	this.comment("NOTE: "+this.langName+" doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".cls\".");
 
 		//if it has interfaces, lets spit em out
 		if(info.hasInterfaces){
@@ -89,7 +89,7 @@ class VB6CodeGenerator extends CodeGenerator {
 
 			//code to return:
 			ret = 	this.comment("Constants") + 
-					this.comment("NOTE: In VB6 Class Constants can only be private.");
+					this.comment("NOTE: In "+this.langName+" Class Constants can only be private.");
 
 			//loop over methods
 			for(var i=0; i<items.length; i++){
@@ -169,7 +169,7 @@ class VB6CodeGenerator extends CodeGenerator {
 	buildCode_Constructor(item, info){
 
 		var ret=this.comment("Constructor") + 
-				this.comment("NOTE: VB6 Constructors cannot take parameters!") + 
+				this.comment("NOTE: "+this.langName+" Constructors cannot take parameters!") + 
 				"Private Sub Class_Initialize()\n";
 
 		//get list of methods

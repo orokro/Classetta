@@ -36,6 +36,7 @@ $iconRubyColor: #DA4242;
 $iconPHPColor: #7575AC;
 $iconJSColor: #E2D973;
 $iconVBColor: #6eb0af;
+$iconPerlColor: #1E81B5;
 
 
 //TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
@@ -199,6 +200,12 @@ $iconVBColor: #6eb0af;
 			.tabIcon { 	background-position: -485px 0px;
 						width: 28px; }
 		}
+		.iconPerl {
+			background: desaturate(lighten($iconPerlColor, 5%), 10%);
+			&.activeTab, &:hover { @include tabGradient($iconPerlColor); }
+			.tabIcon { 	background-position: -516px 0px;
+						width: 30px; }
+		}
 	}
 }
 
@@ -248,6 +255,9 @@ $iconVBColor: #6eb0af;
 }
 .tabPageVBBG {
 	@include tabPageGradient($iconVBColor);
+}
+.tabPagePerlBG {
+	@include tabPageGradient($iconPerlColor);
 }
 
 // Make sure the initial tab page is visible

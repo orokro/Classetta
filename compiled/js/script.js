@@ -139,6 +139,7 @@ var ClassDesignApp = (function () {
                 this.codeGenerators.push(new PHPCodeGenerator($('#tabPage_PHP')));
                 this.codeGenerators.push(new JSCodeGenerator($('#tabPage_JS')));
                 this.codeGenerators.push(new VBCodeGenerator($('#tabPage_VB')));
+                this.codeGenerators.push(new PerlCodeGenerator($('#tabPage_Perl')));
 
                 //bind click events for load demo class links
                 $('#aLoadThorough').click(function (e) {
@@ -160,7 +161,7 @@ var ClassDesignApp = (function () {
                 this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
                 this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-                this.TabMgr.setTab('Java');
+                this.TabMgr.setTab('Perl');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -3010,6 +3011,265 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var PerlCodeGenerator = (function (_CodeGenerator) {
+	_inherits(PerlCodeGenerator, _CodeGenerator);
+
+	function PerlCodeGenerator(DOM) {
+		_classCallCheck(this, PerlCodeGenerator);
+
+		_get(Object.getPrototypeOf(PerlCodeGenerator.prototype), "constructor", this).call(this, DOM);
+
+		//Make note of language name
+		this.langName = "Perl";
+
+		//set up comment styles
+		this.singleLineComments = "# ";
+		this.multiLineComments = { open: "=begin comment\n",
+			close: "\n=cut",
+			prefix: "\t" };
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			inheritance: false,
+			final: false,
+			abstract: false,
+			"private": false,
+			types: false,
+			methods: {
+				abstract: false,
+				final: false,
+				"static": false,
+				"private": false,
+				"protected": false
+			},
+			members: {
+				final: true,
+				"static": false,
+				"private": false,
+				"protected": false
+			}
+		};
+
+		//build the area for the code:
+		this.DOM.append("<pre><code class=\"perl\"></code></pre>");
+
+		//cache reference to the PRE tag
+		this.codeDOM = $(this.DOM.find('code'));
+	}
+
+	//builds the code!
+
+	_createClass(PerlCodeGenerator, [{
+		key: "buildCode",
+		value: function buildCode(item, info) {
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_StaticMembers(item, info) + this.buildCode_Constructor(item, info) + "\n" + this.buildCode_Methods(item, info) + this.comment("All Packages must end in a true statement") + "1;";
+
+			return ret;
+		}
+
+		//build essentially the first line of the class: the defition
+	}, {
+		key: "buildCode_Definition",
+		value: function buildCode_Definition(item, info) {
+
+			//build the left part that usually looks like "public final class foo"
+			var ret = this.comment("NOTE: " + this.langName + " doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + "package " + info.name + ";\n";
+
+			//if it has interfaces, lets spit em out
+			/*if(info.hasInterfaces){
+   	for(var i=0; i<info.interfaces.length; i++){
+   		ret += "Implements " + info.interfaces[i].mName + "\n";
+   	}//next i
+   		}
+   ret += "\n";*/
+
+			return ret;
+		}
+
+		//build out all the static member variables
+	}, {
+		key: "buildCode_StaticMembers",
+		value: function buildCode_StaticMembers(item, info) {
+
+			var typeDefaults = ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
+
+			//get list of methods
+			var items = info.staticMembers;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasStaticMembers > 0) {
+
+				//code to return:
+				ret = this.comment("Static Members");
+
+				//loop over methods
+				for (var i = 0; i < items.length; i++) {
+
+					//get the method
+					var itm = items[i];
+
+					ret += 'my ' + itm.mName + " = ";
+
+					if (itm.val != null) {
+						switch (parseInt(itm.mType)) {
+							case INT:
+							case DOUBLE:
+							case SHORT:
+							case LONG:
+							case BYTE:
+							case FLOAT:
+								ret += itm.val;
+								break;
+							case CHAR:
+								ret += "'" + itm.val + "'";
+								break;
+							case STRING:
+								ret += "\"" + itm.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += this.firstToUpper(itm.val);
+								break;
+						} //swatch
+					} else {
+							ret += " = undef";
+						} //has default value
+
+					//apply the new line
+					ret += ";\n";
+				} //next i
+				ret += "\n";
+			} //endif has statics
+
+			return ret;
+		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = this.comment("Constructor") + "def new {\n" + "\tmy $class = shift;\n\n" + "\tmy $self = {\n";
+
+			ret += this.buildCode_Members(item, info);
+
+			ret += "\t};\n\n" + "\tbless($self, $class);\n";
+
+			if (info.hasAncestor) ret += "\n\t" + this.comment("Call Super Constructor") + "\t$class->SUPER::new();\n";
+
+			ret += "\n}\n";
+
+			return ret;
+		}
+
+		//build out all the member variables
+	}, {
+		key: "buildCode_Members",
+		value: function buildCode_Members(item, info) {
+
+			var typeDefaults = ["undef", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
+
+			//get list of methods
+			var items = item.getMembers().filter(function (n) {
+				return n.isStatic != true;
+			});
+
+			//code to return
+			var ret = '';
+
+			if (items.length > 0) {
+
+				//code to return:
+				//ret = 	this.comment("Members");
+
+				//loop over methods
+				for (var i = 0; i < items.length; i++) {
+
+					//get the method
+					var itm = items[i];
+					ret += "\t\t" + (itm.access == PUBLIC ? '' : '_') + itm.mName + ' => ';
+
+					if (itm.val != null) {
+						switch (parseInt(itm.mType)) {
+							case INT:
+							case DOUBLE:
+							case SHORT:
+							case LONG:
+							case BYTE:
+							case FLOAT:
+								ret += itm.val;
+								break;
+							case CHAR:
+								ret += "'" + itm.val + "'";
+								break;
+							case STRING:
+								ret += "\"" + itm.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += this.firstToUpper(itm.val);
+								break;
+						} //swatch
+					} else {
+							ret += " = undef";
+						} //has default value
+
+					//apply the new line
+					ret += ",\n";
+				} //next i
+				ret += "\n";
+			} //endif has constnats
+
+			//remove the last comma:
+			ret = ret.split(',');
+			ret = ret.splice(0, ret.length - 1).join(',') + ret[ret.length - 1];
+
+			return ret;
+		}
+
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(item, info) {
+
+			//get list of methods
+			var methods = info.methods;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMethods) {
+
+				//code to return:
+				ret = this.comment("Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					if (method.isStatic == true) ret += 'def ' + method.mName + " {\n" + "\t" + this.comment("...") + "}\n\n";else ret += 'def ' + method.mName + " {\n" + "\tmy $self = shift;\n" + "\t" + this.comment("...") + "}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+	}]);
+
+	return PerlCodeGenerator;
+})(CodeGenerator);
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var PHPCodeGenerator = (function (_CodeGenerator) {
 	_inherits(PHPCodeGenerator, _CodeGenerator);
 
@@ -4659,7 +4919,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = this.comment("NOTE: VB6 doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".cls\".");
+			var ret = this.comment("NOTE: " + this.langName + " doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".cls\".");
 
 			//if it has interfaces, lets spit em out
 			if (info.hasInterfaces) {
@@ -4690,7 +4950,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 			if (info.hasConstMembers > 0) {
 
 				//code to return:
-				ret = this.comment("Constants") + this.comment("NOTE: In VB6 Class Constants can only be private.");
+				ret = this.comment("Constants") + this.comment("NOTE: In " + this.langName + " Class Constants can only be private.");
 
 				//loop over methods
 				for (var i = 0; i < items.length; i++) {
@@ -4773,7 +5033,7 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 		key: "buildCode_Constructor",
 		value: function buildCode_Constructor(item, info) {
 
-			var ret = this.comment("Constructor") + this.comment("NOTE: VB6 Constructors cannot take parameters!") + "Private Sub Class_Initialize()\n";
+			var ret = this.comment("Constructor") + this.comment("NOTE: " + this.langName + " Constructors cannot take parameters!") + "Private Sub Class_Initialize()\n";
 
 			//get list of methods
 			var items = item.getMembers().filter(function (n) {

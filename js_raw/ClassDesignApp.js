@@ -37,6 +37,7 @@ class ClassDesignApp {
         this.codeGenerators.push( new PHPCodeGenerator(     $('#tabPage_PHP')) );
         this.codeGenerators.push( new JSCodeGenerator(      $('#tabPage_JS')) );
         this.codeGenerators.push( new VBCodeGenerator(      $('#tabPage_VB')) );
+        this.codeGenerators.push( new PerlCodeGenerator(    $('#tabPage_Perl')) );
 
         //bind click events for load demo class links
         $('#aLoadThorough').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo()); });
@@ -54,7 +55,7 @@ class ClassDesignApp {
         this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
         this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-        this.TabMgr.setTab('Java');
+        this.TabMgr.setTab('Perl');
 
     }
 
