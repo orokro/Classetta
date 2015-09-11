@@ -196,6 +196,17 @@
   bottom: 12px;
   border: 1px solid #BBB; }
 
+#topTabsContainer.rowsMode {
+  position: relative; }
+  #topTabsContainer.rowsMode .tabsRow {
+    display: block;
+    position: absolute;
+    left: 0px;
+    bottom: 30px !important;
+    z-index: 9001; }
+    #topTabsContainer.rowsMode .tabsRow.activeRow {
+      bottom: 0px !important; }
+
 #topTabsContainer.smallMode li, #topTabsContainer.mediumMode li {
   font-size: 12px !important;
   padding: 4px 10px 2px 4px !important; }

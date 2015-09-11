@@ -2383,13 +2383,17 @@ var ResponsiveHelper = (function () {
 			//get windows width
 			var width = $(window).width();
 
+			//start with nothing
+			$('#topTabsContainer').removeClass('smallMode mediumMode rowsMode');
+
+			if (width < 960) $('#topTabsContainer').addClass('rowsMode');
+
 			if (width >= 1390) {
-				$('#topTabsContainer').removeClass('smallMode mediumMode');
+				//$('#topTabsContainer').removeClass('smallMode mediumMode');
+				$('#topTabsContainer').removeClass('smallMode mediumMode rowsMode');
 			} else if (width >= 1180) {
-				$('#topTabsContainer').removeClass('smallMode');
 				$('#topTabsContainer').addClass('mediumMode');
 			} else {
-				$('#topTabsContainer').removeClass('mediumMode');
 				$('#topTabsContainer').addClass('smallMode');
 			}
 		}
@@ -2492,6 +2496,10 @@ var TabManager = (function () {
 						//update tab sytles:
 						this.tabsDOM.removeClass('activeTab');
 						$('#tab_' + name).addClass('activeTab');
+
+						//update row styles in-case we're in stacked mode
+						this.DOM.find('.tabsRow').removeClass('activeRow');
+						$('#tab_' + name).parent().addClass('activeRow');
 
 						//show just the tab we care about:
 						this.tabs[name].show();
