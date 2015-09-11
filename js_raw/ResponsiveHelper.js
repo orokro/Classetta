@@ -22,13 +22,18 @@ class ResponsiveHelper{
 		//get windows width
 		var width = $(window).width();
 
+		//start with nothing
+		$('#topTabsContainer').removeClass('smallMode mediumMode rowsMode');
+
+		if(width<960)
+			$('#topTabsContainer').addClass('rowsMode');
+		
 		if(width>=1390){
-			$('#topTabsContainer').removeClass('smallMode mediumMode');
+			//$('#topTabsContainer').removeClass('smallMode mediumMode');
+			$('#topTabsContainer').removeClass('smallMode mediumMode rowsMode');
 		}else if(width>=1180){
-			$('#topTabsContainer').removeClass('smallMode');
 			$('#topTabsContainer').addClass('mediumMode');
 		}else{
-			$('#topTabsContainer').removeClass('mediumMode');
 			$('#topTabsContainer').addClass('smallMode');
 		}
 	}	

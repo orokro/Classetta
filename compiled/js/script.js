@@ -2497,10 +2497,6 @@ var TabManager = (function () {
 						this.tabsDOM.removeClass('activeTab');
 						$('#tab_' + name).addClass('activeTab');
 
-						//update row styles in-case we're in stacked mode
-						this.DOM.find('.tabsRow').removeClass('activeRow');
-						$('#tab_' + name).parent().addClass('activeRow');
-
 						//show just the tab we care about:
 						this.tabs[name].show();
 				}
