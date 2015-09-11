@@ -14,7 +14,7 @@
 
 	<!-- delicious CSS -->
 	<link rel="stylesheet" type="text/css" href="css/style.css"/>
-	<link rel="stylesheet" type="text/css" href="css/hljs/googlecode.css"/>
+	<!--link rel="stylesheet" type="text/css" href="css/hljs/googlecode.css"/-->
 
 	<!-- required scripts -->
 	<script type="text/javascript" src="js/extern/jquery.js"></script>
@@ -47,10 +47,17 @@
 					<div id="cmdAddClassItem"><span>+</span></div>
 					<div id="cmdRemoveClassItem"><span>-</span></div>
 				</div>
-				<div class="classListContainer">
-					<div id="divClassList">
+				<div id="classListContainer" class="listContainer">
+					<div id="divClassList" class="divSideBarList">
 					</div>
 				</div>
+			</div>
+			<div id="divExtraOptionsArea" class="contents">
+				Code Styles:
+				<div id="stylesListContainer" class="listContainer divSideBarList">
+				</div>
+				<input type="checkbox" id="chkShowExtras"><label for="chkShowExtras">Show Extra Code Samples</label>
+				<div class="desc">... in target language, such as loops, conditionals, etc.</div>
 			</div>
 		</div>
 
@@ -61,19 +68,19 @@
 			<div id="topTabsContainer">
 				<ul id="topTabs">
 					<!-- awkward spacing to fix the whitespace issue betwen ...</li><li>... -->
+					<div id="tabsRow_01" class="tabsRow">
 						 <li id="tab_Editor" 	class="iconEditor activeTab"><div class="tabIcon"></div><div class="tabLabel">Editor</div>
 					</li><li id="tab_Java" 		class="iconJava"><div 	class="tabIcon"></div><div class="tabLabel">Java</div>
 					</li><li id="tab_CSharp" 	class="iconCSharp"><div class="tabIcon"></div><div class="tabLabel">C#</div>
 					</li><li id="tab_Python" 	class="iconPython"><div class="tabIcon"></div><div class="tabLabel">Python</div>
 					</li><li id="tab_Ruby" 		class="iconRuby"><div 	class="tabIcon"></div><div class="tabLabel">Ruby</div>
 					</li><li id="tab_PHP" 		class="iconPHP"><div 	class="tabIcon"></div><div class="tabLabel">PHP</div>
-					</li><li id="tab_JS" 		class="iconJS"><div 	class="tabIcon"></div><div class="tabLabel">JavaScript</div>
+					</li></div><div id="tabsRow_02" class="tabsRow"><li id="tab_JS" 		class="iconJS"><div 	class="tabIcon"></div><div class="tabLabel">JavaScript</div>
 					</li><li id="tab_VB" 		class="iconVB"><div 	class="tabIcon"></div><div class="tabLabel">VB</div>
 					</li><li id="tab_Perl" 		class="iconPerl"><div 	class="tabIcon"></div><div class="tabLabel">Perl</div>
 					</li><li id="tab_Cpp" 		class="iconCpp"><div 	class="tabIcon"></div><div class="tabLabel">C++</div>
-					</li><li id="tab_ObjC" 		class="iconObjC"><div 	class="tabIcon"></div><div class="tabLabel">Objective C</div>
 					</li><li id="tab_Swift" 	class="iconSwift"><div 	class="tabIcon"></div><div class="tabLabel">Swift</div>
-					</li>
+					</li></div>
 				</ul>
 			</div>
 

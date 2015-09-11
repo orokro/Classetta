@@ -38,7 +38,6 @@ $iconJSColor: #E2D973;
 $iconVBColor: #6eb0af;
 $iconPerlColor: #4D93B7; //#1E81B5;
 $iconCppColor: #78A8D4; //#659AC3;
-$iconObjCColor: #8E8E8E; //#aeaeae;
 $iconSwiftColor: #EF8172; //#fc9565;
 
 //TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS +++ TABS
@@ -57,7 +56,81 @@ $iconSwiftColor: #EF8172; //#fc9565;
 	filter: progid:DXImageTransform.Microsoft.gradient(			 startColorstr='lighten($color, 35%)', 																					endColorstr='darken($color, 10%)',GradientType=0 ); /* IE6-9 */
 }
 
-//the container for the tabs
+//the container for the tabs when they are in "small-mode" or "medium-mode";
+#topTabsContainer.smallMode, #topTabsContainer.mediumMode {
+	li {
+
+		font-size: 12px !important;
+		padding: 4px 10px 2px 4px !important;
+	}
+
+	// FUCKING MAGICAL CORNER HACK. I DON'T EVEN
+	// http://jsfiddle.net/Gdqex/
+	li:before {
+	    border-top:12px solid #DCDCDC !important;
+	}
+	li:after {
+	    border-top:13px solid #DCDCDC !important;
+	}
+
+
+	.tabIcon {
+			background: url('/img/Icon_Sprites_Small.png') !important;
+			height: 22px !important;
+	}
+
+	.tabLabel {
+		margin-left: 3px !important;
+	}
+
+	//THE INVIDUAL TAB STYLES
+	.iconEditor {	.tabIcon { 	background-position: -199px 0px !important;
+					width: 19px !important; }}
+	.iconJava {		.tabIcon { 	background-position: -236px 0px !important;
+					width: 22px !important; }}
+	.iconCSharp {	.tabIcon { 	background-position: -274px 0px !important;
+					width: 29px !important; }}
+	.iconPython {	.tabIcon { 	background-position: -329px 0px !important;
+					width: 19px !important; }}
+	.iconRuby {		.tabIcon { 	background-position: -366px 0px !important;
+					width: 18px !important; }}
+	.iconPHP {		.tabIcon { 	background-position: -399px 0px !important;
+					width: 27px !important; }}
+	.iconJS {		.tabIcon { 	background-position: -451px 0px !important;
+					width: 17px !important; }}
+	.iconVB {		.tabIcon { 	background-position: -485px 0px !important;
+					width: 16px !important; }}
+	.iconPerl {		.tabIcon { 	background-position: -517px 0px !important;
+					width: 18px !important; }}
+	.iconCpp {		.tabIcon { 	background-position: -553px 0px !important;
+					width: 16px !important; }}
+	.iconSwift {	.tabIcon { 	background-position: -586px 0px !important;
+					width: 19px !important; }}
+}
+
+//medium mode only
+#topTabsContainer.mediumMode {
+	li {
+
+		font-size: 14px !important;
+		padding: 8px 16px 4px 8px !important;
+	}
+
+	.tabLabel {
+		transform: translateY(-30%) !important;
+		margin-left: 8px !important;
+	}
+}
+
+//small mode only
+#topTabsContainer.smallMode {
+
+	.tabLabel {
+		transform: translateY(-35%) !important;
+	}
+}
+
+//the container for the tabs when they are in their "normal, large-size mode"
 #topTabsContainer {
 
 	position: absolute;
@@ -146,6 +219,7 @@ $iconSwiftColor: #EF8172; //#fc9565;
 			transform: translateY(-50%);
 		}
 
+
 		//general styles for the tab icons
 		.tabIcon {
 			background: url('/img/Icon_Sprites.png');
@@ -214,18 +288,14 @@ $iconSwiftColor: #EF8172; //#fc9565;
 			.tabIcon { 	background-position: -553px 0px;
 						width: 27px; }
 		}
-		.iconObjC {
-			background: desaturate(lighten($iconObjCColor, 5%), 10%);
-			&.activeTab, &:hover { @include tabGradient($iconObjCColor); }
-			.tabIcon { 	background-position: -586px 0px;
-						width: 23px; }
-		}
 		.iconSwift {
 			background: desaturate(lighten($iconSwiftColor, 5%), 10%);
 			&.activeTab, &:hover { @include tabGradient($iconSwiftColor); }
-			.tabIcon { 	background-position: -615px 0px;
+			.tabIcon { 	background-position: -586px 0px;
 						width: 30px; }
 		}
+		
+
 	}
 }
 
@@ -262,7 +332,6 @@ $iconSwiftColor: #EF8172; //#fc9565;
 .tabPageVBBG {		@include tabPageGradient($iconVBColor); }
 .tabPagePerlBG {	@include tabPageGradient($iconPerlColor); }
 .tabPageCppBG {		@include tabPageGradient($iconCppColor); }
-.tabPageObjCBG {	@include tabPageGradient($iconObjCColor); }
 .tabPageSwiftBG {	@include tabPageGradient($iconSwiftColor); }
 
 // Make sure the initial tab page is visible
@@ -276,7 +345,7 @@ $iconSwiftColor: #EF8172; //#fc9565;
 	bottom: 10px;
 	left: 10px;
 	right: 10px;
-	padding: 5px;
+	//padding: 5px;
 
 	overflow-y: scroll;
 
@@ -287,6 +356,9 @@ $iconSwiftColor: #EF8172; //#fc9565;
 	//hidden by default
 	display: none;
 
+	.hljs {
+		padding: 10px! important;
+	}
 }
 
 
@@ -328,4 +400,8 @@ $iconSwiftColor: #EF8172; //#fc9565;
 		border-bottom: 1px solid #549998;
 	}
 
+}
+
+.tabsRow {
+	display: inline-block;
 }

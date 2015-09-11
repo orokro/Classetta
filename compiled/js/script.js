@@ -130,6 +130,27 @@ var ClassDesignApp = (function () {
                         me.handleSelectionEdited(me, o);
                 });
 
+                //Create a Code style manager so the user can select different colorization styles for their code
+                this.CodeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
+
+                //add some styles
+                this.CodeStyleMgr.addStyle("Atelier Forest Light", "atelier-forest.light.css");
+                this.CodeStyleMgr.addStyle("Atelier Health Light", "atelier-heath.light.css");
+                this.CodeStyleMgr.addStyle("Color Brewer", "color-brewer.css");
+                this.CodeStyleMgr.addStyle("HLJS", "default.css");
+                this.CodeStyleMgr.addStyle("Docco", "docco.css");
+                this.CodeStyleMgr.addStyle("Google Code", "googlecode.css");
+                this.CodeStyleMgr.addStyle("Idea", "idea.css");
+                this.CodeStyleMgr.addStyle("Tomorrow", "tomorrow.css");
+                this.CodeStyleMgr.addStyle("Visual Studio", "vs.css");
+                this.CodeStyleMgr.addStyle("X Code", "xcode.css");
+
+                //select the Google Code style by default
+                this.CodeStyleMgr.setSelectedItemByName("Google Code");
+
+                //instantiate the responsive-design helper that swaps out css depending out window size
+                this.responsiveHelper = new ResponsiveHelper();
+
                 //create a bunch of code generators for the tabs
                 this.codeGenerators = [];
                 this.codeGenerators.push(new JavaCodeGenerator($('#tabPage_Java')));
@@ -140,6 +161,8 @@ var ClassDesignApp = (function () {
                 this.codeGenerators.push(new JSCodeGenerator($('#tabPage_JS')));
                 this.codeGenerators.push(new VBCodeGenerator($('#tabPage_VB')));
                 this.codeGenerators.push(new PerlCodeGenerator($('#tabPage_Perl')));
+                this.codeGenerators.push(new CppCodeGenerator($('#tabPage_Cpp')));
+                this.codeGenerators.push(new SwiftCodeGenerator($('#tabPage_Swift')));
 
                 //bind click events for load demo class links
                 $('#aLoadThorough').click(function (e) {
@@ -151,7 +174,7 @@ var ClassDesignApp = (function () {
 
                 this.refreshCodeOutput();
 
-                return;
+                //return;
 
                 //add default item for debugging
                 this.ClassItmMgr.addClassItm(demoClasses.Blank());
@@ -161,7 +184,7 @@ var ClassDesignApp = (function () {
                 this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
                 this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-                this.TabMgr.setTab('Perl');
+                this.TabMgr.setTab('Cpp');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -1784,6 +1807,270 @@ var CodeGenerator = (function () {
 
 	return CodeGenerator;
 })();
+/*
+	This is the main class file for our StyleManager.
+
+	Basically this adds, appends, and manages stylesheets so the HighlightJS (HLJS) Code samples can be re-styled by the user.
+*/
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var CodeStyleManager = (function () {
+		function CodeStyleManager(baseCSSPath, ListAreaDOM) {
+				_classCallCheck(this, CodeStyleManager);
+
+				//reference to self so call backs work properly
+				var me = this;
+
+				//lets intialize a counter that will only always increment - so new stylkes can have unqiue IDs
+				//start with 1000, giving us 1000 private IDs that the Code Style Manager will never attempt to use.
+				this.IDCounter = 1000;
+
+				//and of course, initialize our list of styles
+				this.styles = [];
+
+				//keep track of our "selected" style...
+				//let -1 mean that no class is currently selected
+				this.selectedStyle = -1;
+
+				//save reference to the DOM area we'll be manipulating
+				this.DOM = ListAreaDOM;
+
+				//keep track of the base path to the CSS files for the styles
+				this.baseCSSPath = baseCSSPath;
+
+				//save reference to the actual list
+				this.listDOM = this.DOM.find('#stylesListContainer');
+
+				//now we can use some DOM bubbling magic to only bind one event to catch all the list item fires...
+				//basically if we bind the list itself we can check for event.target to see which list item was clicked..
+				this.listDOM.click(function (e) {
+						me.handleListClick(me, this, e);
+				});
+
+				//and prevent dragging from messing everything up with highlighting
+				this.listDOM.mousedown(function (e) {
+						e.preventDefault();
+				});
+
+				//for our own events lets make some helper objects
+				this.eventSelectionChange = new CallbackHelperObj();
+		}
+
+		//constructor
+
+		/* EVENT HANDLERS +++ EVENT HANDLERS +++ EVENT HANDLERS +++ EVENT HANDLERS +++ EVENT HANDLERS +++ EVENT HANDLERS */
+		//Handle when an item is clicked by capturing it's bubble on the way up
+
+		_createClass(CodeStyleManager, [{
+				key: 'handleListClick',
+				value: function handleListClick(me, item, e) {
+
+						//check if the target has an id:
+						var targetID = $(e.target).attr('id');
+						if (!(typeof targetID === "undefined")) {
+
+								//make sure the first half of the id is "style_"
+								if (targetID.substr(0, 6) == "style_") {
+
+										//get the ID of the class item clicked:
+										var styleID = parseInt(targetID.split('_')[1]);
+
+										//change which item is selected:
+										me.setSelectedItem(styleID);
+								} //matches correct id pattern
+						} //end if has ID
+				}
+
+				/* METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS +++ METHODS */
+
+				//allow the base bath to be get/set
+		}, {
+				key: 'setBaseCSSPath',
+				value: function setBaseCSSPath(path) {
+						this.baseCSSPath = path;
+				}
+		}, {
+				key: 'getBaseCSSPath',
+				value: function getBaseCSSPath() {
+						return this.baseCSSPath;
+				}
+
+				//add a style to our list of styles
+		}, {
+				key: 'addStyle',
+				value: function addStyle(styleName, fileName) {
+
+						//make a simple item object
+						var item = {
+								ID: this.IDCounter++,
+								name: styleName,
+								fileName: fileName
+						};
+
+						//add the style to our list of styles
+						this.styles.push(item);
+
+						//as soon as at lease one style is present, we should select it
+						if (this.selectedStyle < 0) this.setSelectedItem(item.ID);
+
+						//we should add a link to this file to the head area
+						var CSSPath = this.baseCSSPath + item.fileName;
+						$('head').append('<link id="css_' + item.ID + '" class="cssCodeStyle" rel="stylesheet" type="text/css" href="' + CSSPath + '" disabled />');
+
+						//and rebuild our list of styles:
+						this.updateList();
+				}
+
+				//remove a style from our list of styles
+		}, {
+				key: 'removeStyle',
+				value: function removeStyle(styleID) {
+
+						//we need to find where in the array it is so we can splice it out
+						var arrayPos = this.findIndexByID(styleID);
+
+						//if nothing was found, it's not present and therefore cant be removed
+						//note: must use ===false and NOT !arrayPos because 0 is a valid position!
+						if (arrayPos === false) return;
+
+						//other wise, let's split the item out of our array:
+						this.styles.splice(arrayPos, 1);
+
+						//now we need to update which item is selected.. this is the tricky part.
+						//IF there were more items after the array, in theory the arrayPos variable should
+						//still be in valid range... we should just select that one.
+						//BUT if we deleted an item from the end of the list, then arrayPos will now be out
+						//of bounds... so we should just select array.length-1;
+						//but if the array is now empty, we should just select -1 for no item!
+						var newItemPos;
+						if (this.styles.length <= 0) this.setSelectedItem(-1);else if (arrayPos <= this.styles.length - 1) this.setSelectedItem(this.styles[arrayPos].ID);else this.setSelectedItem(this.styles[this.styles.length - 1].ID);
+
+						//we should remove the old CSS file from the head-dom
+						$('#css_' + styleID).remove();
+				}
+
+				//check all our styles and look for one with the given id
+		}, {
+				key: 'findIndexByID',
+				value: function findIndexByID(styleID) {
+
+						//loop over all our styles
+						for (var i = 0; i < this.styles.length; i++) {
+
+								//check if the ID matches:
+								if (this.styles[i].ID == styleID) return i;
+						} //next i
+
+						//nothing was found? return false as error code
+						return false;
+				}
+
+				//check all our stles and look for one with a matching name
+		}, {
+				key: 'findIndexByName',
+				value: function findIndexByName(name) {
+
+						//loop over all our styles
+						for (var i = 0; i < this.styles.length; i++) {
+
+								//check if the ID matches:
+								if (this.styles[i].name == name) return i;
+						} //next i
+
+						//nothing was found? return false as error code
+						return false;
+				}
+
+				//get a reference to one of the styles by it's ID
+		}, {
+				key: 'getStyleByID',
+				value: function getStyleByID(styleID) {
+						return this.styles[this.findIndexByID(styleID)];
+				}
+
+				//get a style by its name
+		}, {
+				key: 'getStyleByName',
+				value: function getStyleByName(name) {
+						return this.styles[this.findIndexByName(name)];
+				}
+
+				//change which item is selected, by name
+		}, {
+				key: 'setSelectedItemByName',
+				value: function setSelectedItemByName(name) {
+						var item = this.getStyleByName(name);
+						if (item == false) return;
+						this.setSelectedItem(item.ID);
+				}
+
+				//change which item is currently selected
+		}, {
+				key: 'setSelectedItem',
+				value: function setSelectedItem(styleID) {
+
+						//update the index
+						this.selectedStyle = styleID;
+
+						//disable all the other CSS links
+						$('.cssCodeStyle').prop('disabled', true);
+
+						//enable only the selected one
+						$('#css_' + styleID).prop('disabled', false);
+
+						//and rebuild our list:
+						this.updateList();
+
+						//fire the event for the selection change!
+						this.eventSelectionChange.fire(this.getStyleByID(styleID));
+				}
+
+				//Rebuild the DOM List of items
+		}, {
+				key: 'updateList',
+				value: function updateList() {
+
+						//create an empty div to add the items to
+						var listItemsDOM = $('<div class="listItems"></div>');
+
+						var top = this.listDOM.scrollTop();
+
+						//loop over our styles and update the dom list
+						for (var i = 0; i < this.styles.length; i++) {
+
+								//loop over all our items
+								var item = this.styles[i];
+
+								//add a row for this item. Auto add in the "selected" identifier if the ID's match
+								listItemsDOM.append('<div id="style_' + item.ID + '" class="listItem ' + (item.ID == this.selectedStyle ? 'selectedClassItem' : '') + '">' + item.name); //+' {'+item.getID()+'}</div>');
+						} //next i
+
+						//update the list DOM
+						//this.listDOM.find('.listItems').remove();
+						this.listDOM.html(listItemsDOM);
+
+						this.listDOM.scrollTop(top);
+				}
+
+				//allow functions to be un/registerd for our SelectionChange event
+		}, {
+				key: 'onSelectionChange',
+				value: function onSelectionChange(func) {
+						return this.eventSelectionChange.register(func);
+				}
+		}, {
+				key: 'unbindSelectionChange',
+				value: function unbindSelectionChange(id) {
+						return this.eventSelectionChange.unregister(id);
+				}
+		}]);
+
+		return CodeStyleManager;
+})();
 'use strict';
 
 var demoClasses = {
@@ -2064,6 +2351,52 @@ var demoClasses = {
 				return NewItem;
 		}
 };
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var ResponsiveHelper = (function () {
+	function ResponsiveHelper() {
+		_classCallCheck(this, ResponsiveHelper);
+
+		//for scope resolution in call backs
+		var me = this;
+
+		//bind an event for when the window resizes
+		$(document).ready(function () {
+			$(window).resize(function (e) {
+				me.onResize(me, e);
+			});
+
+			me.onResize(me, null);
+		});
+	}
+
+	//when the window resizes...
+
+	_createClass(ResponsiveHelper, [{
+		key: 'onResize',
+		value: function onResize(me, e) {
+
+			//get windows width
+			var width = $(window).width();
+
+			if (width >= 1390) {
+				$('#topTabsContainer').removeClass('smallMode mediumMode');
+			} else if (width >= 1180) {
+				$('#topTabsContainer').removeClass('smallMode');
+				$('#topTabsContainer').addClass('mediumMode');
+			} else {
+				$('#topTabsContainer').removeClass('mediumMode');
+				$('#topTabsContainer').addClass('smallMode');
+			}
+		}
+	}]);
+
+	return ResponsiveHelper;
+})();
 /*
 	This is the main class for our Tab Manger.
 
@@ -2215,6 +2548,274 @@ var Employee = (function () {
 
   return Employee;
 })();
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var CppCodeGenerator = (function (_CodeGenerator) {
+	_inherits(CppCodeGenerator, _CodeGenerator);
+
+	function CppCodeGenerator(DOM) {
+		_classCallCheck(this, CppCodeGenerator);
+
+		_get(Object.getPrototypeOf(CppCodeGenerator.prototype), "constructor", this).call(this, DOM);
+
+		//Make note of language name
+		this.langName = "C++";
+
+		//set up comment styles
+		this.singleLineComments = "// ";
+		this.multiLineComments = { open: '/*\n',
+			close: '\n*/',
+			prefix: "\t" };
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			methods: {},
+			members: {}
+		};
+
+		//build the area for the code:
+		this.DOM.append("<pre><code class=\"cpp\"></code></pre>");
+
+		//cache reference to the PRE tag
+		this.codeDOM = $(this.DOM.find('code'));
+	}
+
+	//builds the code!
+
+	_createClass(CppCodeGenerator, [{
+		key: "buildCode",
+		value: function buildCode(item, info) {
+
+			//variable to build the code
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Destructor(item, info) + "\n\n" + this.buildCode_PublicItems(item, info) + this.buildCode_ProtectedItems(item, info) + this.buildCode_PrivateItems(item, info) + "}";
+
+			return ret;
+		}
+
+		//build essentially the first line of the class: the defition
+	}, {
+		key: "buildCode_Definition",
+		value: function buildCode_Definition(item, info) {
+
+			var ret = '';
+
+			//check if this code requires strings:
+			var arr1 = info.methods.filter(function (n) {
+				return n.mType == STRING;
+			});
+			var arr2 = info.members.filter(function (n) {
+				return n.mType == STRING;
+			});
+			if (arr1.length > 0 || arr2.length > 0) ret += "#include &lt;string&gt;\n" + "using std::string;\n\n";
+
+			if (!info.isPublic) ret += this.comment("NOTE: to have a private class, it must be placed under the \"private:\" header of the containing class:") + "private:\n";
+
+			//build the left part that usually looks like "public final class foo"
+			ret += 'class ' + info.name + ' ' + (info.isFinal ? 'final ' : '');
+			//((info.isAbstract)?'abstract ':'')+
+
+			//if it extends anything, add that here:
+			if (info.hasAncestor) ret += ': public ' + info.ancestor;
+
+			//if it implements any interfaces, add those here:
+			if (info.hasInterfaces) {
+				if (info.hasAncestor) ret += ', ';else ret += ' : ';
+				for (var i = 0; i < info.interfaces.length; i++) ret += 'public ' + info.interfaces[i].mName + ', ';
+				//truncate last two chars (', ')
+				ret = ret.substring(0, ret.length - 2);
+			}
+
+			//finally add the '{'
+			ret += ' {';
+			return ret;
+		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = "\t" + this.comment("Constructor") + "\t" + info.name + "()";
+
+			//if the class has an ancestor lets call super in the constructor!
+			if (info.hasAncestor) ret += " : " + info.ancestor + "()";
+
+			ret += "{\n" + "\n\t\t" + this.comment("...") + "\t}";
+			return ret;
+		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Destructor",
+		value: function buildCode_Destructor(item, info) {
+
+			var ret = "\t" + this.comment("Destructor") + "\t~" + info.name + "()";
+
+			ret += "{\n" + "\n\t\t" + this.comment("...") + "\t}";
+			return ret;
+		}
+
+		//build all the public items at once
+	}, {
+		key: "buildCode_PublicItems",
+		value: function buildCode_PublicItems(item, info) {
+
+			//make sure there actually are public items:
+			if (!info.hasPublicMembers && !info.hasPublicMethods) return '';
+
+			var ret = "\t" + this.comment("Public Items past this point:") + "\tpublic:\n";
+
+			//if it has public members, add them now:
+			if (info.hasPublicMembers) ret += "\n" + this.buildCode_Members(info.publicMembers, item, info);
+
+			//if it has public methods, add them now:"
+			if (info.hasPublicMethods) ret += "\n" + this.buildCode_Methods(info.publicMethods, item, info);
+
+			return ret;
+		}
+
+		//build all the protected items at once
+	}, {
+		key: "buildCode_ProtectedItems",
+		value: function buildCode_ProtectedItems(item, info) {
+
+			//make sure there actually are protected items:
+			if (!info.hasProtectedMembers && !info.hasProtectedMethods) return '';
+
+			var ret = "\t" + this.comment("Protected Items past this point:") + "\tprotected:\n";
+
+			//if it has public members, add them now:
+			if (info.hasProtectedMembers) ret += "\n" + this.buildCode_Members(info.protectedMembers, item, info);
+
+			//if it has public methods, add them now:"
+			if (info.hasProtectedMethods) ret += "\n" + this.buildCode_Methods(info.protectedMethods, item, info);
+
+			return ret;
+		}
+
+		//build all the private items at once
+	}, {
+		key: "buildCode_PrivateItems",
+		value: function buildCode_PrivateItems(item, info) {
+
+			//make sure there actually are private items:
+			if (!info.hasPrivateMembers && !info.hasPrivateMethods) return '';
+
+			var ret = "\t" + this.comment("Private Items past this point:") + "\tprivate:\n";
+
+			//if it has public members, add them now:
+			if (info.hasPrivateMembers) ret += "\n" + this.buildCode_Members(info.privateMembers, item, info);
+
+			//if it has public methods, add them now:"
+			if (info.hasPrivateMethods) ret += "\n" + this.buildCode_Methods(info.privateMethods, item, info);
+
+			return ret;
+		}
+
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(methods, item, info) {
+
+			var typeToStr = ['void', 'int', 'short int', 'long int', 'char', 'float', 'double', 'char', 'string', 'bool'];
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMethods) {
+
+				//code to return:
+				ret = "\t" + this.comment("Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					if (method.isAbstract) ret += "\t" + 'virtual ' + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "()" + (method.isConst ? ' final' : '') + +" = 0\n\n";else ret += "\t" + (method.isStatic && !method.isAbstract ? 'static ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "()" + (method.isConst ? ' final' : '') + "{\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+
+		//build out all the member variables
+	}, {
+		key: "buildCode_Members",
+		value: function buildCode_Members(members, item, info) {
+
+			var typeToStr = ['void', 'int', 'short int', 'long int', 'char', 'float', 'double', 'char', 'string', 'bool'];
+			var typeDefaults = ["Null", 0, 0, 0, 0, '0.0', '0.0', '', '', 'False'];
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMembers) {
+
+				//code to return:
+				ret = "\t" + this.comment("Member Variables");
+
+				//loop over methods
+				for (var i = 0; i < members.length; i++) {
+
+					//get the method
+					var member = members[i];
+
+					ret += "\t" + (member.isConst ? 'const ' : '') + (member.isStatic ? 'static ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+
+					if (member.val != null) {
+						switch (parseInt(member.mType)) {
+							case INT:
+							case DOUBLE:
+								ret += " = " + member.val;
+								break;
+							case SHORT:
+								ret += " = (short int)" + member.val;
+								break;
+							case LONG:
+								ret += " = (long int)" + member.val;
+								break;
+							case BYTE:
+								ret += " = (char)" + member.val;
+								break;
+							case FLOAT:
+								ret += " = " + member.val + 'f';
+								break;
+							case CHAR:
+								ret += " = '" + member.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + member.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + member.val.toString();
+								break;
+						} //swatch
+					} else {
+							if (member.isConst) ret += " = " + typeDefaults[member.mType];
+						} //has default value
+
+					//apply the semicolon and new line
+					ret += ";\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+	}]);
+
+	return CppCodeGenerator;
+})(CodeGenerator);
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -4137,6 +4738,198 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 		}]);
 
 		return RubyCodeGenerator;
+})(CodeGenerator);
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SwiftCodeGenerator = (function (_CodeGenerator) {
+	_inherits(SwiftCodeGenerator, _CodeGenerator);
+
+	function SwiftCodeGenerator(DOM) {
+		_classCallCheck(this, SwiftCodeGenerator);
+
+		_get(Object.getPrototypeOf(SwiftCodeGenerator.prototype), "constructor", this).call(this, DOM);
+
+		//Make note of language name
+		this.langName = "Swift";
+
+		//set up comment styles
+		this.singleLineComments = "// ";
+		this.multiLineComments = { open: '/*\n',
+			close: '\n*/',
+			prefix: "\t" };
+
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			methods: {},
+			members: {}
+		};
+
+		//build the area for the code:
+		this.DOM.append("<pre><code class=\"swift\"></code></pre>");
+
+		//cache reference to the PRE tag
+		this.codeDOM = $(this.DOM.find('code'));
+	}
+
+	//builds the code!
+
+	_createClass(SwiftCodeGenerator, [{
+		key: "buildCode",
+		value: function buildCode(item, info) {
+
+			//variable to build the code
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
+
+			return ret;
+		}
+
+		//build essentially the first line of the class: the defition
+	}, {
+		key: "buildCode_Definition",
+		value: function buildCode_Definition(item, info) {
+
+			//build the left part that usually looks like "public final class foo"
+			var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'sealed ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
+
+			//if it extends anything, add that here:
+			if (info.hasAncestor) ret += ' : ' + info.ancestor;
+
+			//if it implements any interfaces, add those here:
+			if (info.hasInterfaces) {
+				if (info.hasAncestor) ret += ', ';else ret += ' : ';
+				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
+				//truncate last two chars (', ')
+				ret = ret.substring(0, ret.length - 2);
+			}
+
+			//finally add the '{'
+			ret += ' {';
+			return ret;
+		}
+
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
+
+			var ret = "\t" + this.comment("Constructor") + "\tpublic " + info.name + "()";
+
+			//if the class has an ancestor lets call super in the constructor!
+			if (info.hasAncestor) ret += " : base()";
+
+			ret += "{\n" + "\n\t\t" + this.comment("...") + "\t}";
+			return ret;
+		}
+
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(item, info) {
+
+			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
+			var accessToStr = ['private', 'public', 'protected'];
+
+			//get list of methods
+			var methods = info.methods;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMethods) {
+
+				//code to return:
+				ret = "\t" + this.comment("Methods");
+
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
+
+					//get the method
+					var method = methods[i];
+
+					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+
+		//build out all the member variables
+	}, {
+		key: "buildCode_Members",
+		value: function buildCode_Members(item, info) {
+
+			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
+			var accessToStr = ['private', 'public', 'protected'];
+
+			//get list of methods
+			var members = info.members;
+
+			//code to return
+			var ret = '';
+
+			if (info.hasMembers) {
+
+				//code to return:
+				ret = "\t" + this.comment("Member Variables");
+
+				//loop over methods
+				for (var i = 0; i < members.length; i++) {
+
+					//get the method
+					var member = members[i];
+
+					ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'const ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+
+					if (member.val != null) {
+						switch (parseInt(member.mType)) {
+							case INT:
+							case DOUBLE:
+								ret += " = " + member.val;
+								break;
+							case SHORT:
+								ret += " = (short)" + member.val;
+								break;
+							case LONG:
+								ret += " = (long)" + member.val;
+								break;
+							case BYTE:
+								ret += " = (byte)" + member.val;
+								break;
+							case FLOAT:
+								ret += " = " + member.val + 'f';
+								break;
+
+							case CHAR:
+								ret += " = '" + member.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + member.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + member.val.toString();
+								break;
+						} //swatch
+					} //has default value
+
+					//apply the semicolon and new line
+					ret += ";\n";
+				} //next i
+			} //endif has methods
+
+			return ret;
+		}
+	}]);
+
+	return SwiftCodeGenerator;
 })(CodeGenerator);
 "use strict";
 

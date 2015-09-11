@@ -25,6 +25,7 @@ body {
 
 	//So all the default tabs will fit:
 	min-width: 1008px !important;
+	min-height: 480px !important;
 }
 
 pre { margin: 0px; }
@@ -45,6 +46,7 @@ pre { margin: 0px; }
 
 	//So all the default tabs will fit:
 	min-width: 1008px !important;
+    min-height: 365px !important;
 
 	border-top: 1px solid #FFF;
 	border-bottom: 1px solid #000;
@@ -56,6 +58,8 @@ pre { margin: 0px; }
 
 	h1 { color: #222; }
 	h2, h3, h4, h5 { color: #555; }
+
+
 }
 
 //the welcome page for when there are no ClassItems to edit yet

@@ -28,23 +28,27 @@
 	height: 100%;
 	width: 208px;
 
-	//The contents of the side bar
-	.contents {
+	//the area for the class list
+	#divClassListArea {
 		position: absolute;
 		top: 10px;
 		left: 12px;
 		right: 12px;
-		bottom: 12px;
+		bottom: 250px;
 	}
 
 	//the box containing the list of classes
-	.classListContainer {
+	#classListContainer {
 
 		//SIZE AND POSITION
 		position: absolute;
 		top: 25px;
 		width: 100%;
 		bottom: 0px;
+	}
+
+	//genertic list container styles
+	.listContainer {
 
 		//STYLE
 		border: 1px solid #BBB;
@@ -57,13 +61,11 @@
 
 		//MISC
 		overflow-y: scroll;
-
 	}
 
-	//the actual box containing the class names
-	#divClassList {
+	//the actual box containing list styles
+	.divSideBarList {
 		
-
 		//styles for the list items themselves
 		.listItem {
 			cursor: pointer;
@@ -76,7 +78,10 @@
 
 			border-bottom: 1px solid #FFF;
 
-			//alternating backgrounds...
+			overflow: hidden;
+			white-space: nowrap;
+
+			//alternating bottom:ackgrounds...
 			background: #EBF4F7;
 			&:nth-child(even){ background: #D6E8EF; /* #C9E9F5; */ }
 
@@ -89,8 +94,6 @@
 					}
 		}
 
-
-		
 	}
 
 	//floating box to position the add/remove class buttons
@@ -135,4 +138,28 @@
 			}
 	}
 
+	#divExtraOptionsArea {
+
+		position: absolute;
+		//top: 10px;
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		height: 228px;
+
+	}
+
+	#stylesListContainer {
+		height: 150px;
+	}
+
+	#chkShowExtras {
+		margin-top: 12px;
+	}
+	label { font-size: 12px; font-weight: 600; }
+	.desc { 
+		position: relative;
+		top: -3px;
+		font-size: 10px;
+		padding-left: 10px;}
 }

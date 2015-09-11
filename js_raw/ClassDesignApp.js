@@ -28,6 +28,27 @@ class ClassDesignApp {
         //and when the editor edits the selected ClassItem... so we can update the code tabs
         this.ClassItmMgr.onSelectionEdited(function(o){ me.handleSelectionEdited(me, o); });
 
+        //Create a Code style manager so the user can select different colorization styles for their code
+        this.CodeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
+
+        //add some styles
+        this.CodeStyleMgr.addStyle("Atelier Forest Light", 	"atelier-forest.light.css");
+        this.CodeStyleMgr.addStyle("Atelier Health Light", 	"atelier-heath.light.css");
+        this.CodeStyleMgr.addStyle("Color Brewer",			"color-brewer.css");
+        this.CodeStyleMgr.addStyle("HLJS", 					"default.css");
+        this.CodeStyleMgr.addStyle("Docco", 				"docco.css");
+        this.CodeStyleMgr.addStyle("Google Code", 			"googlecode.css");
+        this.CodeStyleMgr.addStyle("Idea", 					"idea.css");
+        this.CodeStyleMgr.addStyle("Tomorrow", 				"tomorrow.css");
+        this.CodeStyleMgr.addStyle("Visual Studio", 		"vs.css");
+        this.CodeStyleMgr.addStyle("X Code", 				"xcode.css");
+        
+        //select the Google Code style by default
+        this.CodeStyleMgr.setSelectedItemByName("Google Code");
+
+        //instantiate the responsive-design helper that swaps out css depending out window size
+        this.responsiveHelper = new ResponsiveHelper();
+        
         //create a bunch of code generators for the tabs
         this.codeGenerators = [];
         this.codeGenerators.push( new JavaCodeGenerator(    $('#tabPage_Java')) );
@@ -38,6 +59,8 @@ class ClassDesignApp {
         this.codeGenerators.push( new JSCodeGenerator(      $('#tabPage_JS')) );
         this.codeGenerators.push( new VBCodeGenerator(      $('#tabPage_VB')) );
         this.codeGenerators.push( new PerlCodeGenerator(    $('#tabPage_Perl')) );
+        this.codeGenerators.push( new CppCodeGenerator(    	$('#tabPage_Cpp')) );
+        this.codeGenerators.push( new SwiftCodeGenerator(   $('#tabPage_Swift')) );
 
         //bind click events for load demo class links
         $('#aLoadThorough').click(function(e){ me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo()); });
@@ -45,7 +68,7 @@ class ClassDesignApp {
 
         this.refreshCodeOutput();
 
-        return;
+        //return;
 
         //add default item for debugging
         this.ClassItmMgr.addClassItm(demoClasses.Blank());
@@ -55,7 +78,7 @@ class ClassDesignApp {
         this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
         this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-        this.TabMgr.setTab('Perl');
+        this.TabMgr.setTab('Cpp');
 
     }
 

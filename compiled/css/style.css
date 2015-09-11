@@ -84,35 +84,38 @@
   position: relative;
   height: 100%;
   width: 208px; }
-  #divSideBar .contents {
+  #divSideBar #divClassListArea {
     position: absolute;
     top: 10px;
     left: 12px;
     right: 12px;
-    bottom: 12px; }
-  #divSideBar .classListContainer {
+    bottom: 250px; }
+  #divSideBar #classListContainer {
     position: absolute;
     top: 25px;
     width: 100%;
-    bottom: 0px;
+    bottom: 0px; }
+  #divSideBar .listContainer {
     border: 1px solid #BBB;
     background: #FFF;
     -webkit-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
     -moz-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
     box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
     overflow-y: scroll; }
-  #divSideBar #divClassList .listItem {
+  #divSideBar .divSideBarList .listItem {
     cursor: pointer;
     color: #333;
     padding: 4px 10px;
     border-bottom: 1px solid #FFF;
+    overflow: hidden;
+    white-space: nowrap;
     background: #EBF4F7; }
-    #divSideBar #divClassList .listItem:nth-child(even) {
+    #divSideBar .divSideBarList .listItem:nth-child(even) {
       background: #D6E8EF;
       /* #C9E9F5; */ }
-    #divSideBar #divClassList .listItem:hover {
+    #divSideBar .divSideBarList .listItem:hover {
       background: #65C9EF; }
-    #divSideBar #divClassList .listItem.selectedClassItem {
+    #divSideBar .divSideBarList .listItem.selectedClassItem {
       background: #65C9EF;
       /* Old browsers */
       background: linear-gradient(to bottom, #c1e9f9 0%, #7cd1f1 50%, #65C9EF 51%, #37b9ea 100%);
@@ -153,6 +156,24 @@
         top: -2px; }
     #divSideBar .addRemoveButtons div:hover {
       background: #dfdede; }
+  #divSideBar #divExtraOptionsArea {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    height: 228px; }
+  #divSideBar #stylesListContainer {
+    height: 150px; }
+  #divSideBar #chkShowExtras {
+    margin-top: 12px; }
+  #divSideBar label {
+    font-size: 12px;
+    font-weight: 600; }
+  #divSideBar .desc {
+    position: relative;
+    top: -3px;
+    font-size: 10px;
+    padding-left: 10px; }
 
 /*
 	This is the main style sheet for the "tabbed area"
@@ -174,6 +195,78 @@
   top: -2px;
   bottom: 12px;
   border: 1px solid #BBB; }
+
+#topTabsContainer.smallMode li, #topTabsContainer.mediumMode li {
+  font-size: 12px !important;
+  padding: 4px 10px 2px 4px !important; }
+
+#topTabsContainer.smallMode li:before, #topTabsContainer.mediumMode li:before {
+  border-top: 12px solid #DCDCDC !important; }
+
+#topTabsContainer.smallMode li:after, #topTabsContainer.mediumMode li:after {
+  border-top: 13px solid #DCDCDC !important; }
+
+#topTabsContainer.smallMode .tabIcon, #topTabsContainer.mediumMode .tabIcon {
+  background: url("/img/Icon_Sprites_Small.png") !important;
+  height: 22px !important; }
+
+#topTabsContainer.smallMode .tabLabel, #topTabsContainer.mediumMode .tabLabel {
+  margin-left: 3px !important; }
+
+#topTabsContainer.smallMode .iconEditor .tabIcon, #topTabsContainer.mediumMode .iconEditor .tabIcon {
+  background-position: -199px 0px !important;
+  width: 19px !important; }
+
+#topTabsContainer.smallMode .iconJava .tabIcon, #topTabsContainer.mediumMode .iconJava .tabIcon {
+  background-position: -236px 0px !important;
+  width: 22px !important; }
+
+#topTabsContainer.smallMode .iconCSharp .tabIcon, #topTabsContainer.mediumMode .iconCSharp .tabIcon {
+  background-position: -274px 0px !important;
+  width: 29px !important; }
+
+#topTabsContainer.smallMode .iconPython .tabIcon, #topTabsContainer.mediumMode .iconPython .tabIcon {
+  background-position: -329px 0px !important;
+  width: 19px !important; }
+
+#topTabsContainer.smallMode .iconRuby .tabIcon, #topTabsContainer.mediumMode .iconRuby .tabIcon {
+  background-position: -366px 0px !important;
+  width: 18px !important; }
+
+#topTabsContainer.smallMode .iconPHP .tabIcon, #topTabsContainer.mediumMode .iconPHP .tabIcon {
+  background-position: -399px 0px !important;
+  width: 27px !important; }
+
+#topTabsContainer.smallMode .iconJS .tabIcon, #topTabsContainer.mediumMode .iconJS .tabIcon {
+  background-position: -451px 0px !important;
+  width: 17px !important; }
+
+#topTabsContainer.smallMode .iconVB .tabIcon, #topTabsContainer.mediumMode .iconVB .tabIcon {
+  background-position: -485px 0px !important;
+  width: 16px !important; }
+
+#topTabsContainer.smallMode .iconPerl .tabIcon, #topTabsContainer.mediumMode .iconPerl .tabIcon {
+  background-position: -517px 0px !important;
+  width: 18px !important; }
+
+#topTabsContainer.smallMode .iconCpp .tabIcon, #topTabsContainer.mediumMode .iconCpp .tabIcon {
+  background-position: -553px 0px !important;
+  width: 16px !important; }
+
+#topTabsContainer.smallMode .iconSwift .tabIcon, #topTabsContainer.mediumMode .iconSwift .tabIcon {
+  background-position: -586px 0px !important;
+  width: 19px !important; }
+
+#topTabsContainer.mediumMode li {
+  font-size: 14px !important;
+  padding: 8px 16px 4px 8px !important; }
+
+#topTabsContainer.mediumMode .tabLabel {
+  transform: translateY(-30%) !important;
+  margin-left: 8px !important; }
+
+#topTabsContainer.smallMode .tabLabel {
+  transform: translateY(-35%) !important; }
 
 #topTabsContainer {
   position: absolute;
@@ -456,28 +549,6 @@
       #topTabsContainer #topTabs .iconCpp .tabIcon {
         background-position: -553px 0px;
         width: 27px; }
-    #topTabsContainer #topTabs .iconObjC {
-      background: #9b9b9b; }
-      #topTabsContainer #topTabs .iconObjC.activeTab, #topTabsContainer #topTabs .iconObjC:hover {
-        background: #8E8E8E;
-        /* Old browsers */
-        background: linear-gradient(to bottom, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
-        /* W3C */
-        background: -moz-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
-        /* FF3.6+ */
-        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e7e7e7), color-stop(50%, #b4b4b4), color-stop(51%, #8E8E8E), color-stop(100%, #757575));
-        /* Chrome,Safari4+ */
-        background: -webkit-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
-        /* Chrome10+,Safari5.1+ */
-        background: -o-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
-        /* Opera 11.10+ */
-        background: -ms-linear-gradient(top, #e7e7e7 0%, #b4b4b4 50%, #8E8E8E 51%, #757575 100%);
-        /* IE10+ */
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
-        /* IE6-9 */ }
-      #topTabsContainer #topTabs .iconObjC .tabIcon {
-        background-position: -586px 0px;
-        width: 23px; }
     #topTabsContainer #topTabs .iconSwift {
       background: #eb9a8f; }
       #topTabsContainer #topTabs .iconSwift.activeTab, #topTabsContainer #topTabs .iconSwift:hover {
@@ -498,7 +569,7 @@
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='lighten($color, 35%)', endColorstr='darken($color, 10%)',GradientType=0 );
         /* IE6-9 */ }
       #topTabsContainer #topTabs .iconSwift .tabIcon {
-        background-position: -615px 0px;
+        background-position: -586px 0px;
         width: 30px; }
 
 .tabPageEditorBG {
@@ -681,24 +752,6 @@
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
   /* IE6-9 */ }
 
-.tabPageObjCBG {
-  background: #8E8E8E;
-  /* Old browsers */
-  background: linear-gradient(to bottom, #757575 0%, #f9f9f9 100%);
-  /* W3C */
-  background: -moz-linear-gradient(top, #757575 0%, #f9f9f9 100%);
-  /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #757575), color-stop(100%, #f9f9f9));
-  /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #757575 0%, #f9f9f9 100%);
-  /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #757575 0%, #f9f9f9 100%);
-  /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #757575 0%, #f9f9f9 100%);
-  /* IE10+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='darken($color, 10%)', endColorstr='lighten($color, 42%)', GradientType=0 );
-  /* IE6-9 */ }
-
 .tabPageSwiftBG {
   background: #EF8172;
   /* Old browsers */
@@ -723,11 +776,12 @@
   bottom: 10px;
   left: 10px;
   right: 10px;
-  padding: 5px;
   overflow-y: scroll;
   border: 1px solid #CCC;
   background: #FFF;
   display: none; }
+  .tabPage .hljs {
+    padding: 10px !important; }
 
 .GenHeader {
   padding: 10px;
@@ -751,6 +805,9 @@
   #tabPage_VB .GenHeader {
     background: #CBE2E2;
     border-bottom: 1px solid #549998; }
+
+.tabsRow {
+  display: inline-block; }
 
 /*
 	This is the main stylesheet for the class Editor interface.
@@ -883,7 +940,8 @@ body {
   padding: 0px;
   margin: 0px;
   background: #cccccc;
-  min-width: 1008px !important; }
+  min-width: 1008px !important;
+  min-height: 480px !important; }
 
 pre {
   margin: 0px; }
@@ -895,6 +953,7 @@ pre {
   left: 0px;
   right: 0px;
   min-width: 1008px !important;
+  min-height: 365px !important;
   border-top: 1px solid #FFF;
   border-bottom: 1px solid #000;
   background: #EAE8E8; }
