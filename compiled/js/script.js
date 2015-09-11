@@ -108,45 +108,45 @@ var ClassDesignApp = (function () {
                 var me = this;
 
                 //Create and Initialize our TabManager. It expects a reference to the tabs area
-                this.TabMgr = new TabManager($('#divTabbedArea'));
+                this.tabMgr = new TabManager($('#divTabbedArea'));
 
                 //Create an Initialize our ClassItemsManager. It expects a reference to the area in the sidebar for the list...
-                this.ClassItmMgr = new ClassItemManager($('#divClassListArea'));
+                this.classItmMgr = new ClassItemManager($('#divClassListArea'));
 
                 //Keep track of which ClassItem is being worked on, or null if none
                 this.currentClassItem = null;
 
                 //Create and Initialize a new ClassEditor. It expects a reference to the current class object, and Editor Tab Page div
-                this.Editor = new ClassEditor(this.currentClassItem, $('#divEditor'));
+                this.editor = new ClassEditor(this.currentClassItem, $('#divEditor'));
 
                 //we need to bind an event for when the user changes the selected class,
                 //so we can update the editor
-                this.ClassItmMgr.onSelectionChange(function (o) {
+                this.classItmMgr.onSelectionChange(function (o) {
                         me.handleSelectionChange(me, o);
                 });
 
                 //and when the editor edits the selected ClassItem... so we can update the code tabs
-                this.ClassItmMgr.onSelectionEdited(function (o) {
+                this.classItmMgr.onSelectionEdited(function (o) {
                         me.handleSelectionEdited(me, o);
                 });
 
                 //Create a Code style manager so the user can select different colorization styles for their code
-                this.CodeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
+                this.codeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
 
                 //add some styles
-                this.CodeStyleMgr.addStyle("Atelier Forest Light", "atelier-forest.light.css");
-                this.CodeStyleMgr.addStyle("Atelier Health Light", "atelier-heath.light.css");
-                this.CodeStyleMgr.addStyle("Color Brewer", "color-brewer.css");
-                this.CodeStyleMgr.addStyle("HLJS", "default.css");
-                this.CodeStyleMgr.addStyle("Docco", "docco.css");
-                this.CodeStyleMgr.addStyle("Google Code", "googlecode.css");
-                this.CodeStyleMgr.addStyle("Idea", "idea.css");
-                this.CodeStyleMgr.addStyle("Tomorrow", "tomorrow.css");
-                this.CodeStyleMgr.addStyle("Visual Studio", "vs.css");
-                this.CodeStyleMgr.addStyle("X Code", "xcode.css");
+                this.codeStyleMgr.addStyle("Atelier Forest Light", "atelier-forest.light.css");
+                this.codeStyleMgr.addStyle("Atelier Health Light", "atelier-heath.light.css");
+                this.codeStyleMgr.addStyle("Color Brewer", "color-brewer.css");
+                this.codeStyleMgr.addStyle("HLJS", "default.css");
+                this.codeStyleMgr.addStyle("Docco", "docco.css");
+                this.codeStyleMgr.addStyle("Google Code", "googlecode.css");
+                this.codeStyleMgr.addStyle("Idea", "idea.css");
+                this.codeStyleMgr.addStyle("Tomorrow", "tomorrow.css");
+                this.codeStyleMgr.addStyle("Visual Studio", "vs.css");
+                this.codeStyleMgr.addStyle("X Code", "xcode.css");
 
                 //select the Google Code style by default
-                this.CodeStyleMgr.setSelectedItemByName("Google Code");
+                this.codeStyleMgr.setSelectedItemByName("Google Code");
 
                 //instantiate the responsive-design helper that swaps out css depending out window size
                 this.responsiveHelper = new ResponsiveHelper();
@@ -166,10 +166,10 @@ var ClassDesignApp = (function () {
 
                 //bind click events for load demo class links
                 $('#aLoadThorough').click(function (e) {
-                        me.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
+                        me.classItmMgr.addClassItm(demoClasses.CompleteDemo());
                 });
                 $('#aLoadRoboKitty').click(function (e) {
-                        me.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
+                        me.classItmMgr.addClassItm(demoClasses.RoboKitty());
                 });
 
                 this.refreshCodeOutput();
@@ -177,14 +177,14 @@ var ClassDesignApp = (function () {
                 //return;
 
                 //add default item for debugging
-                this.ClassItmMgr.addClassItm(demoClasses.Blank());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyMembers());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyConstants());
-                this.ClassItmMgr.addClassItm(demoClasses.OnlyStatics());
-                this.ClassItmMgr.addClassItm(demoClasses.RoboKitty());
-                this.ClassItmMgr.addClassItm(demoClasses.CompleteDemo());
+                this.classItmMgr.addClassItm(demoClasses.Blank());
+                this.classItmMgr.addClassItm(demoClasses.OnlyMembers());
+                this.classItmMgr.addClassItm(demoClasses.OnlyConstants());
+                this.classItmMgr.addClassItm(demoClasses.OnlyStatics());
+                this.classItmMgr.addClassItm(demoClasses.RoboKitty());
+                this.classItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-                this.TabMgr.setTab('Cpp');
+                this.tabMgr.setTab('Cpp');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -194,7 +194,7 @@ var ClassDesignApp = (function () {
                 value: function handleSelectionChange(me, newItem) {
 
                         //update the editor...
-                        me.Editor.setClassItem(newItem);
+                        me.editor.setClassItem(newItem);
 
                         //if the new item is null or undefined, that means no item is selected (e.g. the list was emptied)
                         if (typeof newItem === "undefined" || newItem == null) {
