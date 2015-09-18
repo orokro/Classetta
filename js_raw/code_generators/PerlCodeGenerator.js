@@ -15,7 +15,6 @@ class PerlCodeGenerator extends CodeGenerator {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
-							inheritance: false,
 							final: false,
 							abstract: false,
 							private: false,
@@ -62,16 +61,32 @@ class PerlCodeGenerator extends CodeGenerator {
 
 		//build the left part that usually looks like "public final class foo"
 		var ret = 	this.comment("NOTE: "+this.langName+" doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + 
-					"package " + info.name + ";\n";
+					this.comment("ALSO NOTE: Nobody should use Perl for anything, ever.") + 
+					"package " + info.name + ";\n\n" + 
+					"use strict;\n" + 
+					"use warnings;\n";
 
-		//if it has interfaces, lets spit em out
-		/*if(info.hasInterfaces){
-			for(var i=0; i<info.interfaces.length; i++){
-				ret += "Implements " + info.interfaces[i].mName + "\n";
-			}//next i
+		//if it has either an ancestor or interfaces:
+		if(info.hasAncestor || info.hasInterfaces){
+			ret += 	"\n" + this.comment("Ancestors and Interfaces") + 
+					"our @ISA = qw(\n";
 
-		}
-		ret += "\n";*/
+			//if we have an ancestor, add that now:
+			if(info.hasAncestor)
+				ret += "\t"+info.ancestor+"\n";
+
+			//if it has interfaces, lets spit em out
+			if(info.hasInterfaces){
+				for(var i=0; i<info.interfaces.length; i++){
+					ret += "\t"+info.interfaces[i].mName+"\n";
+				}//next i
+
+			}
+
+			ret += ");"
+		}//ancestors or interfaces
+
+		ret += "\n";
 
 		return ret;
 
@@ -122,7 +137,7 @@ class PerlCodeGenerator extends CodeGenerator {
 							break
 					}//swatch
 				}else{
-					ret += " = undef";
+					ret += "undef";
 				}//has default value
 
 				//apply the new line
@@ -139,7 +154,7 @@ class PerlCodeGenerator extends CodeGenerator {
 	buildCode_Constructor(item, info){
 
 		var ret=this.comment("Constructor") + 
-				"def new {\n" + 
+				"sub new {\n" + 
 				"\tmy $class = shift;\n\n" + 
 				"\tmy $self = {\n";
 
@@ -150,13 +165,12 @@ class PerlCodeGenerator extends CodeGenerator {
 
 		if(info.hasAncestor)
 			ret += 	"\n\t" + this.comment("Call Super Constructor") + 
-					"\t$class->SUPER::new();\n";
+					"\t$self->SUPER::new();\n";
 
 		ret += "\n}\n";
 
 		return ret;
 	}
-
 
 	//build out all the member variables
 	buildCode_Members(item, info){
@@ -240,11 +254,11 @@ class PerlCodeGenerator extends CodeGenerator {
 				var method = methods[i];
 
 				if(method.isStatic==true)
-					ret += 	'def ' + method.mName + " {\n" + 
+					ret += 	'sub ' + ((method.access==PUBLIC)?'':'_') + method.mName + " {\n" + 
 							"\t" + this.comment("...") + 
 							"}\n\n";
 				else
-					ret +=  'def ' + method.mName + " {\n" + 
+					ret +=  'sub ' + ((method.access==PUBLIC)?'':'_') + method.mName + " {\n" + 
 							"\tmy $self = shift;\n" + 
 							"\t" + this.comment("...") + 
 							"}\n\n";
