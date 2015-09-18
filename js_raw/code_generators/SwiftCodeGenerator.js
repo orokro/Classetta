@@ -15,9 +15,13 @@ class SwiftCodeGenerator extends CodeGenerator {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
+							abstract: false,
 							methods: {
+										abstract: false,
+										protected: false
 									 },
 							members: {
+										protected: false
 									 }
 						};
 						
@@ -35,9 +39,10 @@ class SwiftCodeGenerator extends CodeGenerator {
 		//variable to build the code
 		var ret = 	this.buildCode_Warnings(item, info) +
 					this.buildCode_Definition(item, info) + "\n\n" +
-					this.buildCode_Constructor(item, info) + "\n\n" +
-					this.buildCode_Methods(item, info) + 
 					this.buildCode_Members(item, info) +
+					this.buildCode_Constructor(item, info) + "\n\n" +
+					this.buildCode_Destructor(item, info) + "\n\n" +
+					this.buildCode_Methods(item, info) + 
 					"}";
 
 		return ret;
@@ -47,21 +52,20 @@ class SwiftCodeGenerator extends CodeGenerator {
 	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	((info.isPublic)?'public ':'private ') +
-					((info.isFinal)?'sealed ':'') +
-					((info.isAbstract)?'abstract ':'')+
+		var ret = 	((info.isPublic)?'public ':'internal ') +
+					((info.isFinal)?'final ':'') +
 					'class ' + info.name;
 
 		//if it extends anything, add that here:
 		if(info.hasAncestor)
-			ret += ' : ' + info.ancestor;
+			ret += ': ' + info.ancestor;
 
 		//if it implements any interfaces, add those here:
 		if(info.hasInterfaces){
 			if(info.hasAncestor)
 				ret += ', ';
 			else
-				ret += ' : ';
+				ret += ': ';
 			for(var i=0; i<info.interfaces.length; i++)
 				ret += info.interfaces[i].mName + ', ';
 			//truncate last two chars (', ')
@@ -74,17 +78,92 @@ class SwiftCodeGenerator extends CodeGenerator {
 
 	}
 
+	//build out all the member variables
+	buildCode_Members(item, info){
+
+		var typeToStr = ['', 'Int', 'Int16', 'Int64', 'Int8', 'Float', 'Double', 'Character', 'String', 'Boolean'];
+		var accessToStr = ['private', 'public', 'private'];
+
+		//get list of methods
+		var members = info.members;
+		
+		//code to return
+		var ret = '';
+
+		if(info.hasMembers){
+
+			//code to return:
+			ret = "\t" + this.comment("Member Variables");
+
+			//loop over methods
+			for(var i=0; i<members.length; i++){
+
+				//get the method
+				var member = members[i];
+
+				ret += 	"\t" + 
+						accessToStr[member.access] + ' ' +
+						((member.isFinal)?'final ':'') +
+						((member.isStatic)?'static ':'') +
+						((member.isConst)?'let ':'var ') +
+						member.mName + 
+						((member.mType!=VOID) ? ": " + typeToStr[parseInt(member.mType)]:"");
+
+				if(member.val != null){
+					switch(parseInt(member.mType)){
+						case INT:
+						case SHORT:
+						case LONG:
+						case BYTE:
+						case DOUBLE:
+							ret += " = " + member.val;
+							break;
+						case FLOAT:
+							ret += " = " + member.val + 'f';
+							break;
+						case CHAR:
+						case STRING:
+							ret += " = \"" + member.val + "\"";
+							break;
+						case BOOLEAN:
+							ret += " = " + member.val.toString();
+							break
+					}//swatch
+				}//has default value
+
+				//apply the new line
+				ret += "\n";
+
+			}//next i
+
+			//apply the new line
+			ret += "\n";
+
+		}//endif has methods
+
+		return ret;
+	}
+
 	//build a constructor method for the class:
 	buildCode_Constructor(item, info){
 
 		var ret="\t" + this.comment("Constructor") + 
-				"\tpublic " + info.name + "()";
-
-		//if the class has an ancestor lets call super in the constructor!
-		if(info.hasAncestor)
-			ret += 	" : base()";
+				"\tinit()";
 
 		ret +=	"{\n" + 
+				"\n\t\t" + this.comment("...") +
+				(info.hasAncestor ? "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper.init()\n":"") + 
+				"\t}";
+		return ret;
+	}
+
+	//build a Destructor method for the class:
+	buildCode_Destructor(item, info){
+
+		var ret="\t" + this.comment("Optional Destructor") + 
+				"\tdeinit ";
+
+		ret +=	"{" + 
 				"\n\t\t" + this.comment("...") +
 				"\t}";
 		return ret;
@@ -93,8 +172,8 @@ class SwiftCodeGenerator extends CodeGenerator {
 	//build out all the methods
 	buildCode_Methods(item, info){
 
-		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-		var accessToStr = ['private', 'public', 'protected'];
+		var typeToStr = ['', 'Int', 'Int16', 'Int64', 'Int8', 'Float', 'Double', 'Character', 'String', 'Boolean'];
+		var accessToStr = ['private', 'public', 'private'];
 
 		//get list of methods
 		var methods = info.methods;
@@ -116,82 +195,12 @@ class SwiftCodeGenerator extends CodeGenerator {
 				ret += 	"\t" + 
 						accessToStr[method.access] + ' ' +
 						((method.isStatic)?'static ':'') +
-						((method.isConst)?'sealed override ':'') +
-						typeToStr[parseInt(method.mType)] + ' ' + 
-						method.mName + "(){\n" + 
+						((method.isConst)?'final ':'') +
+						"func " + method.mName + "()" + 
+						((method.mType!=VOID)?" -> " + typeToStr[parseInt(method.mType)] + ' ':"") + 
+						"{\n" + 
 						"\t\t" + this.comment("...") + 
 						"\t}\n\n";
-			}//next i
-
-		}//endif has methods
-
-		return ret;
-	}
-
-	//build out all the member variables
-	buildCode_Members(item, info){
-
-		var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-		var accessToStr = ['private', 'public', 'protected'];
-
-		//get list of methods
-		var members = info.members;
-		
-		//code to return
-		var ret = '';
-
-		if(info.hasMembers){
-
-			//code to return:
-			ret = "\t" + this.comment("Member Variables");
-
-			//loop over methods
-			for(var i=0; i<members.length; i++){
-
-				//get the method
-				var member = members[i];
-
-				ret += 	"\t" + 
-						accessToStr[member.access] + ' ' +
-						((member.isStatic)?'static ':'') +
-						((member.isConst)?'const ':'') +
-						typeToStr[parseInt(member.mType)] + ' ' + 
-						member.mName;
-
-				if(member.val != null){
-					switch(parseInt(member.mType)){
-						case INT:
-						case DOUBLE:
-							ret += " = " + member.val;
-							break;
-						case SHORT:
-							ret += " = (short)" + member.val;
-							break;
-						case LONG:
-							ret += " = (long)" + member.val;
-							break;
-						case BYTE:
-							ret += " = (byte)" + member.val;
-							break;
-						case FLOAT:
-							ret += " = " + member.val + 'f';
-							break;
-						
-						case CHAR:
-							ret += " = '" + member.val + "'";
-							break;
-						case STRING:
-							ret += " = \"" + member.val + "\"";
-							break;
-						case BOOLEAN:
-							ret += " = " + member.val.toString();
-							break
-					}//swatch
-				}//has default value
-
-				//apply the semicolon and new line
-				ret += ";\n";
-
 			}//next i
 
 		}//endif has methods
