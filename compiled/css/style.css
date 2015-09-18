@@ -89,7 +89,7 @@
     top: 10px;
     left: 12px;
     right: 12px;
-    bottom: 250px; }
+    bottom: 350px; }
   #divSideBar #classListContainer {
     position: absolute;
     top: 25px;
@@ -161,9 +161,9 @@
     left: 12px;
     right: 12px;
     bottom: 12px;
-    height: 228px; }
+    height: 328px; }
   #divSideBar #stylesListContainer {
-    height: 150px; }
+    height: 250px; }
   #divSideBar #chkShowExtras {
     margin-top: 12px; }
   #divSideBar label {
@@ -941,7 +941,7 @@ body {
   margin: 0px;
   background: #cccccc;
   min-width: 1008px !important;
-  min-height: 480px !important; }
+  min-height: 585px !important; }
 
 pre {
   margin: 0px; }
@@ -953,7 +953,7 @@ pre {
   left: 0px;
   right: 0px;
   min-width: 1008px !important;
-  min-height: 365px !important;
+  min-height: 465px !important;
   border-top: 1px solid #FFF;
   border-bottom: 1px solid #000;
   background: #EAE8E8; }
