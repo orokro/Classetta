@@ -198,5 +198,18 @@ class CSharpCodeGenerator extends CodeGenerator {
 
 		return ret;
 	}
+	
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{"+
+				"\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:"+
+				"\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase 5:\n\t\t// C#"+
+				" can goto case labels\n\t\tgoto case 3;\n\tdefault:\n\t\t// ...\n\t\tbreak;\n}\n\n// For loop\n"+
+				"for(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint[] items = new int[]{1, "+
+				"2, 3, 4, 5};\nforeach(int itm in items){\n\t// ...\n}\n\n// While loops\nwhile(true){\n\t"+
+				"// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);"+
+				"";
+	}
 
 }

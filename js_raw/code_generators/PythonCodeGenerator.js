@@ -250,5 +250,14 @@ class PythonCodeGenerator extends CodeGenerator {
 
 		return ret;
 	}
+	
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"# Conditionals\nif someVar==true:\n\t# ...\nelif otherVar>10):\n\t# ...\nelse:\n\t# ...\n\n"+
+				"# For loop\nfor i in range(1, 10):\n\t# ...\n\n# For Each loop\nitems = [1, 2, 3, 4, 5"+
+				"]\nfor itm in items:\n\t# ...\n\n# While loop\nwhile true:\n\t# ..."+
+				"";
+	}
 
 }

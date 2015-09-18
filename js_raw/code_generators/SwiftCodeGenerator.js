@@ -208,4 +208,23 @@ class SwiftCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"// Conditionals\nif someVar==true {\n\t// ...\nelse if otherVar>10 {\n\t// ...\n} else "+
+				"{\n\t// ...\n}\n\n// Switchs are powerful in Swift. See tinyurl.com/pwesoa4 for more "+
+				"info.\nswitch approximateCount {\ncase 0:\n    naturalCount = \"no\"\n\n    // Note: th"+
+				"ere are no implicit fallthroughs.\n    // \"break\" can be used, but is not require"+
+				"d\n    break\ncase 1..<5:\n    naturalCount = \"a few\"\ncase 5..<12:\n    naturalCount"+
+				" = \"several\"\ncase 12..<100:\n    naturalCount = \"dozens of\"\ncase 100..<1000:\n    "+
+				"naturalCount = \"hundreds of\"\ndefault:\n    naturalCount = \"many\"\n}\n\n// For loop\nf"+
+				"or i in 0..9 {\n\t// ...\n}\n\n// For loop without increment variable for simplly loo"+
+				"ping N times:\nfor _ in 1...N {\n\t// ...\n}\n\n// More traditional For loop\nfor var i"+
+				"=0; i<10; i++ {\n\t// ...\n}\n\n// For In loop\nlet names = [\"Anna\", \"Alex\", \"Brian\", "+
+				"\"Jack\"]\nfor name in names {\n    print(\"Hello, \(name)!\")\n}\n\n// While loops\nwhile"+
+				" true {\n\t// ...\n}\n\n// repeat-while loops, like Do-while loops\nrepeat {\n\t// ...\n}"+
+				" while true"+
+				"";
+	}
+
 }

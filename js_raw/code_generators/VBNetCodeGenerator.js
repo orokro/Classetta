@@ -188,4 +188,24 @@ class VBNetCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"'Conditionals\nIf someVar==true Then\n\t'...\nElseIf otherVar>10 Then\n\t'...\nElse\n\t'."+
+				"..\nEnd If\n\n'\"Select Case\" is like Switch in other languages\n'and will work with "+
+				"strings and numbers\nDim number As Integer = 8\nSelect Case number\n    Case 1 To 5"+
+				"\n        Debug.WriteLine(\"Between 1 and 5, inclusive\")\n        'The following is"+
+				" the only Case clause that evaluates to True. \n    Case 6, 7, 8\n        Debug.Wr"+
+				"iteLine(\"Between 6 and 8, inclusive\")\n    Case 9 To 10\n        Debug.WriteLine(\""+
+				"Equal to 9 or 10\")\n    Case Else\n        Debug.WriteLine(\"Not between 1 and 10, "+
+				"inclusive\")\nEnd Select\n\n'For loop with Integers (Step is optional)\nFor i As Inte"+
+				"ger = 1 to 10 Step 1\n\t'...\nNext\n\n'For loop with floating point values\nFor number"+
+				" As Double = 2 To 0 Step -0.25\n    '...\n    If SomeCondition Then\n    \tExit For\n"+
+				"    Else\n    \tContinue For\n    End if\nNext\n\n'For Each loop\nDim items() As Intege"+
+				"r = {1, 2, 3, 4, 5};\nFor Each itm As Integer In items\n\t'...\nNext\n\n'While loops\nW"+
+				"hile index <= 10\n    '...\nEnd While\n\n'Do-while loops\nDo\n    '...\nLoop Until inde"+
+				"x > 10"+
+				"";
+	}
+
 }

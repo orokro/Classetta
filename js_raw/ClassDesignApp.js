@@ -74,14 +74,14 @@ class ClassDesignApp {
         //return;
 
         //add default item for debugging
-        this.classItmMgr.addClassItm(demoClasses.Blank());
+        /*this.classItmMgr.addClassItm(demoClasses.Blank());
         this.classItmMgr.addClassItm(demoClasses.OnlyMembers());
         this.classItmMgr.addClassItm(demoClasses.OnlyConstants());
         this.classItmMgr.addClassItm(demoClasses.OnlyStatics());
         this.classItmMgr.addClassItm(demoClasses.RoboKitty());
         this.classItmMgr.addClassItm(demoClasses.CompleteDemo());
-
-        this.tabMgr.setTab('CSharp');
+		*/
+        //this.tabMgr.setTab('Swift');
 
     }
 

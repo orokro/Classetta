@@ -257,4 +257,21 @@ class VB6CodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"'Conditionals\nIf someVar==true Then\n\t'...\nElseIf otherVar>10 Then\n\t'...\nElse\n\t'."+
+				"..\nEnd If\n\n'\"Select Case\" is like Switch in other languages\n'and will work with "+
+				"strings and numbers\nDim number = 8\nSelect Case number\n    Case 1 To 5\n        De"+
+				"bug.print(\"Between 1 and 5, inclusive\")\n        'The following is the only Case "+
+				"clause that evaluates to True. \n    Case 6, 7, 8\n        Debug.print(\"Between 6 "+
+				"and 8, inclusive\")\n    Case 9 To 10\n        Debug.print(\"Equal to 9 or 10\")\n    "+
+				"Case Else\n        Debug.print(\"Not between 1 and 10, inclusive\")\nEnd Select\n\n'Fo"+
+				"r loop with Integers (Step is optional)\ndim i\nFor i = 1 to 10 Step 1\n\t'...\nNext\n"+
+				"\n'For Each loop\nDim items() As Integer = {1, 2, 3, 4, 5};\nFor Each itm As Intege"+
+				"r In items\n\t'...\nNext\n\n'While loops\nWhile index <= 10\n    '...\nEnd While\n\n'Do-wh"+
+				"ile loops\nDo\n    '...\nLoop Until index > 10"+
+				"";
+	}
+
 }

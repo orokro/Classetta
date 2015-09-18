@@ -328,4 +328,19 @@ class ES6CodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{"+
+				"\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:"+
+				"\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase \"five\":\n\t\t"+
+				"// JS can use string labels also\n\t\tbreak;\n\tdefault:\n\t\t// ...\n}\n\n// For loop\nfor("+
+				"let i=0; i<10; i++){\n\t// ...\n}\n\n// For In loop\n// NOTE: Look this one up, it's g"+
+				"ot some gotcha's.\nitems = [1, 2, 3, 4, 5];\nfor(let i in items){\n\t// ...\n}\n\n// Fo"+
+				"r Of Loop\n// NOTE: ES6 new feature - look up for details, but this is closer to "+
+				"for-each\nfor(let i of items){\n\t// ...\n}\n\n// While loops\nwhile(true){\n\t// ...\n}\n\n"+
+				"// Do-while loops\ndo{\n\t// ...\n}while(true);"+
+				"";
+	}
+
 }

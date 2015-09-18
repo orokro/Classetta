@@ -203,8 +203,8 @@ class JavaCodeGenerator extends CodeGenerator {
 				"\n\t// ...\n}\n\n// Switch only works with numbers\nswitch(someVar){\n\tcase 1:\n\tcase 2:"+
 				"\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tdefault:\n\t\t// ...\n\t\tbrea"+
 				"k;\n}\n\n// For loop\nfor(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint items"+
-				"[] = {1, 2, 3, 4, 5};\nfor(int itm :  items){\n\t// ...\n}\n\n// While loops\nwhile(tru"+
-				"e){\n\t// ...\n}\n\ndo{\n\t// ...\n}while(true);"+
+				"[] = {1, 2, 3, 4, 5};\nfor(int itm : items){\n\t// ...\n}\n\n// While loops\nwhile(tru"+
+				"e){\n\t// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);"+
 				"";
 	}
 

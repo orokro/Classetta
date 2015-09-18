@@ -269,4 +269,20 @@ class PerlCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"# Conditionals\nif($someVar==true){\n\t# ...\n}elsif($otherVar>10){\n\t# ...\n}else{\n\t#"+
+				" ...\n}\n\n# Switch statements via tinyurl.com/oxrnyq4\nuse Switch;\nswitch ($value) "+
+				"{\n\tcase 17         { print \"number 17\"       }\n\tcase \"snipe\"    { print \"a snipe"+
+				"\"         }\n\tcase /[a-f]+\/i  { print \"pattern matched\" }\n\tcase [1..10,42] { prin"+
+				"t \"in the list\"     }\n\tcase (@array)   { print \"in the array\"    }\n\tcase (%hash)"+
+				"    { print \"in the hash\"     }\n\telse            { print \"no case applies\" }\n}\n\n"+
+				"# For loop\nfor (my $i=0; $i<10; $i++) {\n\t// ...\n}\n\n# For Each loop via tinyurl.c"+
+				"om/qxjg9jg\nmy @items = (\"apple\", \"orange\", \"banana\");\nforeach my $item(@items) {"+
+				"\n\tprint \"$item\n\";\n}\n\n# While loops\nwhile(1){\n\t# ...\n}\n\n# Do-while loops\ndo{\n\t# "+
+				"...\n}while(1);"+
+				"";
+	}
+
 }

@@ -373,5 +373,24 @@ class RubyCodeGenerator extends CodeGenerator {
 
 		return ret;
 	}
+	
+	// build out some useful common code structures
+	buildExtraSamplesCode(){
+
+		return 	"# If conditionals\nif someVar==true\n\t# ...\nelsif otherVar>10\n\t# ...\nelse\n\t# ...\ne"+
+				"nd\n\n# Unless conditionals\nunless someVar>10\n\t# ...\nelse\n\t# ...\nend\n\n# case and w"+
+				"hen are like Switch in other languages\ncase someValue\nwhen 1, 4, 9\n\t# whens can "+
+				"list more than one \"Case\"\nwhen 10..20\n\t# whens can specify a range\nwhen > 20\n\t# "+
+				"whens can specify open ended ranges\nwhen String\n\t# whens can reference type\nwhen"+
+				" \"foo\"\n\t# or strings as values\nwhen \"bar\" then puts(\"hello\") # all on the same w"+
+				"ith with \"then\" keyword\nelse\n\t# instead of default, like most langauges, Ruby us"+
+				"es \"else\"\nend\n\n# For loop\nfor i in 0..9\n\t# ...\nend\n\n# Each loop\nitems = int[1, 2"+
+				", 3, 4, 5]\nitems.each do |itm|\n\t# ...\nend\n\n# While loops\nwhile true\n\t# ...\nend\n\n"+
+				"# While one-liner\nwhile true do puts(\"hello\")\n\n# Like do-loops in other language"+
+				"s:\nbein\n\t# ...\nend while true\n\n# Of course Ruby has an alternate syntax for ever"+
+				"ything. Below are \"until\" loops\nuntil $i > $num  do\n   puts(\"Inside the loop i ="+
+				" #$i\" )\n   $i +=1;\nend\n\nbegin\n   # ...\nend until false"+
+				"";
+	}
 
 }

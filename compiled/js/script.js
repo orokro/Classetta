@@ -182,14 +182,14 @@ var ClassDesignApp = (function () {
                 //return;
 
                 //add default item for debugging
-                this.classItmMgr.addClassItm(demoClasses.Blank());
+                /*this.classItmMgr.addClassItm(demoClasses.Blank());
                 this.classItmMgr.addClassItm(demoClasses.OnlyMembers());
                 this.classItmMgr.addClassItm(demoClasses.OnlyConstants());
                 this.classItmMgr.addClassItm(demoClasses.OnlyStatics());
                 this.classItmMgr.addClassItm(demoClasses.RoboKitty());
                 this.classItmMgr.addClassItm(demoClasses.CompleteDemo());
-
-                this.tabMgr.setTab('CSharp');
+                */
+                //this.tabMgr.setTab('Swift');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -2851,6 +2851,14 @@ var CppCodeGenerator = (function (_CodeGenerator) {
 
 			return ret;
 		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch only works with numbers / chars\nswitch(someVar){\n\tcase 1:\n" + "\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tdefault:\n\t\t// .." + ".\n}\n\n// For loop\nfor(int i=0; i<10; i++){\n\t// ...\n}\n\n// While loops\nwhile(true){" + "\n\t// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);" + "";
+		}
 	}]);
 
 	return CppCodeGenerator;
@@ -3042,6 +3050,14 @@ var CSharpCodeGenerator = (function (_CodeGenerator) {
 			} //endif has methods
 
 			return ret;
+		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:" + "\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase 5:\n\t\t// C#" + " can goto case labels\n\t\tgoto case 3;\n\tdefault:\n\t\t// ...\n\t\tbreak;\n}\n\n// For loop\n" + "for(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint[] items = new int[]{1, " + "2, 3, 4, 5};\nforeach(int itm in items){\n\t// ...\n}\n\n// While loops\nwhile(true){\n\t" + "// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);" + "";
 		}
 	}]);
 
@@ -3376,6 +3392,14 @@ var ES6CodeGenerator = (function (_CodeGenerator) {
 
 			return ret;
 		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:" + "\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase \"five\":\n\t\t" + "// JS can use string labels also\n\t\tbreak;\n\tdefault:\n\t\t// ...\n}\n\n// For loop\nfor(" + "let i=0; i<10; i++){\n\t// ...\n}\n\n// For In loop\n// NOTE: Look this one up, it's g" + "ot some gotcha's.\nitems = [1, 2, 3, 4, 5];\nfor(let i in items){\n\t// ...\n}\n\n// Fo" + "r Of Loop\n// NOTE: ES6 new feature - look up for details, but this is closer to " + "for-each\nfor(let i of items){\n\t// ...\n}\n\n// While loops\nwhile(true){\n\t// ...\n}\n\n" + "// Do-while loops\ndo{\n\t// ...\n}while(true);" + "";
+		}
 	}]);
 
 	return ES6CodeGenerator;
@@ -3574,7 +3598,7 @@ var JavaCodeGenerator = (function (_CodeGenerator) {
 		key: "buildExtraSamplesCode",
 		value: function buildExtraSamplesCode() {
 
-			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch only works with numbers\nswitch(someVar){\n\tcase 1:\n\tcase 2:" + "\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tdefault:\n\t\t// ...\n\t\tbrea" + "k;\n}\n\n// For loop\nfor(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint items" + "[] = {1, 2, 3, 4, 5};\nfor(int itm :  items){\n\t// ...\n}\n\n// While loops\nwhile(tru" + "e){\n\t// ...\n}\n\ndo{\n\t// ...\n}while(true);" + "";
+			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch only works with numbers\nswitch(someVar){\n\tcase 1:\n\tcase 2:" + "\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tdefault:\n\t\t// ...\n\t\tbrea" + "k;\n}\n\n// For loop\nfor(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint items" + "[] = {1, 2, 3, 4, 5};\nfor(int itm : items){\n\t// ...\n}\n\n// While loops\nwhile(tru" + "e){\n\t// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);" + "";
 		}
 	}]);
 
@@ -3914,6 +3938,14 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 
 			return ret;
 		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "# Conditionals\nif($someVar==true){\n\t# ...\n}elsif($otherVar>10){\n\t# ...\n}else{\n\t#" + " ...\n}\n\n# Switch statements via tinyurl.com/oxrnyq4\nuse Switch;\nswitch ($value) " + "{\n\tcase 17         { print \"number 17\"       }\n\tcase \"snipe\"    { print \"a snipe" + "\"         }\n\tcase /[a-f]+\/i  { print \"pattern matched\" }\n\tcase [1..10,42] { prin" + "t \"in the list\"     }\n\tcase (@array)   { print \"in the array\"    }\n\tcase (%hash)" + "    { print \"in the hash\"     }\n\telse            { print \"no case applies\" }\n}\n\n" + "# For loop\nfor (my $i=0; $i<10; $i++) {\n\t// ...\n}\n\n# For Each loop via tinyurl.c" + "om/qxjg9jg\nmy @items = (\"apple\", \"orange\", \"banana\");\nforeach my $item(@items) {" + "\n\tprint \"$item\n\";\n}\n\n# While loops\nwhile(1){\n\t# ...\n}\n\n# Do-while loops\ndo{\n\t# " + "...\n}while(1);" + "";
+		}
 	}]);
 
 	return PerlCodeGenerator;
@@ -3929,228 +3961,236 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var PHPCodeGenerator = (function (_CodeGenerator) {
-	_inherits(PHPCodeGenerator, _CodeGenerator);
+		_inherits(PHPCodeGenerator, _CodeGenerator);
 
-	function PHPCodeGenerator(DOM) {
-		_classCallCheck(this, PHPCodeGenerator);
+		function PHPCodeGenerator(DOM) {
+				_classCallCheck(this, PHPCodeGenerator);
 
-		_get(Object.getPrototypeOf(PHPCodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(PHPCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//Make note of language name
-		this.langName = "PHP";
+				//Make note of language name
+				this.langName = "PHP";
 
-		//set up comment styles
-		this.singleLineComments = "// ";
-		this.multiLineComments = { open: '/*\n',
-			close: '\n*/',
-			prefix: "\t" };
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-		//set up what this class supports:
-		//Note: support is assumed by default, so this only has to disable features
-		this.features = {
-			"private": false,
-			types: false,
-			methods: {},
-			members: {}
-		};
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						"private": false,
+						types: false,
+						methods: {},
+						members: {}
+				};
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"php\"></code></pre>");
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"php\"></code></pre>");
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
-	}
-
-	//builds the code!
-
-	_createClass(PHPCodeGenerator, [{
-		key: "buildCode",
-		value: function buildCode(item, info) {
-
-			//variable to build the code
-			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + "\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "}";
-
-			return ret;
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 		}
 
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item, info) {
+		//builds the code!
 
-			//build the left part that usually looks like "public final class foo"
-			var ret = (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
-			//((item.getPublic())?'public ':'private ') +
+		_createClass(PHPCodeGenerator, [{
+				key: "buildCode",
+				value: function buildCode(item, info) {
 
-			//if it extends anything, add that here:
-			if (info.hasAncestor) ret += ' extends ' + info.ancestor;
+						//variable to build the code
+						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n" + this.buildCode_Members(item, info) + "\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "}";
 
-			//if it implements any interfaces, add those here:
-			if (info.hasInterfaces) {
-				ret += ' implements ';
-				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
-				//truncate last two chars (', ')
-				ret = ret.substring(0, ret.length - 2);
-			}
+						return ret;
+				}
 
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item, info) {
 
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item, info) {
+						//build the left part that usually looks like "public final class foo"
+						var ret = (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
+						//((item.getPublic())?'public ':'private ') +
 
-			var accessToStr = ['private', 'public', 'protected'];
+						//if it extends anything, add that here:
+						if (info.hasAncestor) ret += ' extends ' + info.ancestor;
 
-			//get list of methods
-			var members = info.members;
+						//if it implements any interfaces, add those here:
+						if (info.hasInterfaces) {
+								ret += ' implements ';
+								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
+								//truncate last two chars (', ')
+								ret = ret.substring(0, ret.length - 2);
+						}
 
-			//code to return
-			var ret = "";
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
 
-			if (info.hasMembers) {
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item, info) {
 
-				//handle constants first since the syntax is slightly different
-				var constants = members.filter(function (n) {
-					return n.isConst == true;
-				});
-				if (constants.length > 0) {
+						var accessToStr = ['private', 'public', 'protected'];
 
-					ret += "\n\t" + this.comment("Class Constants");
-					for (var i = 0; i < constants.length; i++) {
+						//get list of methods
+						var members = info.members;
 
-						var constant = constants[i];
-						ret += "\tconst " + constant.mName;
+						//code to return
+						var ret = "";
 
-						if (constant.val != null) {
-							switch (parseInt(constant.mType)) {
-								case INT:
-								case DOUBLE:
-								case SHORT:
-								case LONG:
-								case BYTE:
-								case FLOAT:
-									ret += " = " + constant.val;
-									break;
-								case CHAR:
-									ret += " = '" + constant.val + "'";
-									break;
-								case STRING:
-									ret += " = \"" + constant.val + "\"";
-									break;
-								case BOOLEAN:
-									ret += " = " + constant.val.toString().toUpperCase();
-									break;
-							} //swatch
-						} else {
-								ret += ' = NULL';
-							} //has default value
+						if (info.hasMembers) {
 
-						ret += ";\n";
-					} //next i
+								//handle constants first since the syntax is slightly different
+								var constants = members.filter(function (n) {
+										return n.isConst == true;
+								});
+								if (constants.length > 0) {
 
-					//ret += "\n";
-				} //end if has constants
+										ret += "\n\t" + this.comment("Class Constants");
+										for (var i = 0; i < constants.length; i++) {
 
-				//now that we handled constants, lets filter them out
-				members = members.filter(function (n) {
-					return n.isConst != true;
-				});
+												var constant = constants[i];
+												ret += "\tconst " + constant.mName;
 
-				if (members.length > 0) {
+												if (constant.val != null) {
+														switch (parseInt(constant.mType)) {
+																case INT:
+																case DOUBLE:
+																case SHORT:
+																case LONG:
+																case BYTE:
+																case FLOAT:
+																		ret += " = " + constant.val;
+																		break;
+																case CHAR:
+																		ret += " = '" + constant.val + "'";
+																		break;
+																case STRING:
+																		ret += " = \"" + constant.val + "\"";
+																		break;
+																case BOOLEAN:
+																		ret += " = " + constant.val.toString().toUpperCase();
+																		break;
+														} //swatch
+												} else {
+																ret += ' = NULL';
+														} //has default value
 
-					//code to return:
-					ret += "\n\t" + this.comment("Member Variables");
+												ret += ";\n";
+										} //next i
 
-					//loop over methods
-					for (var i = 0; i < members.length; i++) {
+										//ret += "\n";
+								} //end if has constants
 
-						//get the method
-						var member = members[i];
+								//now that we handled constants, lets filter them out
+								members = members.filter(function (n) {
+										return n.isConst != true;
+								});
 
-						ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + '$' + member.mName;
+								if (members.length > 0) {
 
-						if (member.val != null) {
-							switch (parseInt(member.mType)) {
-								case INT:
-								case DOUBLE:
-								case SHORT:
-								case LONG:
-								case BYTE:
-								case FLOAT:
-									ret += " = " + member.val;
-									break;
-								case CHAR:
-									ret += " = '" + member.val + "'";
-									break;
-								case STRING:
-									ret += " = \"" + member.val + "\"";
-									break;
-								case BOOLEAN:
-									ret += " = " + member.val.toString().toUpperCase();
-									break;
-							} //swatch
-						} //has default value
+										//code to return:
+										ret += "\n\t" + this.comment("Member Variables");
 
-						//apply the semicolon and new line
-						ret += ";\n";
-					} //next i
-				} //end if has non constants
-			} //endif has methods
+										//loop over methods
+										for (var i = 0; i < members.length; i++) {
 
-			return ret;
-		}
+												//get the method
+												var member = members[i];
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item, info) {
+												ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + '$' + member.mName;
 
-			var ret = "\t" + this.comment("Constructor") + "\tfunction __construct(){\n";
+												if (member.val != null) {
+														switch (parseInt(member.mType)) {
+																case INT:
+																case DOUBLE:
+																case SHORT:
+																case LONG:
+																case BYTE:
+																case FLOAT:
+																		ret += " = " + member.val;
+																		break;
+																case CHAR:
+																		ret += " = '" + member.val + "'";
+																		break;
+																case STRING:
+																		ret += " = \"" + member.val + "\"";
+																		break;
+																case BOOLEAN:
+																		ret += " = " + member.val.toString().toUpperCase();
+																		break;
+														} //swatch
+												} //has default value
 
-			//if the class has an ancestor lets call super in the constructor!
-			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tparent::__construct();\n";
+												//apply the semicolon and new line
+												ret += ";\n";
+										} //next i
+								} //end if has non constants
+						} //endif has methods
 
-			ret += "\n\t\t" + this.comment("...") + "\t}";
-			return ret;
-		}
+						return ret;
+				}
 
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item, info) {
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item, info) {
 
-			var accessToStr = ['private', 'public', 'protected'];
+						var ret = "\t" + this.comment("Constructor") + "\tfunction __construct(){\n";
 
-			//get list of methods
-			var methods = info.methods;
+						//if the class has an ancestor lets call super in the constructor!
+						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tparent::__construct();\n";
 
-			//code to return
-			var ret = '';
+						ret += "\n\t\t" + this.comment("...") + "\t}";
+						return ret;
+				}
 
-			if (info.hasMethods) {
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item, info) {
 
-				//code to return:
-				ret = "\t" + this.comment("Methods");
+						var accessToStr = ['private', 'public', 'protected'];
 
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
+						//get list of methods
+						var methods = info.methods;
 
-					//get the method
-					var method = methods[i];
+						//code to return
+						var ret = '';
 
-					ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
-				} //next i
-			} //endif has methods
+						if (info.hasMethods) {
 
-			return ret;
-		}
-	}]);
+								//code to return:
+								ret = "\t" + this.comment("Methods");
 
-	return PHPCodeGenerator;
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
+
+										//get the method
+										var method = methods[i];
+
+										ret += "\t" + (method.isConst ? 'final ' : '') + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + "function " + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "// Conditionals\nif($someVar==TRUE){\n\t// ...\n}elseif($otherVar>10){\n\t// ...\n}else" + "{\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch($someVar){\n\tcase " + "1:\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase \"five\":\n" + "\t\t// PHP can use string labels also\n\t\tbreak;\n\tdefault:\n\t\t// ...\n}\n\n// For loop\nf" + "or($i=0; $i<10; $i++){\n\t// ...\n}\n\n// For Each loop\n$items = array(1, 2, 3, 4, 5)" + ";\nforeach($items as $itm){\n\t// ...\n}\n\n// For Each with keys and values\nforeach($" + "items as $key => $value){\n\t// ...\n}\n\n// While loops\nwhile(TRUE){\n\t// ...\n}\n\n// D" + "o-while loops\ndo{\n\t// ...\n}while(TRUE);" + "";
+				}
+		}]);
+
+		return PHPCodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -4406,6 +4446,14 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 			} //endif has methods
 
 			return ret;
+		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "# Conditionals\nif someVar==true:\n\t# ...\nelif otherVar>10):\n\t# ...\nelse:\n\t# ...\n\n" + "# For loop\nfor i in range(1, 10):\n\t# ...\n\n# For Each loop\nitems = [1, 2, 3, 4, 5" + "]\nfor itm in items:\n\t# ...\n\n# While loop\nwhile true:\n\t# ..." + "";
 		}
 	}]);
 
@@ -4792,6 +4840,14 @@ var RubyCodeGenerator = (function (_CodeGenerator) {
 
 						return ret;
 				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "# If conditionals\nif someVar==true\n\t# ...\nelsif otherVar>10\n\t# ...\nelse\n\t# ...\ne" + "nd\n\n# Unless conditionals\nunless someVar>10\n\t# ...\nelse\n\t# ...\nend\n\n# case and w" + "hen are like Switch in other languages\ncase someValue\nwhen 1, 4, 9\n\t# whens can " + "list more than one \"Case\"\nwhen 10..20\n\t# whens can specify a range\nwhen > 20\n\t# " + "whens can specify open ended ranges\nwhen String\n\t# whens can reference type\nwhen" + " \"foo\"\n\t# or strings as values\nwhen \"bar\" then puts(\"hello\") # all on the same w" + "ith with \"then\" keyword\nelse\n\t# instead of default, like most langauges, Ruby us" + "es \"else\"\nend\n\n# For loop\nfor i in 0..9\n\t# ...\nend\n\n# Each loop\nitems = int[1, 2" + ", 3, 4, 5]\nitems.each do |itm|\n\t# ...\nend\n\n# While loops\nwhile true\n\t# ...\nend\n\n" + "# While one-liner\nwhile true do puts(\"hello\")\n\n# Like do-loops in other language" + "s:\nbein\n\t# ...\nend while true\n\n# Of course Ruby has an alternate syntax for ever" + "ything. Below are \"until\" loops\nuntil $i > $num  do\n   puts(\"Inside the loop i =" + " #$i\" )\n   $i +=1;\nend\n\nbegin\n   # ...\nend until false" + "";
+				}
 		}]);
 
 		return RubyCodeGenerator;
@@ -4991,6 +5047,14 @@ var SwiftCodeGenerator = (function (_CodeGenerator) {
 						} //endif has methods
 
 						return ret;
+				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "// Conditionals\nif someVar==true {\n\t// ...\nelse if otherVar>10 {\n\t// ...\n} else " + "{\n\t// ...\n}\n\n// Switchs are powerful in Swift. See tinyurl.com/pwesoa4 for more " + "info.\nswitch approximateCount {\ncase 0:\n    naturalCount = \"no\"\n\n    // Note: th" + "ere are no implicit fallthroughs.\n    // \"break\" can be used, but is not require" + "d\n    break\ncase 1..<5:\n    naturalCount = \"a few\"\ncase 5..<12:\n    naturalCount" + " = \"several\"\ncase 12..<100:\n    naturalCount = \"dozens of\"\ncase 100..<1000:\n    " + "naturalCount = \"hundreds of\"\ndefault:\n    naturalCount = \"many\"\n}\n\n// For loop\nf" + "or i in 0..9 {\n\t// ...\n}\n\n// For loop without increment variable for simplly loo" + "ping N times:\nfor _ in 1...N {\n\t// ...\n}\n\n// More traditional For loop\nfor var i" + "=0; i<10; i++ {\n\t// ...\n}\n\n// For In loop\nlet names = [\"Anna\", \"Alex\", \"Brian\", " + "\"Jack\"]\nfor name in names {\n    print(\"Hello, \(name)!\")\n}\n\n// While loops\nwhile" + " true {\n\t// ...\n}\n\n// repeat-while loops, like Do-while loops\nrepeat {\n\t// ...\n}" + " while true" + "";
 				}
 		}]);
 
@@ -5331,6 +5395,14 @@ var TypeScriptCodeGenerator = (function (_CodeGenerator) {
 						} //endif has methods
 
 						return ret;
+				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:" + "\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase \"five\":\n\t\t" + "// JS can use string labels also\n\t\tbreak;\n\tdefault:\n\t\t// ...\n}\n\n// For loop\nfor(" + "let i=0; i<10; i++){\n\t// ...\n}\n\n// For In loop\n// NOTE: Look this one up, it's g" + "ot some gotcha's.\nitems = [1, 2, 3, 4, 5];\nfor(let i in items){\n\t// ...\n}\n\n// Fo" + "r Of Loop\n// NOTE: look up for details, but this is closer to for-each\nfor(let i" + " of items){\n\t// ...\n}\n\n// While loops\nwhile(true){\n\t// ...\n}\n\n// Do-while loops\n" + "do{\n\t// ...\n}while(true);" + "";
 				}
 		}]);
 
@@ -5703,6 +5775,14 @@ var VanillaJSCodeGenerator = (function (_CodeGenerator) {
 
 						return ret;
 				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch can use numbers or string labels\nswitch(someVar){\n\tcase 1:" + "\n\tcase 2:\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tcase \"five\":\n\t\t" + "// JS can use string labels also\n\t\tbreak;\n\tdefault:\n\t\t// ...\n}\n\n// For loop\nfor(" + "var i=0; i<10; i++){\n\t// ...\n}\n\n// For In loop\n// NOTE: Look this one up, it's g" + "ot some gotcha's.\nitems = [1, 2, 3, 4, 5];\nfor(var i in items){\n\t// ...\n}\n\n// Wh" + "ile loops\nwhile(true){\n\t// ...\n}\n\n// Do-while loops\ndo{\n\t// ...\n}while(true);" + "";
+				}
 		}]);
 
 		return VanillaJSCodeGenerator;
@@ -5967,6 +6047,14 @@ var VB6CodeGenerator = (function (_CodeGenerator) {
 
 			return ret;
 		}
+
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return "'Conditionals\nIf someVar==true Then\n\t'...\nElseIf otherVar>10 Then\n\t'...\nElse\n\t'." + "..\nEnd If\n\n'\"Select Case\" is like Switch in other languages\n'and will work with " + "strings and numbers\nDim number = 8\nSelect Case number\n    Case 1 To 5\n        De" + "bug.print(\"Between 1 and 5, inclusive\")\n        'The following is the only Case " + "clause that evaluates to True. \n    Case 6, 7, 8\n        Debug.print(\"Between 6 " + "and 8, inclusive\")\n    Case 9 To 10\n        Debug.print(\"Equal to 9 or 10\")\n    " + "Case Else\n        Debug.print(\"Not between 1 and 10, inclusive\")\nEnd Select\n\n'Fo" + "r loop with Integers (Step is optional)\ndim i\nFor i = 1 to 10 Step 1\n\t'...\nNext\n" + "\n'For Each loop\nDim items() As Integer = {1, 2, 3, 4, 5};\nFor Each itm As Intege" + "r In items\n\t'...\nNext\n\n'While loops\nWhile index <= 10\n    '...\nEnd While\n\n'Do-wh" + "ile loops\nDo\n    '...\nLoop Until index > 10" + "";
+		}
 	}]);
 
 	return VB6CodeGenerator;
@@ -6217,6 +6305,14 @@ var VBNetCodeGenerator = (function (_CodeGenerator) {
 						} //endif has methods
 
 						return ret;
+				}
+
+				// build out some useful common code structures
+		}, {
+				key: "buildExtraSamplesCode",
+				value: function buildExtraSamplesCode() {
+
+						return "'Conditionals\nIf someVar==true Then\n\t'...\nElseIf otherVar>10 Then\n\t'...\nElse\n\t'." + "..\nEnd If\n\n'\"Select Case\" is like Switch in other languages\n'and will work with " + "strings and numbers\nDim number As Integer = 8\nSelect Case number\n    Case 1 To 5" + "\n        Debug.WriteLine(\"Between 1 and 5, inclusive\")\n        'The following is" + " the only Case clause that evaluates to True. \n    Case 6, 7, 8\n        Debug.Wr" + "iteLine(\"Between 6 and 8, inclusive\")\n    Case 9 To 10\n        Debug.WriteLine(\"" + "Equal to 9 or 10\")\n    Case Else\n        Debug.WriteLine(\"Not between 1 and 10, " + "inclusive\")\nEnd Select\n\n'For loop with Integers (Step is optional)\nFor i As Inte" + "ger = 1 to 10 Step 1\n\t'...\nNext\n\n'For loop with floating point values\nFor number" + " As Double = 2 To 0 Step -0.25\n    '...\n    If SomeCondition Then\n    \tExit For\n" + "    Else\n    \tContinue For\n    End if\nNext\n\n'For Each loop\nDim items() As Intege" + "r = {1, 2, 3, 4, 5};\nFor Each itm As Integer In items\n\t'...\nNext\n\n'While loops\nW" + "hile index <= 10\n    '...\nEnd While\n\n'Do-while loops\nDo\n    '...\nLoop Until inde" + "x > 10" + "";
 				}
 		}]);
 
