@@ -41,7 +41,7 @@ class VBCodeGenerator extends CodeGenerator {
 
 	//OVERRIDE the parents update method, so we can update all of our children!
 	//takes a class item and rebuilds the appropriate source code based on the class item for this language
-	update(item){
+	update(item, extraCodeSamples){
 		
 		//update each of the code generators!
         for(var g=0; g<this.codeGenerators.length; g++){
@@ -50,7 +50,7 @@ class VBCodeGenerator extends CodeGenerator {
             var generator = this.codeGenerators[g];
 
             //tell it to update it's class
-            generator.update(item);
+            generator.update(item, extraCodeSamples);
 
         }//next g
 

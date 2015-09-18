@@ -21,7 +21,7 @@ class CodeGenerator{
 	}
 
 	//takes a class item and rebuilds the appropriate source code based on the class item for this language
-	update(item){
+	update(item, extraCodeSamples){
 
 		var code;
 
@@ -36,6 +36,15 @@ class CodeGenerator{
 			//variable to build the code
 			code = 	this.buildCode(item, info);
 		}
+
+		//if "extraCodeSamples" was specified, we should add a second section with generic code samples
+		if(extraCodeSamples==true){
+
+			code += "\n\n<hr>" + 
+					this.buildExtraSamplesComment() + 
+					this.buildExtraSamplesCode() + "\n\n\n";
+		}
+
 
 		//update the code inside the code tag
 		this.codeDOM.html(code);
@@ -281,4 +290,24 @@ class CodeGenerator{
 
 	}
 
+	// Build a quick little comment to denote the extra code samples section
+	buildExtraSamplesComment(){
+
+		var ret = 	"EXTRA CODE SAMPLES:\n" + 
+					"-------------------\n" + 
+					"The following section is not part of the class implementation.\n" +
+					"Below you will find sample code for various common routines in " + this.langName + ".\n" + 
+					"To disable this section, uncheck \"Show Extra Code Samples\" On the left.";
+
+		ret = this.wrapMuliLineComment(ret) + "\n\n";
+
+		return ret;
+
+	}
+
+	// Let the target languages override this method
+	buildExtraSamplesCode(){
+
+		return this.comment("buildExtraSamplesCode() was not overridden in " + this.langName );
+	}
 }

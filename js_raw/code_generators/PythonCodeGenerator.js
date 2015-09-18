@@ -242,7 +242,7 @@ class PythonCodeGenerator extends CodeGenerator {
 					ret +=	"\t\t\"\"\"Abstract Method: "+ method.mName +" Documentation...\"\"\"\n"+
 							"\t\treturn\n\n";
 
-				ret +=		"\t\t#...\n\n";
+				ret +=		"\t\t"+this.comment("...")+"\n\n";
 
 			}//next i
 

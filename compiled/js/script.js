@@ -130,6 +130,11 @@ var ClassDesignApp = (function () {
                         me.handleSelectionEdited(me, o);
                 });
 
+                //if the show extras check boxs is checked we should update the various code
+                $('#chkShowExtras').bind('change click keyup', function (e) {
+                        me.refreshCodeOutput();
+                });
+
                 //Create a Code style manager so the user can select different colorization styles for their code
                 this.codeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
 
@@ -184,7 +189,7 @@ var ClassDesignApp = (function () {
                 this.classItmMgr.addClassItm(demoClasses.RoboKitty());
                 this.classItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-                this.tabMgr.setTab('Cpp');
+                this.tabMgr.setTab('CSharp');
         }
 
         //update the app apropriately when the selected ClassItem changes, or becomes null
@@ -224,6 +229,10 @@ var ClassDesignApp = (function () {
         }, {
                 key: 'updateGenerators',
                 value: function updateGenerators(item) {
+
+                        //get the statis of our "extra code samples" check box to pass along
+                        var extraCodeSamples = $('#chkShowExtras').is(":checked");
+
                         //update each of the code generators!
                         for (var g = 0; g < this.codeGenerators.length; g++) {
 
@@ -231,7 +240,7 @@ var ClassDesignApp = (function () {
                                 var generator = this.codeGenerators[g];
 
                                 //tell it to update it's class
-                                generator.update(item);
+                                generator.update(item, extraCodeSamples);
                         } //next g
                 }
 
@@ -239,7 +248,7 @@ var ClassDesignApp = (function () {
         }, {
                 key: 'refreshCodeOutput',
                 value: function refreshCodeOutput() {
-                        this.updateGenerators(this.currentClassItem);
+                        this.updateGenerators(this.editor.currentClassItem);
                 }
         }]);
 
@@ -1536,7 +1545,7 @@ var CodeGenerator = (function () {
 
 	_createClass(CodeGenerator, [{
 		key: "update",
-		value: function update(item) {
+		value: function update(item, extraCodeSamples) {
 
 			var code;
 
@@ -1548,6 +1557,12 @@ var CodeGenerator = (function () {
 
 				//variable to build the code
 				code = this.buildCode(item, info);
+			}
+
+			//if "extraCodeSamples" was specified, we should add a second section with generic code samples
+			if (extraCodeSamples == true) {
+
+				code += "\n\n<hr>" + this.buildExtraSamplesComment() + this.buildExtraSamplesCode() + "\n\n\n";
 			}
 
 			//update the code inside the code tag
@@ -1802,6 +1817,26 @@ var CodeGenerator = (function () {
 
 			//return our list of warnings!
 			return ret;
+		}
+
+		// Build a quick little comment to denote the extra code samples section
+	}, {
+		key: "buildExtraSamplesComment",
+		value: function buildExtraSamplesComment() {
+
+			var ret = "EXTRA CODE SAMPLES:\n" + "-------------------\n" + "The following section is not part of the class implementation.\n" + "Below you will find sample code for various common routines in " + this.langName + ".\n" + "To disable this section, uncheck \"Show Extra Code Samples\" On the left.";
+
+			ret = this.wrapMuliLineComment(ret) + "\n\n";
+
+			return ret;
+		}
+
+		// Let the target languages override this method
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
+
+			return this.comment("buildExtraSamplesCode() was not overridden in " + this.langName);
 		}
 	}]);
 
@@ -3356,186 +3391,194 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var JavaCodeGenerator = (function (_CodeGenerator) {
-		_inherits(JavaCodeGenerator, _CodeGenerator);
+	_inherits(JavaCodeGenerator, _CodeGenerator);
 
-		function JavaCodeGenerator(DOM) {
-				_classCallCheck(this, JavaCodeGenerator);
+	function JavaCodeGenerator(DOM) {
+		_classCallCheck(this, JavaCodeGenerator);
 
-				_get(Object.getPrototypeOf(JavaCodeGenerator.prototype), "constructor", this).call(this, DOM);
+		_get(Object.getPrototypeOf(JavaCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-				//Make note of language name
-				this.langName = "Java";
+		//Make note of language name
+		this.langName = "Java";
 
-				//set up comment styles
-				this.singleLineComments = "// ";
-				this.multiLineComments = { open: '/*\n',
-						close: '\n*/',
-						prefix: "\t" };
+		//set up comment styles
+		this.singleLineComments = "// ";
+		this.multiLineComments = { open: '/*\n',
+			close: '\n*/',
+			prefix: "\t" };
 
-				//set up what this class supports:
-				//Note: support is assumed by default, so this only has to disable features
-				this.features = {
-						methods: {},
-						members: {}
-				};
+		//set up what this class supports:
+		//Note: support is assumed by default, so this only has to disable features
+		this.features = {
+			methods: {},
+			members: {}
+		};
 
-				//build the area for the code:
-				this.DOM.append("<pre><code class=\"java\"></code></pre>");
+		//build the area for the code:
+		this.DOM.append("<pre><code class=\"java\"></code></pre>");
 
-				//cache reference to the PRE tag
-				this.codeDOM = $(this.DOM.find('code'));
+		//cache reference to the PRE tag
+		this.codeDOM = $(this.DOM.find('code'));
+	}
+
+	//builds the code!
+
+	_createClass(JavaCodeGenerator, [{
+		key: "buildCode",
+		value: function buildCode(item, info) {
+
+			//variable to build the code
+			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
+
+			return ret;
 		}
 
-		//builds the code!
+		//build essentially the first line of the class: the defition
+	}, {
+		key: "buildCode_Definition",
+		value: function buildCode_Definition(item, info) {
 
-		_createClass(JavaCodeGenerator, [{
-				key: "buildCode",
-				value: function buildCode(item, info) {
+			//build the left part that usually looks like "public final class foo"
+			var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
 
-						//variable to build the code
-						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
+			//if it extends anything, add that here:
+			if (info.hasAncestor) ret += ' extends ' + info.ancestor;
 
-						return ret;
-				}
+			//if it implements any interfaces, add those here:
+			if (info.hasInterfaces) {
+				ret += ' implements ';
+				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
+				//truncate last two chars (', ')
+				ret = ret.substring(0, ret.length - 2);
+			}
 
-				//build essentially the first line of the class: the defition
-		}, {
-				key: "buildCode_Definition",
-				value: function buildCode_Definition(item, info) {
+			//finally add the '{'
+			ret += ' {';
+			return ret;
+		}
 
-						//build the left part that usually looks like "public final class foo"
-						var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'final ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
+		//build a constructor method for the class:
+	}, {
+		key: "buildCode_Constructor",
+		value: function buildCode_Constructor(item, info) {
 
-						//if it extends anything, add that here:
-						if (info.hasAncestor) ret += ' extends ' + info.ancestor;
+			var ret = "\t" + this.comment("Constructor") + "\tpublic " + item.getName() + "(){\n";
 
-						//if it implements any interfaces, add those here:
-						if (info.hasInterfaces) {
-								ret += ' implements ';
-								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
-								//truncate last two chars (', ')
-								ret = ret.substring(0, ret.length - 2);
-						}
+			//if the class has an ancestor lets call super in the constructor!
+			if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper();\n";
 
-						//finally add the '{'
-						ret += ' {';
-						return ret;
-				}
+			ret += "\n\t\t" + this.comment("...") + "\t}";
+			return ret;
+		}
 
-				//build a constructor method for the class:
-		}, {
-				key: "buildCode_Constructor",
-				value: function buildCode_Constructor(item, info) {
+		//build out all the methods
+	}, {
+		key: "buildCode_Methods",
+		value: function buildCode_Methods(item, info) {
 
-						var ret = "\t" + this.comment("Constructor") + "\tpublic " + item.getName() + "(){\n";
+			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
+			var accessToStr = ['private', 'public', 'protected'];
 
-						//if the class has an ancestor lets call super in the constructor!
-						if (item.getAncestor() != null && item.getAncestor != "") ret += "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper();\n";
+			//get list of methods
+			var methods = info.methods;
 
-						ret += "\n\t\t" + this.comment("...") + "\t}";
-						return ret;
-				}
+			//code to return
+			var ret = '';
 
-				//build out all the methods
-		}, {
-				key: "buildCode_Methods",
-				value: function buildCode_Methods(item, info) {
+			if (info.hasMethods) {
 
-						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-						var accessToStr = ['private', 'public', 'protected'];
+				//code to return:
+				ret = "\t" + this.comment("Methods");
 
-						//get list of methods
-						var methods = info.methods;
+				//loop over methods
+				for (var i = 0; i < methods.length; i++) {
 
-						//code to return
-						var ret = '';
+					//get the method
+					var method = methods[i];
 
-						if (info.hasMethods) {
+					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+				} //next i
+			} //endif has methods
 
-								//code to return:
-								ret = "\t" + this.comment("Methods");
+			return ret;
+		}
 
-								//loop over methods
-								for (var i = 0; i < methods.length; i++) {
+		//build out all the member variables
+	}, {
+		key: "buildCode_Members",
+		value: function buildCode_Members(item, info) {
 
-										//get the method
-										var method = methods[i];
+			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
+			var accessToStr = ['private', 'public', 'protected'];
 
-										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
-								} //next i
-						} //endif has methods
+			//get list of methods
+			var members = info.members;
 
-						return ret;
-				}
+			//code to return
+			var ret = '';
 
-				//build out all the member variables
-		}, {
-				key: "buildCode_Members",
-				value: function buildCode_Members(item, info) {
+			if (info.hasMembers) {
 
-						var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'String', 'boolean'];
-						var accessToStr = ['private', 'public', 'protected'];
+				//code to return:
+				ret = "\t" + this.comment("Member Variables");
 
-						//get list of methods
-						var members = info.members;
+				//loop over methods
+				for (var i = 0; i < members.length; i++) {
 
-						//code to return
-						var ret = '';
+					//get the method
+					var member = members[i];
 
-						if (info.hasMembers) {
+					ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'final ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
 
-								//code to return:
-								ret = "\t" + this.comment("Member Variables");
+					if (member.val != null) {
+						switch (parseInt(member.mType)) {
+							case INT:
+							case DOUBLE:
+								ret += " = " + member.val;
+								break;
+							case SHORT:
+								ret += " = (short)" + member.val;
+								break;
+							case LONG:
+								ret += " = (long)" + member.val;
+								break;
+							case BYTE:
+								ret += " = (byte)" + member.val;
+								break;
+							case FLOAT:
+								ret += " = " + member.val + 'f';
+								break;
 
-								//loop over methods
-								for (var i = 0; i < members.length; i++) {
+							case CHAR:
+								ret += " = '" + member.val + "'";
+								break;
+							case STRING:
+								ret += " = \"" + member.val + "\"";
+								break;
+							case BOOLEAN:
+								ret += " = " + member.val.toString();
+								break;
+						} //swatch
+					} //has default value
 
-										//get the method
-										var member = members[i];
+					//apply the semicolon and new line
+					ret += ";\n";
+				} //next i
+			} //endif has methods
 
-										ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'final ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+			return ret;
+		}
 
-										if (member.val != null) {
-												switch (parseInt(member.mType)) {
-														case INT:
-														case DOUBLE:
-																ret += " = " + member.val;
-																break;
-														case SHORT:
-																ret += " = (short)" + member.val;
-																break;
-														case LONG:
-																ret += " = (long)" + member.val;
-																break;
-														case BYTE:
-																ret += " = (byte)" + member.val;
-																break;
-														case FLOAT:
-																ret += " = " + member.val + 'f';
-																break;
+		// build out some useful common code structures
+	}, {
+		key: "buildExtraSamplesCode",
+		value: function buildExtraSamplesCode() {
 
-														case CHAR:
-																ret += " = '" + member.val + "'";
-																break;
-														case STRING:
-																ret += " = \"" + member.val + "\"";
-																break;
-														case BOOLEAN:
-																ret += " = " + member.val.toString();
-																break;
-												} //swatch
-										} //has default value
+			return "// Conditionals\nif(someVar==true){\n\t// ...\n}else if(otherVar>10){\n\t// ...\n}else{" + "\n\t// ...\n}\n\n// Switch only works with numbers\nswitch(someVar){\n\tcase 1:\n\tcase 2:" + "\n\tcase 3:\n\t\t// ...\n\t\tbreak;\n\tcase 4:\n\t\t// ...\n\t\tbreak;\n\tdefault:\n\t\t// ...\n\t\tbrea" + "k;\n}\n\n// For loop\nfor(int i=0; i<10; i++){\n\t// ...\n}\n\n// For Each loop\nint items" + "[] = {1, 2, 3, 4, 5};\nfor(int itm :  items){\n\t// ...\n}\n\n// While loops\nwhile(tru" + "e){\n\t// ...\n}\n\ndo{\n\t// ...\n}while(true);" + "";
+		}
+	}]);
 
-										//apply the semicolon and new line
-										ret += ";\n";
-								} //next i
-						} //endif has methods
-
-						return ret;
-				}
-		}]);
-
-		return JavaCodeGenerator;
+	return JavaCodeGenerator;
 })(CodeGenerator);
 'use strict';
 
@@ -3590,7 +3633,7 @@ var JSCodeGenerator = (function (_CodeGenerator) {
 
 	_createClass(JSCodeGenerator, [{
 		key: 'update',
-		value: function update(item) {
+		value: function update(item, extraCodeSamples) {
 
 			//update each of the code generators!
 			for (var g = 0; g < this.codeGenerators.length; g++) {
@@ -3599,7 +3642,7 @@ var JSCodeGenerator = (function (_CodeGenerator) {
 				var generator = this.codeGenerators[g];
 
 				//tell it to update it's class
-				generator.update(item);
+				generator.update(item, extraCodeSamples);
 			} //next g
 		}
 	}]);
@@ -3636,7 +3679,6 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 		//set up what this class supports:
 		//Note: support is assumed by default, so this only has to disable features
 		this.features = {
-			inheritance: false,
 			final: false,
 			abstract: false,
 			"private": false,
@@ -3679,15 +3721,26 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = this.comment("NOTE: " + this.langName + " doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + "package " + info.name + ";\n";
+			var ret = this.comment("NOTE: " + this.langName + " doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + this.comment("ALSO NOTE: Nobody should use Perl for anything, ever.") + "package " + info.name + ";\n\n" + "use strict;\n" + "use warnings;\n";
 
-			//if it has interfaces, lets spit em out
-			/*if(info.hasInterfaces){
-   	for(var i=0; i<info.interfaces.length; i++){
-   		ret += "Implements " + info.interfaces[i].mName + "\n";
-   	}//next i
-   		}
-   ret += "\n";*/
+			//if it has either an ancestor or interfaces:
+			if (info.hasAncestor || info.hasInterfaces) {
+				ret += "\n" + this.comment("Ancestors and Interfaces") + "our @ISA = qw(\n";
+
+				//if we have an ancestor, add that now:
+				if (info.hasAncestor) ret += "\t" + info.ancestor + "\n";
+
+				//if it has interfaces, lets spit em out
+				if (info.hasInterfaces) {
+					for (var i = 0; i < info.interfaces.length; i++) {
+						ret += "\t" + info.interfaces[i].mName + "\n";
+					} //next i
+				}
+
+				ret += ");";
+			} //ancestors or interfaces
+
+			ret += "\n";
 
 			return ret;
 		}
@@ -3739,7 +3792,7 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 								break;
 						} //swatch
 					} else {
-							ret += " = undef";
+							ret += "undef";
 						} //has default value
 
 					//apply the new line
@@ -3756,13 +3809,13 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 		key: "buildCode_Constructor",
 		value: function buildCode_Constructor(item, info) {
 
-			var ret = this.comment("Constructor") + "def new {\n" + "\tmy $class = shift;\n\n" + "\tmy $self = {\n";
+			var ret = this.comment("Constructor") + "sub new {\n" + "\tmy $class = shift;\n\n" + "\tmy $self = {\n";
 
 			ret += this.buildCode_Members(item, info);
 
 			ret += "\t};\n\n" + "\tbless($self, $class);\n";
 
-			if (info.hasAncestor) ret += "\n\t" + this.comment("Call Super Constructor") + "\t$class->SUPER::new();\n";
+			if (info.hasAncestor) ret += "\n\t" + this.comment("Call Super Constructor") + "\t$self->SUPER::new();\n";
 
 			ret += "\n}\n";
 
@@ -3855,7 +3908,7 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 					//get the method
 					var method = methods[i];
 
-					if (method.isStatic == true) ret += 'def ' + method.mName + " {\n" + "\t" + this.comment("...") + "}\n\n";else ret += 'def ' + method.mName + " {\n" + "\tmy $self = shift;\n" + "\t" + this.comment("...") + "}\n\n";
+					if (method.isStatic == true) ret += 'sub ' + (method.access == PUBLIC ? '' : '_') + method.mName + " {\n" + "\t" + this.comment("...") + "}\n\n";else ret += 'sub ' + (method.access == PUBLIC ? '' : '_') + method.mName + " {\n" + "\tmy $self = shift;\n" + "\t" + this.comment("...") + "}\n\n";
 				} //next i
 			} //endif has methods
 
@@ -4348,7 +4401,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 
 					if (method.isAbstract) ret += "\t\t\"\"\"Abstract Method: " + method.mName + " Documentation...\"\"\"\n" + "\t\treturn\n\n";
 
-					ret += "\t\t#...\n\n";
+					ret += "\t\t" + this.comment("...") + "\n\n";
 				} //next i
 			} //endif has methods
 
@@ -4754,186 +4807,194 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var SwiftCodeGenerator = (function (_CodeGenerator) {
-	_inherits(SwiftCodeGenerator, _CodeGenerator);
+		_inherits(SwiftCodeGenerator, _CodeGenerator);
 
-	function SwiftCodeGenerator(DOM) {
-		_classCallCheck(this, SwiftCodeGenerator);
+		function SwiftCodeGenerator(DOM) {
+				_classCallCheck(this, SwiftCodeGenerator);
 
-		_get(Object.getPrototypeOf(SwiftCodeGenerator.prototype), "constructor", this).call(this, DOM);
+				_get(Object.getPrototypeOf(SwiftCodeGenerator.prototype), "constructor", this).call(this, DOM);
 
-		//Make note of language name
-		this.langName = "Swift";
+				//Make note of language name
+				this.langName = "Swift";
 
-		//set up comment styles
-		this.singleLineComments = "// ";
-		this.multiLineComments = { open: '/*\n',
-			close: '\n*/',
-			prefix: "\t" };
+				//set up comment styles
+				this.singleLineComments = "// ";
+				this.multiLineComments = { open: '/*\n',
+						close: '\n*/',
+						prefix: "\t" };
 
-		//set up what this class supports:
-		//Note: support is assumed by default, so this only has to disable features
-		this.features = {
-			methods: {},
-			members: {}
-		};
+				//set up what this class supports:
+				//Note: support is assumed by default, so this only has to disable features
+				this.features = {
+						abstract: false,
+						methods: {
+								abstract: false,
+								"protected": false
+						},
+						members: {
+								"protected": false
+						}
+				};
 
-		//build the area for the code:
-		this.DOM.append("<pre><code class=\"swift\"></code></pre>");
+				//build the area for the code:
+				this.DOM.append("<pre><code class=\"swift\"></code></pre>");
 
-		//cache reference to the PRE tag
-		this.codeDOM = $(this.DOM.find('code'));
-	}
-
-	//builds the code!
-
-	_createClass(SwiftCodeGenerator, [{
-		key: "buildCode",
-		value: function buildCode(item, info) {
-
-			//variable to build the code
-			var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + this.buildCode_Members(item, info) + "}";
-
-			return ret;
+				//cache reference to the PRE tag
+				this.codeDOM = $(this.DOM.find('code'));
 		}
 
-		//build essentially the first line of the class: the defition
-	}, {
-		key: "buildCode_Definition",
-		value: function buildCode_Definition(item, info) {
+		//builds the code!
 
-			//build the left part that usually looks like "public final class foo"
-			var ret = (info.isPublic ? 'public ' : 'private ') + (info.isFinal ? 'sealed ' : '') + (info.isAbstract ? 'abstract ' : '') + 'class ' + info.name;
+		_createClass(SwiftCodeGenerator, [{
+				key: "buildCode",
+				value: function buildCode(item, info) {
 
-			//if it extends anything, add that here:
-			if (info.hasAncestor) ret += ' : ' + info.ancestor;
+						//variable to build the code
+						var ret = this.buildCode_Warnings(item, info) + this.buildCode_Definition(item, info) + "\n\n" + this.buildCode_Members(item, info) + this.buildCode_Constructor(item, info) + "\n\n" + this.buildCode_Destructor(item, info) + "\n\n" + this.buildCode_Methods(item, info) + "}";
 
-			//if it implements any interfaces, add those here:
-			if (info.hasInterfaces) {
-				if (info.hasAncestor) ret += ', ';else ret += ' : ';
-				for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
-				//truncate last two chars (', ')
-				ret = ret.substring(0, ret.length - 2);
-			}
+						return ret;
+				}
 
-			//finally add the '{'
-			ret += ' {';
-			return ret;
-		}
+				//build essentially the first line of the class: the defition
+		}, {
+				key: "buildCode_Definition",
+				value: function buildCode_Definition(item, info) {
 
-		//build a constructor method for the class:
-	}, {
-		key: "buildCode_Constructor",
-		value: function buildCode_Constructor(item, info) {
+						//build the left part that usually looks like "public final class foo"
+						var ret = (info.isPublic ? 'public ' : 'internal ') + (info.isFinal ? 'final ' : '') + 'class ' + info.name;
 
-			var ret = "\t" + this.comment("Constructor") + "\tpublic " + info.name + "()";
+						//if it extends anything, add that here:
+						if (info.hasAncestor) ret += ': ' + info.ancestor;
 
-			//if the class has an ancestor lets call super in the constructor!
-			if (info.hasAncestor) ret += " : base()";
+						//if it implements any interfaces, add those here:
+						if (info.hasInterfaces) {
+								if (info.hasAncestor) ret += ', ';else ret += ': ';
+								for (var i = 0; i < info.interfaces.length; i++) ret += info.interfaces[i].mName + ', ';
+								//truncate last two chars (', ')
+								ret = ret.substring(0, ret.length - 2);
+						}
 
-			ret += "{\n" + "\n\t\t" + this.comment("...") + "\t}";
-			return ret;
-		}
+						//finally add the '{'
+						ret += ' {';
+						return ret;
+				}
 
-		//build out all the methods
-	}, {
-		key: "buildCode_Methods",
-		value: function buildCode_Methods(item, info) {
+				//build out all the member variables
+		}, {
+				key: "buildCode_Members",
+				value: function buildCode_Members(item, info) {
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public', 'protected'];
+						var typeToStr = ['', 'Int', 'Int16', 'Int64', 'Int8', 'Float', 'Double', 'Character', 'String', 'Boolean'];
+						var accessToStr = ['private', 'public', 'private'];
 
-			//get list of methods
-			var methods = info.methods;
+						//get list of methods
+						var members = info.members;
 
-			//code to return
-			var ret = '';
+						//code to return
+						var ret = '';
 
-			if (info.hasMethods) {
+						if (info.hasMembers) {
 
-				//code to return:
-				ret = "\t" + this.comment("Methods");
+								//code to return:
+								ret = "\t" + this.comment("Member Variables");
 
-				//loop over methods
-				for (var i = 0; i < methods.length; i++) {
+								//loop over methods
+								for (var i = 0; i < members.length; i++) {
 
-					//get the method
-					var method = methods[i];
+										//get the method
+										var member = members[i];
 
-					ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'sealed override ' : '') + typeToStr[parseInt(method.mType)] + ' ' + method.mName + "(){\n" + "\t\t" + this.comment("...") + "\t}\n\n";
-				} //next i
-			} //endif has methods
+										ret += "\t" + accessToStr[member.access] + ' ' + (member.isFinal ? 'final ' : '') + (member.isStatic ? 'static ' : '') + (member.isConst ? 'let ' : 'var ') + member.mName + (member.mType != VOID ? ": " + typeToStr[parseInt(member.mType)] : "");
 
-			return ret;
-		}
+										if (member.val != null) {
+												switch (parseInt(member.mType)) {
+														case INT:
+														case SHORT:
+														case LONG:
+														case BYTE:
+														case DOUBLE:
+																ret += " = " + member.val;
+																break;
+														case FLOAT:
+																ret += " = " + member.val + 'f';
+																break;
+														case CHAR:
+														case STRING:
+																ret += " = \"" + member.val + "\"";
+																break;
+														case BOOLEAN:
+																ret += " = " + member.val.toString();
+																break;
+												} //swatch
+										} //has default value
 
-		//build out all the member variables
-	}, {
-		key: "buildCode_Members",
-		value: function buildCode_Members(item, info) {
+										//apply the new line
+										ret += "\n";
+								} //next i
 
-			var typeToStr = ['void', 'int', 'short', 'long', 'byte', 'float', 'double', 'char', 'string', 'bool'];
-			var accessToStr = ['private', 'public', 'protected'];
+								//apply the new line
+								ret += "\n";
+						} //endif has methods
 
-			//get list of methods
-			var members = info.members;
+						return ret;
+				}
 
-			//code to return
-			var ret = '';
+				//build a constructor method for the class:
+		}, {
+				key: "buildCode_Constructor",
+				value: function buildCode_Constructor(item, info) {
 
-			if (info.hasMembers) {
+						var ret = "\t" + this.comment("Constructor") + "\tinit()";
 
-				//code to return:
-				ret = "\t" + this.comment("Member Variables");
+						ret += "{\n" + "\n\t\t" + this.comment("...") + (info.hasAncestor ? "\n\t\t" + this.comment("Call Super Constructor") + "\t\tsuper.init()\n" : "") + "\t}";
+						return ret;
+				}
 
-				//loop over methods
-				for (var i = 0; i < members.length; i++) {
+				//build a Destructor method for the class:
+		}, {
+				key: "buildCode_Destructor",
+				value: function buildCode_Destructor(item, info) {
 
-					//get the method
-					var member = members[i];
+						var ret = "\t" + this.comment("Optional Destructor") + "\tdeinit ";
 
-					ret += "\t" + accessToStr[member.access] + ' ' + (member.isStatic ? 'static ' : '') + (member.isConst ? 'const ' : '') + typeToStr[parseInt(member.mType)] + ' ' + member.mName;
+						ret += "{" + "\n\t\t" + this.comment("...") + "\t}";
+						return ret;
+				}
 
-					if (member.val != null) {
-						switch (parseInt(member.mType)) {
-							case INT:
-							case DOUBLE:
-								ret += " = " + member.val;
-								break;
-							case SHORT:
-								ret += " = (short)" + member.val;
-								break;
-							case LONG:
-								ret += " = (long)" + member.val;
-								break;
-							case BYTE:
-								ret += " = (byte)" + member.val;
-								break;
-							case FLOAT:
-								ret += " = " + member.val + 'f';
-								break;
+				//build out all the methods
+		}, {
+				key: "buildCode_Methods",
+				value: function buildCode_Methods(item, info) {
 
-							case CHAR:
-								ret += " = '" + member.val + "'";
-								break;
-							case STRING:
-								ret += " = \"" + member.val + "\"";
-								break;
-							case BOOLEAN:
-								ret += " = " + member.val.toString();
-								break;
-						} //swatch
-					} //has default value
+						var typeToStr = ['', 'Int', 'Int16', 'Int64', 'Int8', 'Float', 'Double', 'Character', 'String', 'Boolean'];
+						var accessToStr = ['private', 'public', 'private'];
 
-					//apply the semicolon and new line
-					ret += ";\n";
-				} //next i
-			} //endif has methods
+						//get list of methods
+						var methods = info.methods;
 
-			return ret;
-		}
-	}]);
+						//code to return
+						var ret = '';
 
-	return SwiftCodeGenerator;
+						if (info.hasMethods) {
+
+								//code to return:
+								ret = "\t" + this.comment("Methods");
+
+								//loop over methods
+								for (var i = 0; i < methods.length; i++) {
+
+										//get the method
+										var method = methods[i];
+
+										ret += "\t" + accessToStr[method.access] + ' ' + (method.isStatic ? 'static ' : '') + (method.isConst ? 'final ' : '') + "func " + method.mName + "()" + (method.mType != VOID ? " -> " + typeToStr[parseInt(method.mType)] + ' ' : "") + "{\n" + "\t\t" + this.comment("...") + "\t}\n\n";
+								} //next i
+						} //endif has methods
+
+						return ret;
+				}
+		}]);
+
+		return SwiftCodeGenerator;
 })(CodeGenerator);
 "use strict";
 
@@ -5962,7 +6023,7 @@ var VBCodeGenerator = (function (_CodeGenerator) {
 
 	_createClass(VBCodeGenerator, [{
 		key: 'update',
-		value: function update(item) {
+		value: function update(item, extraCodeSamples) {
 
 			//update each of the code generators!
 			for (var g = 0; g < this.codeGenerators.length; g++) {
@@ -5971,7 +6032,7 @@ var VBCodeGenerator = (function (_CodeGenerator) {
 				var generator = this.codeGenerators[g];
 
 				//tell it to update it's class
-				generator.update(item);
+				generator.update(item, extraCodeSamples);
 			} //next g
 		}
 	}]);

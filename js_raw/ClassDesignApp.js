@@ -28,6 +28,9 @@ class ClassDesignApp {
         //and when the editor edits the selected ClassItem... so we can update the code tabs
         this.classItmMgr.onSelectionEdited(function(o){ me.handleSelectionEdited(me, o); });
 
+        //if the show extras check boxs is checked we should update the various code
+        $('#chkShowExtras').bind('change click keyup', function(e){ me.refreshCodeOutput(); });
+
         //Create a Code style manager so the user can select different colorization styles for their code
         this.codeStyleMgr = new CodeStyleManager('css/hljs/', $('#divExtraOptionsArea'));
 
@@ -78,7 +81,7 @@ class ClassDesignApp {
         this.classItmMgr.addClassItm(demoClasses.RoboKitty());
         this.classItmMgr.addClassItm(demoClasses.CompleteDemo());
 
-        this.tabMgr.setTab('Cpp');
+        this.tabMgr.setTab('CSharp');
 
     }
 
@@ -115,6 +118,10 @@ class ClassDesignApp {
 
     //update all the generators (whether or not they need it)
     updateGenerators(item){
+
+    	//get the statis of our "extra code samples" check box to pass along
+    	var extraCodeSamples = $('#chkShowExtras').is(":checked");
+
         //update each of the code generators!
         for(var g=0; g<this.codeGenerators.length; g++){
 
@@ -122,15 +129,14 @@ class ClassDesignApp {
             var generator = this.codeGenerators[g];
 
             //tell it to update it's class
-            generator.update(item);
+            generator.update(item, extraCodeSamples);
 
         }//next g
     }
 
     //refresh the code genreators!
     refreshCodeOutput(){
-    	this.updateGenerators(this.currentClassItem);
+    	this.updateGenerators(this.editor.currentClassItem);
     }
-
 
 }
