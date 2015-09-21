@@ -58,7 +58,7 @@ class PythonCodeGenerator extends CodeGenerator {
 	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	'class ' + ((info.isPublic)?'':'_') + info.name; 
+		var ret = 	"\n\nclass " + ((info.isPublic)?'':'_') + info.name; 
 
 		//if it extends anything, add that here:
 		if(info.hasAncestor)

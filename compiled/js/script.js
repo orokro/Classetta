@@ -1565,6 +1565,9 @@ var CodeGenerator = (function () {
 				code += "\n\n<hr>" + this.buildExtraSamplesComment() + this.buildExtraSamplesCode() + "\n\n\n";
 			}
 
+			//lets convert tabs into spaces before appending to the dom...
+			code = code.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+
 			//update the code inside the code tag
 			this.codeDOM.html(code);
 
@@ -3707,6 +3710,7 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 			abstract: false,
 			"private": false,
 			types: false,
+			interfaces: false,
 			methods: {
 				abstract: false,
 				final: false,
@@ -3716,7 +3720,7 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 			},
 			members: {
 				final: true,
-				"static": false,
+				"static": true,
 				"private": false,
 				"protected": false
 			}
@@ -3739,27 +3743,46 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 			return ret;
 		}
 
+		//OVERRIDES generic parent class adds some comments with warnings
+	}, {
+		key: "buildCode_Warnings",
+		value: function buildCode_Warnings(item, info) {
+
+			var ret = this.getWarningText(info);
+
+			ret += "\n" + "NOTE: " + this.langName + " doesn't have syntax for defining a class. This code belongs in a file called: \"" + info.name + ".pm\".\n" + "ALSO NOTE: Nobody should use Perl for anything, ever.";
+
+			//finish up the comment
+			ret = this.wrapMuliLineComment(ret) + "\n";
+
+			return ret;
+		}
+
 		//build essentially the first line of the class: the defition
 	}, {
 		key: "buildCode_Definition",
 		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = this.comment("NOTE: " + this.langName + " doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + this.comment("ALSO NOTE: Nobody should use Perl for anything, ever.") + "package " + info.name + ";\n\n" + "use strict;\n" + "use warnings;\n";
+			var ret = "package " + info.name + ";\n\n" + "use strict;\n" + "use warnings;\n";
 
 			//if it has either an ancestor or interfaces:
 			if (info.hasAncestor || info.hasInterfaces) {
-				ret += "\n" + this.comment("Ancestors and Interfaces") + "our @ISA = qw(\n";
+
+				//if we have an ancestor, add that now:
+				if (info.hasAncestor) ret += "use " + info.ancestor + ";\n";
+
+				ret += "\n" + this.comment("Ancestors") + "our @ISA = qw(\n";
 
 				//if we have an ancestor, add that now:
 				if (info.hasAncestor) ret += "\t" + info.ancestor + "\n";
 
 				//if it has interfaces, lets spit em out
-				if (info.hasInterfaces) {
-					for (var i = 0; i < info.interfaces.length; i++) {
-						ret += "\t" + info.interfaces[i].mName + "\n";
-					} //next i
-				}
+				/*if(info.hasInterfaces){
+    	for(var i=0; i<info.interfaces.length; i++){
+    		ret += "\t"+info.interfaces[i].mName+"\n";
+    	}//next i
+    		}*/
 
 				ret += ");";
 			} //ancestors or interfaces
@@ -3904,8 +3927,8 @@ var PerlCodeGenerator = (function (_CodeGenerator) {
 			} //endif has constnats
 
 			//remove the last comma:
-			ret = ret.split(',');
-			ret = ret.splice(0, ret.length - 1).join(',') + ret[ret.length - 1];
+			//ret = ret.split(',');
+			//ret = ret.splice(0, ret.length-1).join(',') + ret[ret.length-1]
 
 			return ret;
 		}
@@ -4263,7 +4286,7 @@ var PythonCodeGenerator = (function (_CodeGenerator) {
 		value: function buildCode_Definition(item, info) {
 
 			//build the left part that usually looks like "public final class foo"
-			var ret = 'class ' + (info.isPublic ? '' : '_') + info.name;
+			var ret = "\n\nclass " + (info.isPublic ? '' : '_') + info.name;
 
 			//if it extends anything, add that here:
 			if (info.hasAncestor) ret += '(' + info.ancestor + ')';

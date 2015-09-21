@@ -19,6 +19,7 @@ class PerlCodeGenerator extends CodeGenerator {
 							abstract: false,
 							private: false,
 							types: false,
+							interfaces: false,
 							methods: {
 										abstract: false,
 										final: false,
@@ -28,7 +29,7 @@ class PerlCodeGenerator extends CodeGenerator {
 									 },
 							members: {
 										final: true,
-										static: false,
+										static: true,
 										private: false,
 										protected: false
 									 }
@@ -56,19 +57,37 @@ class PerlCodeGenerator extends CodeGenerator {
 		return ret;
 	}
 
+	//OVERRIDES generic parent class adds some comments with warnings
+	buildCode_Warnings(item, info){
+
+		var ret = this.getWarningText(info);
+
+		ret +=	"\n" + 
+				"NOTE: "+this.langName+" doesn't have syntax for defining a class. This code belongs in a file called: \"" + info.name + ".pm\".\n" + 
+				"ALSO NOTE: Nobody should use Perl for anything, ever.";
+
+		//finish up the comment
+		ret = this.wrapMuliLineComment(ret) + "\n";
+
+		return ret;
+	}
+
 	//build essentially the first line of the class: the defition
 	buildCode_Definition(item, info){
 
 		//build the left part that usually looks like "public final class foo"
-		var ret = 	this.comment("NOTE: "+this.langName+" doesn't have syntax for definging a class. This code belongs in a file called: \"" + info.name + ".pm\".") + 
-					this.comment("ALSO NOTE: Nobody should use Perl for anything, ever.") + 
-					"package " + info.name + ";\n\n" + 
+		var ret = 	"package " + info.name + ";\n\n" + 
 					"use strict;\n" + 
 					"use warnings;\n";
 
 		//if it has either an ancestor or interfaces:
 		if(info.hasAncestor || info.hasInterfaces){
-			ret += 	"\n" + this.comment("Ancestors and Interfaces") + 
+
+			//if we have an ancestor, add that now:
+			if(info.hasAncestor)
+				ret += "use "+info.ancestor+";\n";
+
+			ret += 	"\n" + this.comment("Ancestors") + 
 					"our @ISA = qw(\n";
 
 			//if we have an ancestor, add that now:
@@ -76,12 +95,12 @@ class PerlCodeGenerator extends CodeGenerator {
 				ret += "\t"+info.ancestor+"\n";
 
 			//if it has interfaces, lets spit em out
-			if(info.hasInterfaces){
+			/*if(info.hasInterfaces){
 				for(var i=0; i<info.interfaces.length; i++){
 					ret += "\t"+info.interfaces[i].mName+"\n";
 				}//next i
 
-			}
+			}*/
 
 			ret += ");"
 		}//ancestors or interfaces
@@ -227,8 +246,8 @@ class PerlCodeGenerator extends CodeGenerator {
 		}//endif has constnats
 
 		//remove the last comma:
-		ret = ret.split(',');
-		ret = ret.splice(0, ret.length-1).join(',') + ret[ret.length-1]
+		//ret = ret.split(',');
+		//ret = ret.splice(0, ret.length-1).join(',') + ret[ret.length-1]
 
 		return ret;
 	}

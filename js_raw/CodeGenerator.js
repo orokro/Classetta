@@ -45,6 +45,8 @@ class CodeGenerator{
 					this.buildExtraSamplesCode() + "\n\n\n";
 		}
 
+		//lets convert tabs into spaces before appending to the dom...
+		code = code.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
 		//update the code inside the code tag
 		this.codeDOM.html(code);
