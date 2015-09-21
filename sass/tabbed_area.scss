@@ -359,6 +359,17 @@ $iconSwiftColor: #EF8172; //#fc9565;
 
 	.hljs {
 		padding: 10px! important;
+
+		//SIZE AND POSITION
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+
+		-webkit-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
+	    -moz-box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
+	    box-shadow: inset 3px 3px 10px -2px rgba(0, 0, 0, 0.2);
 	}
 }
 
