@@ -1,0 +1,45 @@
+'Conditionals
+If someVar==true Then
+	'...
+ElseIf otherVar>10 Then
+	'...
+Else
+	'...
+End If
+
+'"Select Case" is like Switch in other languages
+'and will work with strings and numbers
+Dim number = 8
+Select Case number
+    Case 1 To 5
+        Debug.print("Between 1 and 5, inclusive")
+        'The following is the only Case clause that evaluates to True. 
+    Case 6, 7, 8
+        Debug.print("Between 6 and 8, inclusive")
+    Case 9 To 10
+        Debug.print("Equal to 9 or 10")
+    Case Else
+        Debug.print("Not between 1 and 10, inclusive")
+End Select
+
+'For loop with Integers (Step is optional)
+dim i
+For i = 1 to 10 Step 1
+	'...
+Next
+
+'For Each loop
+Dim items() As Integer = {1, 2, 3, 4, 5};
+For Each itm As Integer In items
+	'...
+Next
+
+'While loops
+While index <= 10
+    '...
+End While
+
+'Do-while loops
+Do
+    '...
+Loop Until index > 10

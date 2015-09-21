@@ -1,0 +1,59 @@
+// Conditionals
+if someVar==true {
+	// ...
+else if otherVar>10 {
+	// ...
+} else {
+	// ...
+}
+
+// Switchs are powerful in Swift. See tinyurl.com/pwesoa4 for more info.
+switch approximateCount {
+case 0:
+    naturalCount = "no"
+
+    // Note: there are no implicit fallthroughs.
+    // "break" can be used, but is not required
+    break
+case 1..<5:
+    naturalCount = "a few"
+case 5..<12:
+    naturalCount = "several"
+case 12..<100:
+    naturalCount = "dozens of"
+case 100..<1000:
+    naturalCount = "hundreds of"
+default:
+    naturalCount = "many"
+}
+
+// For loop
+for i in 0..9 {
+	// ...
+}
+
+// For loop without increment variable for simplly looping N times:
+for _ in 1...N {
+	// ...
+}
+
+// More traditional For loop
+for var i=0; i<10; i++ {
+	// ...
+}
+
+// For In loop
+let names = ["Anna", "Alex", "Brian", "Jack"]
+for name in names {
+    print("Hello, \(name)!")
+}
+
+// While loops
+while true {
+	// ...
+}
+
+// repeat-while loops, like Do-while loops
+repeat {
+	// ...
+} while true

@@ -1,0 +1,53 @@
+// Conditionals
+if(someVar==true){
+	// ...
+}else if(otherVar>10){
+	// ...
+}else{
+	// ...
+}
+
+// Switch can use numbers or string labels
+switch(someVar){
+	case 1:
+	case 2:
+	case 3:
+		// ...
+		break;
+	case 4:
+		// ...
+		break;
+	case "five":
+		// JS can use string labels also
+		break;
+	default:
+		// ...
+}
+
+// For loop
+for(let i=0; i<10; i++){
+	// ...
+}
+
+// For In loop
+// NOTE: Look this one up, it's got some gotcha's.
+items = [1, 2, 3, 4, 5];
+for(let i in items){
+	// ...
+}
+
+// For Of Loop
+// NOTE: ES6 new feature - look up for details, but this is closer to for-each
+for(let i of items){
+	// ...
+}
+
+// While loops
+while(true){
+	// ...
+}
+
+// Do-while loops
+do{
+	// ...
+}while(true);

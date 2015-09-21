@@ -1,0 +1,51 @@
+// Conditionals
+if($someVar==TRUE){
+	// ...
+}elseif($otherVar>10){
+	// ...
+}else{
+	// ...
+}
+
+// Switch can use numbers or string labels
+switch($someVar){
+	case 1:
+	case 2:
+	case 3:
+		// ...
+		break;
+	case 4:
+		// ...
+		break;
+	case "five":
+		// PHP can use string labels also
+		break;
+	default:
+		// ...
+}
+
+// For loop
+for($i=0; $i<10; $i++){
+	// ...
+}
+
+// For Each loop
+$items = array(1, 2, 3, 4, 5);
+foreach($items as $itm){
+	// ...
+}
+
+// For Each with keys and values
+foreach($items as $key => $value){
+	// ...
+}
+
+// While loops
+while(TRUE){
+	// ...
+}
+
+// Do-while loops
+do{
+	// ...
+}while(TRUE);

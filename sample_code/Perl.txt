@@ -1,0 +1,41 @@
+# Conditionals
+if($someVar==true){
+	# ...
+}elsif($otherVar>10){
+	# ...
+}else{
+	# ...
+}
+
+# Switch statements via tinyurl.com/oxrnyq4
+use Switch;
+switch ($value) {
+	case 17         { print "number 17"       }
+	case "snipe"    { print "a snipe"         }
+	case /[a-f]+/i  { print "pattern matched" }
+	case [1..10,42] { print "in the list"     }
+	case (@array)   { print "in the array"    }
+	case (%hash)    { print "in the hash"     }
+	else            { print "no case applies" }
+}
+
+# For loop
+for (my $i=0; $i<10; $i++) {
+	// ...
+}
+
+# For Each loop via tinyurl.com/qxjg9jg
+my @items = ("apple", "orange", "banana");
+foreach my $item(@items) {
+	print "$item\n";
+}
+
+# While loops
+while(1){
+	# ...
+}
+
+# Do-while loops
+do{
+	# ...
+}while(1);

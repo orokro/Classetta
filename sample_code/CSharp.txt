@@ -1,0 +1,47 @@
+// Conditionals
+if(someVar==true){
+	// ...
+}else if(otherVar>10){
+	// ...
+}else{
+	// ...
+}
+
+// Switch can use numbers or string labels
+switch(someVar){
+	case 1:
+	case 2:
+	case 3:
+		// ...
+		break;
+	case 4:
+		// ...
+		break;
+	case 5:
+		// C# can goto case labels
+		goto case 3;
+	default:
+		// ...
+		break;
+}
+
+// For loop
+for(int i=0; i<10; i++){
+	// ...
+}
+
+// For Each loop
+int[] items = new int[]{1, 2, 3, 4, 5};
+foreach(int itm in items){
+	// ...
+}
+
+// While loops
+while(true){
+	// ...
+}
+
+// Do-while loops
+do{
+	// ...
+}while(true);

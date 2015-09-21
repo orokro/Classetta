@@ -1,0 +1,66 @@
+# If conditionals
+if someVar==true
+	# ...
+elsif otherVar>10
+	# ...
+else
+	# ...
+end
+
+# Unless conditionals
+unless someVar>10
+	# ...
+else
+	# ...
+end
+
+# case and when are like Switch in other languages
+case someValue
+when 1, 4, 9
+	# whens can list more than one "Case"
+when 10..20
+	# whens can specify a range
+when > 20
+	# whens can specify open ended ranges
+when String
+	# whens can reference type
+when "foo"
+	# or strings as values
+when "bar" then puts("hello") # all on the same with with "then" keyword
+else
+	# instead of default, like most langauges, Ruby uses "else"
+end
+
+# For loop
+for i in 0..9
+	# ...
+end
+
+# Each loop
+items = int[1, 2, 3, 4, 5]
+items.each do |itm|
+	# ...
+end
+
+# While loops
+while true
+	# ...
+end
+
+# While one-liner
+while true do puts("hello")
+
+# Like do-loops in other languages:
+bein
+	# ...
+end while true
+
+# Of course Ruby has an alternate syntax for everything. Below are "until" loops
+until $i > $num  do
+   puts("Inside the loop i = #$i" )
+   $i +=1;
+end
+
+begin
+   # ...
+end until false

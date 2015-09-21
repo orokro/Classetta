@@ -1,0 +1,44 @@
+// Conditionals
+if(someVar==true){
+	// ...
+}else if(otherVar>10){
+	// ...
+}else{
+	// ...
+}
+
+// Switch only works with numbers
+switch(someVar){
+	case 1:
+	case 2:
+	case 3:
+		// ...
+		break;
+	case 4:
+		// ...
+		break;
+	default:
+		// ...
+		break;
+}
+
+// For loop
+for(int i=0; i<10; i++){
+	// ...
+}
+
+// For Each loop
+int items[] = {1, 2, 3, 4, 5};
+for(int itm : items){
+	// ...
+}
+
+// While loops
+while(true){
+	// ...
+}
+
+// Do-while loops
+do{
+	// ...
+}while(true);
